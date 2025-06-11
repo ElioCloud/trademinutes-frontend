@@ -70,6 +70,14 @@ export default function ProfileDashboardPage() {
             <MdDashboard className="text-lg" />
             Dashboard
           </button>
+           <button className="flex items-center gap-2 w-full text-left py-2 px-4 rounded bg-violet-600 text-white">
+            <MdDashboard className="text-lg" />
+            Book Appointment
+          </button>
+           <button className="flex items-center gap-2 w-full text-left py-2 px-4 rounded bg-violet-600 text-white">
+            <MdDashboard className="text-lg" />
+            My Profile
+          </button>
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 w-full text-left py-2 px-4 rounded 

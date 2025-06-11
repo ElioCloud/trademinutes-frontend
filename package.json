@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fullcalendar/daygrid": "^6.1.17",
+    "@fullcalendar/react": "^6.1.17",
     "@netlify/next": "^1.4.9",
     "@radix-ui/react-slot": "^1.2.3",
     "class-variance-authority": "^0.7.1",
