@@ -44,8 +44,8 @@ export default function AppLayout({ children }: LayoutProps) {
         </h2>
         <nav className="space-y-2">
           <SidebarButton href="/dashboard" label="Dashboard" pathname={pathname} router={router} />
-          <SidebarButton href="/dashboard/book-appointment" label="Book Appointment" pathname={pathname} router={router} />
-          <SidebarButton href="/dashboard/profile" label="My Profile" pathname={pathname} router={router} />
+          <SidebarButton href="/book-appointment" label="Book Appointment" pathname={pathname} router={router} />
+          <SidebarButton href="/profile" label="My Profile" pathname={pathname} router={router} />
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 w-full text-left py-2 px-4 rounded bg-white hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700"
