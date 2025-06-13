@@ -61,7 +61,11 @@ jobs:
         env:
           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Verify Deployed Package Contents
+      - name: Verify Deployed Package Contents via Kudu API
         run: |
-          echo "Deployed package contents in wwwroot:"
-          ls -la /home/site/wwwroot || echo "No wwwroot contents to verify!"
+          echo "Verifying deployed package contents in wwwroot via Kudu API..."
+          curl -u $DEPLOY_USER:$DEPLOY_PASSWORD https://trademinutes-app.scm.azurewebsites.net/api/vfs/site/wwwroot/ || echo "Failed to verify wwwroot contents"
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+          DEPLOY_USER: ${{ secrets.AZURE_DEPLOY_USER }}
+          DEPLOY_PASSWORD: ${{ secrets.AZURE_DEPLOY_PASSWORD }}
