@@ -22,8 +22,10 @@ jobs:
 
       - name: Build
         run: |
-          npm run build || { echo "Build failed with error $?"; exit 1; }
-          ls -la  # List directory contents to verify build/ exists
+          echo "Starting build process..."
+          npm run build || { echo "Build failed with error $?"; cat *.log 2>/dev/null || echo "No log file"; exit 1; }
+          ls -la  # List directory contents
+          if [ ! -d "build" ]; then echo "Build directory not found!"; exit 1; fi
 
       - name: Login to Azure
         uses: azure/login@v1
