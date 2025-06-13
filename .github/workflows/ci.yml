@@ -17,14 +17,19 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Clear npm cache
+        run: npm cache clean --force
+
       - name: Install dependencies
-        run: npm ci  # Use npm ci for consistent installs
+        run: |
+          npm ci || { echo "Dependency installation failed with error $?"; exit 1; }
+          npm list --depth=0
 
       - name: Build
         run: |
           echo "Starting build process..."
           npm run build || { echo "Build failed with error $?"; cat *.log 2>/dev/null || echo "No log file"; exit 1; }
-          ls -la  # List directory contents
+          ls -la
           if [ ! -d "build" ]; then echo "Build directory not found!"; exit 1; fi
 
       - name: Login to Azure
