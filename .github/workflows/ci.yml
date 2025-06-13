@@ -29,9 +29,9 @@ jobs:
       - name: Build
         run: |
           echo "Starting build process..."
-          npm run build || { echo "Build failed with error $?"; cat *.log 2>/dev/null || echo "No log file"; find . -type f; exit 1; }
+          npm run build || { echo "Build failed with error $?"; cat *.log 2>/dev/null || echo "No log file"; exit 1; }
           ls -la
-          if [ ! -d "build" ]; then echo "Build directory not found!"; exit 1; fi
+          if [ ! -d ".next" ]; then echo "Next.js build directory .next not found!"; exit 1; fi
 
       - name: Login to Azure
         uses: azure/login@v1
@@ -44,5 +44,4 @@ jobs:
         with:
           app-name: trademinutes-app
           publish-profile: ${{ secrets.PUBLISH_PROFILE_FRONTEND }}
-          package: ./build
-        continue-on-error: false
+          package: ./.next
