@@ -1,13 +1,21 @@
 'use client';
 
+import Benefits from '@/components/Benefits';
+import FAQ from '@/components/FAQ';
+import Footer from '@/components/Footer';
+import HowItWorks from '@/components/HowItWorks';
+import Navbar from '@/components/Navbar';
+import Pricing from '@/components/Pricing';
 import Image from 'next/image';
 import Link from 'next/link';
+
 
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-white text-gray-900 font-sans">
       {/* Navbar */}
-      <nav className="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
+       <Navbar />
+      {/* <nav className="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
         <div className="text-2xl font-bold text-blue-700">
           Trade<span className="text-black">Minutes</span>
         </div>
@@ -27,7 +35,7 @@ export default function HomePage() {
             </button>
           </Link>
         </div>
-      </nav>
+      </nav> */}
 
       {/* Hero Section */}
       <section className="text-center pt-12 px-4 bg-gradient-to-b from-white to-blue-50">
@@ -45,21 +53,21 @@ export default function HomePage() {
         </Link>
 
         <div className="mt-10 flex flex-col items-center md:flex-row md:justify-center gap-16">
-         <Image
-  src="/clock.png"
-  alt="Clock in hand"
-  width={200}
-  height={200}
-  className="rounded-lg"
-/>
+          <Image
+            src="/clock.png"
+            alt="Clock in hand"
+            width={200}
+            height={200}
+            className="rounded-lg"
+          />
 
- <Image
-  src="/map.png"
-  alt="Clock in hand"
-  width={250}
-  height={200}
-  className="rounded-lg shadow-md"
-/>
+          <Image
+            src="/map.png"
+            alt="Clock in hand"
+            width={250}
+            height={200}
+            className="rounded-lg shadow-md"
+          />
         </div>
       </section>
 
@@ -91,16 +99,23 @@ export default function HomePage() {
             </p>
           </div>
         </div>
-
-        <div className="text-center mt-16 text-gray-400 text-sm">
+       
+       
+        {/* <div className="text-center mt-16 text-gray-400 text-sm">
           <p>Trusted by</p>
           <div className="flex flex-wrap justify-center space-x-4 mt-2">
             <span>© GlobalBank</span>
             <span>© Epicurious</span>
             <span>© Acme Corp</span>
           </div>
-        </div>
+        </div> */}
+        
       </section>
+       <HowItWorks />
+        <Benefits />
+       <Pricing />
+        <FAQ />
+      <Footer />
     </main>
   );
 }

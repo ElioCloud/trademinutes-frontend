@@ -3,29 +3,22 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-export default function RegisterPage() {
+export default function ForgotPasswordPage() {
   const router = useRouter();
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const [isDebugOpen, setIsDebugOpen] = useState(false);
 
-  const addLog = (message: string) => {
-    setLogs((prev) => [...prev, `${new Date().toLocaleTimeString()} — ${message}`]);
-  };
+  const addLog = (msg: string) =>
+    setLogs((prev) => [...prev, `${new Date().toLocaleTimeString()} — ${msg}`]);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    setIsDarkMode(savedTheme === 'dark');
+    const saved = localStorage.getItem('theme');
+    setIsDarkMode(saved === 'dark');
   }, []);
 
   useEffect(() => {
@@ -39,43 +32,34 @@ export default function RegisterPage() {
     }
   }, [isDarkMode]);
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    setMessage('');
     setError('');
-    setSuccess('');
     setLogs([]);
     setLoading(true);
 
-    if (!isValidEmail(email)) {
-      setError('Please enter a valid email address.');
-      addLog('❌ Invalid email format');
-      setLoading(false);
-      return;
-    }
-
     try {
-      addLog('🔌 Connecting to registration endpoint...');
-      const res = await fetch('https://trademinutes-auth.onrender.com/api/auth/register', {
+      addLog('📡 Sending forgot password request...');
+      const res = await fetch('https://trademinutes-auth.onrender.com/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ email }),
       });
 
-      const data = await res.text();
-      addLog('📤 Sent registration data');
+      const text = await res.text();
 
       if (!res.ok) {
-        addLog(`❌ Server responded with: ${data}`);
-        throw new Error(data || 'Registration failed');
+        addLog(`❌ Server error: ${text}`);
+        throw new Error(text || 'Failed to send reset link');
       }
 
-      setSuccess('Registration successful! Redirecting to login...');
-      addLog('✅ Registration successful');
-      setTimeout(() => router.push('/login'), 2000);
+      setMessage('✅ Password reset link sent to your email.');
+      addLog('✅ Reset link sent successfully');
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Something went wrong';
-      setError(message);
-      addLog(`❌ Error: ${message}`);
+      const msg = err instanceof Error ? err.message : 'Something went wrong.';
+      setError(msg);
+      addLog(`❌ Forgot password failed: ${msg}`);
     } finally {
       setLoading(false);
     }
@@ -83,7 +67,7 @@ export default function RegisterPage() {
 
   return (
     <div className={`${isDarkMode ? 'bg-black' : 'bg-white'} min-h-screen transition-colors duration-300 relative`}>
-      {/* 🐞 Debug Toggle Button */}
+      {/* 🐞 Debug Button */}
       <button
         type="button"
         onClick={() => setIsDebugOpen(!isDebugOpen)}
@@ -93,7 +77,7 @@ export default function RegisterPage() {
         🐞
       </button>
 
-      {/* 🐞 Debug Sidebar */}
+      {/* 🧪 Debug Sidebar */}
       <div className={`fixed top-0 right-0 h-full w-72 bg-black text-white p-4 text-xs shadow-xl overflow-y-auto transform transition-transform z-30 ${
         isDebugOpen ? 'translate-x-0' : 'translate-x-full'
       }`}>
@@ -125,50 +109,26 @@ export default function RegisterPage() {
         </button>
       </nav>
 
-      {/* Flex container with image and form */}
-      <div className="flex flex-col md:flex-row justify-center items-center min-h-[calc(100vh-80px)] px-2 gap-12">
+      {/* Content */}
+      <div className="flex flex-col md:flex-row justify-center items-center min-h-[calc(100vh-80px)] px-4 gap-12">
         {/* Left: Image */}
         <div className="hidden md:block">
-          <img
-            src="/register.png"
-            alt="Clock visual"
-            className="h-[400px] object-contain"
-          />
+          <img src="/forgot.png" alt="Forgot visual" className="h-[500px] object-contain" />
         </div>
 
         {/* Right: Form */}
         <div className={`rounded-md p-8 w-full max-w-sm ${isDarkMode ? 'bg-zinc-900 text-white' : 'bg-gray-100 text-black'} transition-colors duration-300`}>
-          <h2 className="text-4xl font-bold text-center mb-6 font-mono">Register</h2>
+          <h2 className="text-4xl font-bold text-center mb-6 font-mono">Forgot Password</h2>
 
-          <form onSubmit={handleRegister}>
-            {success && <p className="text-green-500 text-sm mb-2 text-center">{success}</p>}
+          <form onSubmit={handleForgotPassword}>
+            {message && <p className="text-green-500 text-sm mb-2 text-center">{message}</p>}
             {error && <p className="text-red-500 text-sm mb-2 text-center">{error}</p>}
 
             <input
-              type="text"
-              placeholder="Full Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className={`w-full p-3 mb-3 rounded border ${isDarkMode ? 'bg-zinc-800 border-zinc-700 text-white' : 'bg-white border-gray-300 text-black'}`}
-              required
-              disabled={loading}
-            />
-
-            <input
               type="email"
-              placeholder="Email"
+              placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={`w-full p-3 mb-3 rounded border ${isDarkMode ? 'bg-zinc-800 border-zinc-700 text-white' : 'bg-white border-gray-300 text-black'}`}
-              required
-              disabled={loading}
-            />
-
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               className={`w-full p-3 mb-4 rounded border ${isDarkMode ? 'bg-zinc-800 border-zinc-700 text-white' : 'bg-white border-gray-300 text-black'}`}
               required
               disabled={loading}
@@ -179,17 +139,17 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-bold text-white"
             >
-              {loading ? 'Registering...' : 'Register'}
+              {loading ? 'Sending...' : 'Send Reset Link'}
             </button>
           </form>
 
           <p className={`text-sm text-center mt-4 ${isDarkMode ? 'text-white' : 'text-black'}`}>
-            Already have an account?{' '}
+            Remembered your password?{' '}
             <span
               onClick={() => router.push('/login')}
               className="text-blue-500 cursor-pointer hover:underline"
             >
-              Sign in
+              Log in
             </span>
           </p>
         </div>
