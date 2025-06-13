@@ -33,9 +33,6 @@ jobs:
           ls -la
           if [ ! -d ".next" ]; then echo "Next.js build directory .next not found!"; exit 1; fi
 
-      - name: Copy package.json for runtime
-        run: cp package.json .next/package.json || { echo "Failed to copy package.json"; exit 1; }
-
       - name: Prepare deployment package
         run: |
           echo "Preparing deployment package..."
@@ -43,8 +40,8 @@ jobs:
           mkdir -p /tmp/deploy-package
           cp -r .next /tmp/deploy-package/.next
           cp package.json /tmp/deploy-package/package.json
-          # Remove source files to prevent overwrite
-          find /tmp/deploy-package -maxdepth 1 -type d \( -name "src" -o -name "public" -o -name "types" \) -exec rm -rf {} +
+          # Exclude all source files and directories except .next and package.json
+          find /tmp/deploy-package -mindepth 1 -not -path "*/.next/*" -not -name "package.json" -exec rm -rf {} +
           ls -la /tmp/deploy-package || echo "Deployment package preparation failed!"
 
       - name: Login to Azure
