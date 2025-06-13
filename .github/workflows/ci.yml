@@ -34,7 +34,15 @@ jobs:
           if [ ! -d ".next" ]; then echo "Next.js build directory .next not found!"; exit 1; fi
 
       - name: Copy package.json for runtime
-        run: cp package.json .next/package.json
+        run: cp package.json .next/package.json || { echo "Failed to copy package.json"; exit 1; }
+
+      - name: Prepare deployment package
+        run: |
+          echo "Preparing deployment package..."
+          mkdir -p /tmp/deploy-package
+          cp -r .next /tmp/deploy-package/.next
+          cp package.json /tmp/deploy-package/package.json
+          ls -la /tmp/deploy-package || echo "Deployment package preparation failed!"
 
       - name: Login to Azure
         uses: azure/login@v1
@@ -47,9 +55,9 @@ jobs:
         with:
           app-name: trademinutes-app
           publish-profile: ${{ secrets.PUBLISH_PROFILE_FRONTEND }}
-          package: ./.next
+          package: /tmp/deploy-package
 
       - name: Verify Deployed Package Contents
         run: |
-          echo "Deployed package contents from ./.next:"
-          ls -la ./.next || echo "No .next directory to deploy!"
+          echo "Deployed package contents from /tmp/deploy-package:"
+          ls -la /tmp/deploy-package || echo "No deployment package to verify!"
