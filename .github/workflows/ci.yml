@@ -43,9 +43,9 @@ jobs:
           mkdir -p /tmp/deploy-package
           cp -r .next /tmp/deploy-package/.next
           cp package.json /tmp/deploy-package/package.json
-          ls -la /tmp/deploy-package || echo "Deployment package preparation failed!"
           # Remove source files to prevent overwrite
-          rm -rf /tmp/deploy-package/src /tmp/deploy-package/public /tmp/deploy-package/types
+          find /tmp/deploy-package -maxdepth 1 -type d \( -name "src" -o -name "public" -o -name "types" \) -exec rm -rf {} +
+          ls -la /tmp/deploy-package || echo "Deployment package preparation failed!"
 
       - name: Login to Azure
         uses: azure/login@v1
