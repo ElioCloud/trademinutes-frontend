@@ -58,12 +58,15 @@ jobs:
           echo "Deploying to Azure Web App..."
           zip -r deploy.zip /tmp/deploy-package
           az webapp deploy --resource-group TradeMinutes-RG --name trademinutes-app --src-path deploy.zip --type zip --target-path /home/site/wwwroot
+          # Wait for deployment to settle
+          sleep 30
         env:
           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Verify Deployed Package Contents via Kudu API
         run: |
           echo "Verifying deployed package contents in wwwroot via Kudu API..."
+          sleep 60  # Allow time for extraction
           curl -u $DEPLOY_USER:$DEPLOY_PASSWORD https://trademinutes-app.scm.azurewebsites.net/api/vfs/site/wwwroot/ || echo "Failed to verify wwwroot contents"
         env:
           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
