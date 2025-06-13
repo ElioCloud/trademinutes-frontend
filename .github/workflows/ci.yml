@@ -26,9 +26,9 @@ jobs:
           npm ci || { echo "Dependency installation failed with error $?"; exit 1; }
           npm list --depth=0
 
-      - name: Build
+      - name: Build Next.js app
         run: |
-          echo "Starting build process..."
+          echo "Building Next.js app..."
           npm run build || { echo "Build failed with error $?"; cat *.log 2>/dev/null || echo "No log file"; exit 1; }
           ls -la
           if [ ! -d ".next" ]; then echo "Next.js build directory .next not found!"; exit 1; fi
@@ -36,39 +36,10 @@ jobs:
       - name: Copy package.json for runtime
         run: cp package.json .next/package.json || { echo "Failed to copy package.json"; exit 1; }
 
-      - name: Prepare deployment package
-        run: |
-          echo "Preparing deployment package..."
-          rm -rf /tmp/deploy-package  # Clean previous package
-          mkdir -p /tmp/deploy-package
-          cp -r .next /tmp/deploy-package/.next
-          cp package.json /tmp/deploy-package/package.json
-          # Exclude all source files except .next and package.json
-          find /tmp/deploy-package -mindepth 1 -not -path "*/.next/*" -not -name "package.json" -exec rm -rf {} +
-          ls -la /tmp/deploy-package || echo "Deployment package preparation failed!"
-
-      - name: Login to Azure
-        uses: azure/login@v1
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-        continue-on-error: false
-
-      - name: Deploy to Azure Web App with Custom Script
-        run: |
-          echo "Deploying to Azure Web App..."
-          zip -r deploy.zip /tmp/deploy-package
-          az webapp deploy --resource-group TradeMinutes-RG --name trademinutes-app --src-path deploy.zip --type zip --target-path /home/site/wwwroot
-          # Wait for deployment to settle
-          sleep 30
-        env:
-          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Verify Deployed Package Contents via Kudu API
-        run: |
-          echo "Verifying deployed package contents in wwwroot via Kudu API..."
-          sleep 60  # Allow time for extraction
-          curl -u $DEPLOY_USER:$DEPLOY_PASSWORD https://trademinutes-app.scm.azurewebsites.net/api/vfs/site/wwwroot/ || echo "Failed to verify wwwroot contents"
-        env:
-          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-          DEPLOY_USER: ${{ secrets.AZURE_DEPLOY_USER }}
-          DEPLOY_PASSWORD: ${{ secrets.AZURE_DEPLOY_PASSWORD }}
+          app-name: trademinutes-app
+          publish-profile: ${{ secrets.PUBLISH_PROFILE_FRONTEND }}
+          package: .
+          build: false  # Use pre-built .next folder from the build step
