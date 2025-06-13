@@ -33,6 +33,9 @@ jobs:
           ls -la
           if [ ! -d ".next" ]; then echo "Next.js build directory .next not found!"; exit 1; fi
 
+      - name: Copy package.json for runtime
+        run: cp package.json .next/package.json
+
       - name: Login to Azure
         uses: azure/login@v1
         with:
@@ -48,5 +51,5 @@ jobs:
 
       - name: Verify Deployed Package Contents
         run: |
-          echo "Deploying package contents from ./.next:"
+          echo "Deployed package contents from ./.next:"
           ls -la ./.next || echo "No .next directory to deploy!"
