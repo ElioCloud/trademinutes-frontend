@@ -42,4 +42,14 @@ jobs:
           app-name: trademinutes-app
           publish-profile: ${{ secrets.PUBLISH_PROFILE_FRONTEND }}
           package: .
-          build: false  # Use pre-built .next folder from the build step
+          # Removed 'build' input as it's not supported
+
+      - name: Verify Deployed Package Contents via Kudu API
+        run: |
+          echo "Verifying deployed package contents in wwwroot via Kudu API..."
+          sleep 120  # Increased delay for deployment
+          curl -u $DEPLOY_USER:$DEPLOY_PASSWORD -m 180 https://trademinutes-app.scm.azurewebsites.net/api/vfs/site/wwwroot/ || echo "Verification failed: Check credentials or deployment status"
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+          DEPLOY_USER: ${{ secrets.AZURE_DEPLOY_USER }}
+          DEPLOY_PASSWORD: ${{ secrets.AZURE_DEPLOY_PASSWORD }}
