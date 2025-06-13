@@ -33,6 +33,9 @@ jobs:
           ls -la
           if [ ! -d ".next" ]; then echo "Next.js build directory .next not found!"; exit 1; fi
 
+      - name: Copy package.json for runtime
+        run: cp package.json .next/package.json || { echo "Failed to copy package.json"; exit 1; }
+
       - name: Prepare deployment package
         run: |
           echo "Preparing deployment package..."
@@ -40,7 +43,7 @@ jobs:
           mkdir -p /tmp/deploy-package
           cp -r .next /tmp/deploy-package/.next
           cp package.json /tmp/deploy-package/package.json
-          # Exclude all source files and directories except .next and package.json
+          # Exclude all source files except .next and package.json
           find /tmp/deploy-package -mindepth 1 -not -path "*/.next/*" -not -name "package.json" -exec rm -rf {} +
           ls -la /tmp/deploy-package || echo "Deployment package preparation failed!"
 
@@ -50,12 +53,13 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
         continue-on-error: false
 
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: trademinutes-app
-          publish-profile: ${{ secrets.PUBLISH_PROFILE_FRONTEND }}
-          package: /tmp/deploy-package
+      - name: Deploy to Azure Web App with Custom Script
+        run: |
+          echo "Deploying to Azure Web App..."
+          zip -r deploy.zip /tmp/deploy-package
+          az webapp deploy --resource-group TradeMinutes-RG --name trademinutes-app --src-path deploy.zip --type zip --target-path /home/site/wwwroot
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Verify Deployed Package Contents
         run: |
