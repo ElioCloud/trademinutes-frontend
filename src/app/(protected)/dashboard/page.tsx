@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import ProtectedLayout from "@/components/Layout/ProtectedLayout";
 
 const Map = dynamic(() => import("@/components/OpenStreetMap"), { ssr: false });
+const baseAPIUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // ─── SkillTagInput with light/dark styles ─────────────────────────────────────
 function SkillTagInput() {
@@ -100,12 +101,9 @@ export default function ProfileDashboardPage() {
 
     const fetchProfile = async () => {
       try {
-        const res = await fetch(
-          "https://trademinutes-auth.onrender.com/api/auth/profile",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const res = await fetch(`${baseAPIUrl}/api/auth/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         const contentType = res.headers.get("content-type") || "";
         if (!contentType.includes("application/json")) {

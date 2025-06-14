@@ -27,6 +27,7 @@ export default function UserProfileSummaryPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const router = useRouter();
+  const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   // ──────────────────────────────────────────────────────────────────────────
   // On mount: theme + JWT + fetch profile
@@ -35,7 +36,6 @@ export default function UserProfileSummaryPage() {
     // Restore theme preference
     const savedTheme = localStorage.getItem("theme");
     setIsDarkMode(savedTheme === "dark");
-    const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
     // Validate token
     const token = localStorage.getItem("token");
