@@ -36,43 +36,53 @@ export default function LoginPage() {
   }, [isDarkMode]);
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    setLogs([]);
-    setLoading(true);
+  e.preventDefault();
+  setError('');
+  setSuccess('');
+  setLogs([]);
+  setLoading(true);
 
-    try {
-      addLog('🔌 Connecting to login endpoint...');
-      const res = await fetch('https://trademinutes-auth.onrender.com/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+  try {
+    addLog('🔌 Connecting to login endpoint...');
+    const res = await fetch('http://localhost:8080/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
 
-      addLog('📤 Sent login data');
+    addLog('📤 Sent login data');
 
-      if (!res.ok) {
-        const message = await res.text();
-        addLog(`❌ Server error: ${message}`);
-        throw new Error(
-          message.toLowerCase().includes('user') ? 'Incorrect email or password' : message
-        );
-      }
+    const contentType = res.headers.get('content-type') || '';
 
-      const data = await res.json();
-      localStorage.setItem('token', data.token);
-      setSuccess('Login successful! Redirecting...');
-      addLog('✅ Login successful, redirecting to /profile');
-      setTimeout(() => router.push('/profile'), 2000);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Something went wrong';
-      setError(message);
-      addLog(`❌ Login failed: ${message}`);
-    } finally {
-      setLoading(false);
+    // If not JSON, handle error as plain text
+    if (!res.ok) {
+      const errorText = contentType.includes('application/json')
+        ? (await res.json()).message || 'Login failed'
+        : await res.text();
+      addLog(`❌ Server error: ${errorText}`);
+      throw new Error(errorText);
     }
-  };
+
+    if (!contentType.includes('application/json')) {
+      const raw = await res.text();
+      addLog(`❌ Unexpected response format: ${raw}`);
+      throw new Error('Unexpected response format from server');
+    }
+
+    const data = await res.json();
+    localStorage.setItem('token', data.token);
+    setSuccess('Login successful! Redirecting...');
+    addLog('✅ Login successful, redirecting to /profile');
+    setTimeout(() => router.push('/profile'), 2000);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Something went wrong';
+    setError(message);
+    addLog(`❌ Login failed: ${message}`);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className={`${isDarkMode ? 'bg-black' : 'bg-white'} min-h-screen transition-colors duration-300 relative`}>
@@ -87,23 +97,31 @@ export default function LoginPage() {
       </button>
 
       {/* 🧪 Debug Sidebar */}
-      <div className={`fixed top-0 right-0 h-full w-72 bg-black text-white p-4 text-xs shadow-xl overflow-y-auto transform transition-transform z-30 ${
-        isDebugOpen ? 'translate-x-0' : 'translate-x-full'
-      }`}>
+      <div
+        className={`fixed top-0 right-0 h-full w-72 bg-black text-white p-4 text-xs shadow-xl overflow-y-auto transform transition-transform z-30 ${
+          isDebugOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
         <h2 className="font-bold text-sm mb-2">🧪 Debug Log</h2>
         {logs.length === 0 ? (
           <p className="text-gray-400">No logs yet</p>
         ) : (
           <ul className="space-y-1">
             {logs.map((log, i) => (
-              <li key={i} className="text-green-300">{log}</li>
+              <li key={i} className="text-green-300">
+                {log}
+              </li>
             ))}
           </ul>
         )}
       </div>
 
       {/* Navbar */}
-      <nav className={`${isDarkMode ? 'bg-zinc-900 text-white' : 'bg-white text-black'} shadow-md py-4 px-6 flex justify-between items-center`}>
+      <nav
+        className={`${
+          isDarkMode ? 'bg-zinc-900 text-white' : 'bg-white text-black'
+        } shadow-md py-4 px-6 flex justify-between items-center`}
+      >
         <h1
           className="text-2xl font-bold font-mono cursor-pointer hover:underline"
           onClick={() => router.push('/')}
@@ -126,7 +144,11 @@ export default function LoginPage() {
         </div>
 
         {/* Right: Login Form */}
-        <div className={`rounded-md p-8 w-full max-w-sm ${isDarkMode ? 'bg-zinc-900 text-white' : 'bg-gray-100 text-black'} transition-colors duration-300`}>
+        <div
+          className={`rounded-md p-8 w-full max-w-sm ${
+            isDarkMode ? 'bg-zinc-900 text-white' : 'bg-gray-100 text-black'
+          } transition-colors duration-300`}
+        >
           <h2 className="text-4xl font-bold text-center mb-6 font-mono">Login</h2>
 
           <form onSubmit={handleLogin}>
@@ -138,7 +160,9 @@ export default function LoginPage() {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={`w-full p-3 mb-3 rounded border ${isDarkMode ? 'bg-zinc-800 border-zinc-700 text-white' : 'bg-white border-gray-300 text-black'}`}
+              className={`w-full p-3 mb-3 rounded border ${
+                isDarkMode ? 'bg-zinc-800 border-zinc-700 text-white' : 'bg-white border-gray-300 text-black'
+              }`}
               required
               disabled={loading}
             />
@@ -148,7 +172,9 @@ export default function LoginPage() {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className={`w-full p-3 mb-4 rounded border ${isDarkMode ? 'bg-zinc-800 border-zinc-700 text-white' : 'bg-white border-gray-300 text-black'}`}
+              className={`w-full p-3 mb-4 rounded border ${
+                isDarkMode ? 'bg-zinc-800 border-zinc-700 text-white' : 'bg-white border-gray-300 text-black'
+              }`}
               required
               disabled={loading}
             />
@@ -168,13 +194,27 @@ export default function LoginPage() {
             <div className="flex-grow h-px bg-zinc-700" />
           </div>
 
-          <button
-            onClick={() => signIn('github')}
-            className="flex items-center justify-center gap-2 text-blue-400 hover:underline w-full text-sm"
-          >
-            <img src="/github.png" alt="GitHub" className="w-4 h-4" />
-            Log in with GitHub
-          </button>
+      <div className="flex justify-center gap-4 mt-4">
+  <button
+    onClick={() => signIn('github', { callbackUrl: '/github-auth' })}
+    className="w-10 h-10 bg-white border rounded-full flex items-center justify-center shadow hover:shadow-md"
+    title="Log in with GitHub"
+  >
+    <img src="/github.png" alt="GitHub" className="w-5 h-5" />
+  </button>
+  <button
+    onClick={() => signIn('google', { callbackUrl: '/google-auth' })}
+    className="w-10 h-10 bg-white border rounded-full flex items-center justify-center shadow hover:shadow-md"
+    title="Log in with Google"
+  >
+    <img src="/google.png" alt="Google" className="w-5 h-5" />
+  </button>
+</div>
+
+
+
+
+
 
           <p
             onClick={() => router.push('/forgot-password')}
