@@ -15,6 +15,9 @@ export default function LoginPage() {
   const [logs, setLogs] = useState<string[]>([]);
   const [isDebugOpen, setIsDebugOpen] = useState(false);
 
+  const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
+  console.log("baseURL", baseURL);
+
   const addLog = (message: string) => {
     setLogs((prev) => [
       ...prev,
@@ -47,14 +50,11 @@ export default function LoginPage() {
 
     try {
       addLog("🔌 Connecting to login endpoint...");
-      const res = await fetch(
-        "https://trademinutes-auth.onrender.com/api/auth/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }
-      );
+      const res = await fetch(`${baseURL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
       addLog("📤 Sent login data");
 

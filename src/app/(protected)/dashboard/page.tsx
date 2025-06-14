@@ -97,17 +97,15 @@ export default function ProfileDashboardPage() {
       router.push("/login");
       return;
     }
+    const baseAPIUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
     console.log("✅ JWT token loaded from localStorage:", token);
 
     const fetchProfile = async () => {
       try {
-        const res = await fetch(
-          "https://trademinutes-auth.onrender.com/api/auth/profile",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const res = await fetch(`${baseAPIUrl}/api/auth/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         const contentType = res.headers.get("content-type") || "";
         if (!contentType.includes("application/json")) {

@@ -35,6 +35,7 @@ export default function UserProfileSummaryPage() {
     // Restore theme preference
     const savedTheme = localStorage.getItem("theme");
     setIsDarkMode(savedTheme === "dark");
+    const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
     // Validate token
     const token = localStorage.getItem("token");
@@ -46,12 +47,9 @@ export default function UserProfileSummaryPage() {
     // Async fetch user profile
     const fetchProfile = async () => {
       try {
-        const res = await fetch(
-          "https://trademinutes-auth.onrender.com/api/auth/profile",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const res = await fetch(`${baseURL}/api/auth/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         // Basic content-type guard
         const contentType = res.headers.get("content-type") || "";
