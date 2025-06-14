@@ -12,10 +12,10 @@ export default function ProtectedLayout({ children }: LayoutProps) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const pathname = usePathname();
 
-  useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    setIsDarkMode(saved === "dark");
-  }, []);
+  // useEffect(() => {
+  //   const saved = localStorage.getItem("theme");
+  //   setIsDarkMode(saved === "dark");
+  // }, []);
 
   useEffect(() => {
     const root = document.documentElement;
