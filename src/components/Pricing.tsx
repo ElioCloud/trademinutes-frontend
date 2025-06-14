@@ -1,5 +1,3 @@
-// components/Pricing.tsx
-
 export default function Pricing() {
   return (
     <section className="py-16 px-6">
@@ -7,7 +5,9 @@ export default function Pricing() {
       <div className="flex justify-center gap-12">
         <div className="max-w-xs p-6 border rounded-lg shadow-lg">
           <h3 className="text-2xl font-bold mb-4">Free Plan</h3>
-          <p className="text-lg mb-4">Basic access to browse and exchange services.</p>
+          <p className="text-lg mb-4">
+            Basic access to browse and exchange services.
+          </p>
           <ul className="list-disc ml-4 mb-6">
             <li>Browse offers and requests</li>
             <li>Earn time credits</li>
@@ -19,7 +19,9 @@ export default function Pricing() {
 
         <div className="max-w-xs p-6 border rounded-lg shadow-lg">
           <h3 className="text-2xl font-bold mb-4">Premium Plan</h3>
-          <p className="text-lg mb-4">Advanced features, priority support, and extra credits.</p>
+          <p className="text-lg mb-4">
+            Advanced features, priority support, and extra credits.
+          </p>
           <ul className="list-disc ml-4 mb-6">
             <li>Priority support</li>
             <li>Bonus time credits</li>

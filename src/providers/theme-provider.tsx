@@ -10,7 +10,11 @@ interface Props {
 
 export function ThemeProvider({ children, attribute = "class" }: Props) {
   return (
-    <NextThemesProvider attribute={attribute} defaultTheme="light" enableSystem>
+    <NextThemesProvider
+      attribute={attribute}
+      defaultTheme="light"
+      enableSystem={false}
+    >
       {children}
     </NextThemesProvider>
   );

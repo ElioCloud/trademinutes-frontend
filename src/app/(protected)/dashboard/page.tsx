@@ -8,7 +8,7 @@ import ProtectedLayout from "@/components/Layout/ProtectedLayout";
 
 const Map = dynamic(() => import("@/components/OpenStreetMap"), { ssr: false });
 
-// ─── added modal-related helper component ──────────────────────────────────────
+// ─── SkillTagInput with light/dark styles ─────────────────────────────────────
 function SkillTagInput() {
   const [input, setInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
@@ -27,13 +27,13 @@ function SkillTagInput() {
   return (
     <div>
       <label className="text-sm font-medium block mb-1">
-        Skills &amp; Interests
+        Skills & Interests
       </label>
       <div className="flex flex-wrap gap-2 mb-2">
         {tags.map((tag) => (
           <span
             key={tag}
-            className="bg-violet-100 text-violet-800 px-2 py-1 rounded-full text-xs flex items-center gap-1"
+            className="bg-violet-100 text-violet-800 dark:bg-violet-800 dark:text-white px-2 py-1 rounded-full text-xs flex items-center gap-1"
           >
             {tag}
             <button
@@ -51,7 +51,7 @@ function SkillTagInput() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
           placeholder="e.g. #Python"
-          className="flex-1 px-3 py-2 border rounded bg-white text-black"
+          className="flex-1 px-3 py-2 border rounded bg-white text-black dark:bg-zinc-800 dark:text-white dark:border-zinc-700"
         />
         <button
           onClick={addTag}
@@ -74,7 +74,6 @@ export default function ProfileDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // ─── new state for modal steps ──────────────────────────────────────────────
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [profileStep, setProfileStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -83,7 +82,6 @@ export default function ProfileDashboardPage() {
     yearOfStudy: "",
     skills: [] as string[],
   });
-  // ────────────────────────────────────────────────────────────────────────────
 
   const router = useRouter();
 
@@ -97,15 +95,17 @@ export default function ProfileDashboardPage() {
       router.push("/login");
       return;
     }
-    const baseAPIUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
     console.log("✅ JWT token loaded from localStorage:", token);
 
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`${baseAPIUrl}/api/auth/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(
+          "https://trademinutes-auth.onrender.com/api/auth/profile",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         const contentType = res.headers.get("content-type") || "";
         if (!contentType.includes("application/json")) {
@@ -118,11 +118,8 @@ export default function ProfileDashboardPage() {
 
         setProfile(data);
 
-        // ─── if profile missing university, open dialog ───────────────────────
-        // if (!data.university) {
-        //   setShowProfileDialog(true);
-        // }
-        // ──────────────────────────────────────────────────────────────────────
+        // Optionally open modal if university missing
+        // if (!data.university) setShowProfileDialog(true);
       } catch (error) {
         console.error("❌ Profile fetch error:", error);
         router.push("/login");
@@ -283,13 +280,13 @@ export default function ProfileDashboardPage() {
           )}
         </main>
 
-        {/* ─── new profile-completion dialog (2-step) ───────────────────────────── */}
+        {/* ─── Profile Completion Dialog ─────────────────────────────────────────── */}
         {showProfileDialog && (
           <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center">
-            <div className="bg-white/90 p-6 rounded-lg shadow-xl w-full max-w-xl space-y-4 text-black">
+            <div className="bg-white/90 dark:bg-zinc-900/90 p-6 rounded-lg shadow-xl w-full max-w-xl space-y-4 text-black dark:text-white">
               <h2 className="text-xl font-semibold">Complete Your Profile</h2>
 
-              {/* Step 1: Basic academic info */}
+              {/* Step 1 */}
               {profileStep === 1 && (
                 <div className="space-y-3">
                   <input
@@ -299,7 +296,7 @@ export default function ProfileDashboardPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, university: e.target.value })
                     }
-                    className="w-full px-3 py-2 border rounded bg-white text-black"
+                    className="w-full px-3 py-2 border rounded bg-white text-black dark:bg-zinc-800 dark:text-white dark:border-zinc-700"
                   />
                   <input
                     type="text"
@@ -308,7 +305,7 @@ export default function ProfileDashboardPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, program: e.target.value })
                     }
-                    className="w-full px-3 py-2 border rounded bg-white text-black"
+                    className="w-full px-3 py-2 border rounded bg-white text-black dark:bg-zinc-800 dark:text-white dark:border-zinc-700"
                   />
                   <input
                     type="text"
@@ -317,7 +314,7 @@ export default function ProfileDashboardPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, yearOfStudy: e.target.value })
                     }
-                    className="w-full px-3 py-2 border rounded bg-white text-black"
+                    className="w-full px-3 py-2 border rounded bg-white text-black dark:bg-zinc-800 dark:text-white dark:border-zinc-700"
                   />
                   <div className="text-right">
                     <button
@@ -330,14 +327,14 @@ export default function ProfileDashboardPage() {
                 </div>
               )}
 
-              {/* Step 2: Skills & interests */}
+              {/* Step 2 */}
               {profileStep === 2 && (
                 <div className="space-y-4">
-                  <SkillTagInput /> {/* uses local state only */}
+                  <SkillTagInput />
                   <div className="flex justify-between">
                     <button
                       onClick={() => setProfileStep(1)}
-                      className="text-sm text-gray-500 underline"
+                      className="text-sm text-gray-500 dark:text-gray-400 underline"
                     >
                       ← Back
                     </button>

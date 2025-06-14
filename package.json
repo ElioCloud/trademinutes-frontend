@@ -13,6 +13,7 @@
     "@fullcalendar/react": "^6.1.17",
     "@netlify/next": "^1.4.9",
     "@radix-ui/react-slot": "^1.2.3",
+    "@tanstack/react-query": "^5.80.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cobe": "^0.6.4",

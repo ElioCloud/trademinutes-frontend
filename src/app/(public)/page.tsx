@@ -1,121 +1,360 @@
-'use client';
+"use client";
 
-import Benefits from '@/components/Benefits';
-import FAQ from '@/components/FAQ';
-import Footer from '@/components/Footer';
-import HowItWorks from '@/components/HowItWorks';
-import Navbar from '@/components/Navbar';
-import Pricing from '@/components/Pricing';
-import Image from 'next/image';
-import Link from 'next/link';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import dynamic from "next/dynamic";
+import ProtectedLayout from "@/components/Layout/ProtectedLayout";
 
+const Map = dynamic(() => import("@/components/OpenStreetMap"), { ssr: false });
 
-export default function HomePage() {
+// ─── SkillTagInput with light/dark styles ─────────────────────────────────────
+function SkillTagInput() {
+  const [input, setInput] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+
+  const addTag = () => {
+    if (input.trim() && !tags.includes(input.trim())) {
+      setTags([...tags, input.trim()]);
+      setInput("");
+    }
+  };
+
+  const removeTag = (tag: string) => {
+    setTags(tags.filter((t) => t !== tag));
+  };
+
   return (
-    <main className="min-h-screen bg-white text-gray-900 font-sans">
-      {/* Navbar */}
-       <Navbar />
-      {/* <nav className="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
-        <div className="text-2xl font-bold text-blue-700">
-          Trade<span className="text-black">Minutes</span>
-        </div>
-
-        <div className="flex items-center gap-6 text-sm font-medium">
-          <span className="hover:text-black cursor-pointer">How it works</span>
-          <span className="hover:text-black cursor-pointer">Features</span>
-          <span className="hover:text-black cursor-pointer">Pricing</span>
-
-          <Link href="/login">
-            <span className="hover:text-black cursor-pointer">Login</span>
-          </Link>
-
-          <Link href="/register">
-            <button className="bg-blue-600 text-white px-4 py-1.5 rounded-lg hover:bg-blue-700">
-              Sign up
+    <div>
+      <label className="text-sm font-medium block mb-1">
+        Skills & Interests
+      </label>
+      <div className="flex flex-wrap gap-2 mb-2">
+        {tags.map((tag) => (
+          <span
+            key={tag}
+            className="bg-violet-100 text-violet-800 dark:bg-violet-800 dark:text-white px-2 py-1 rounded-full text-xs flex items-center gap-1"
+          >
+            {tag}
+            <button
+              onClick={() => removeTag(tag)}
+              className="text-red-500 font-bold leading-none"
+            >
+              ×
             </button>
-          </Link>
-        </div>
-      </nav> */}
+          </span>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
+          placeholder="e.g. #Python"
+          className="flex-1 px-3 py-2 border rounded bg-white text-black dark:bg-zinc-800 dark:text-white dark:border-zinc-700"
+        />
+        <button
+          onClick={addTag}
+          className="bg-violet-600 text-white px-3 py-2 rounded"
+        >
+          Add
+        </button>
+      </div>
+    </div>
+  );
+}
+// ───────────────────────────────────────────────────────────────────────────────
 
-      {/* Hero Section */}
-      <section className="text-center pt-12 px-4 bg-gradient-to-b from-white to-blue-50">
-        <div className="w-10 h-10 mx-auto mb-6">
-          <Image src="/refresh.svg" alt="refresh icon" width={30} height={30} />
-        </div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">Exchange Skills, Not Money</h1>
-        <p className="text-gray-600 max-w-xl mx-auto mb-6">
-          Swap your skills for time credits to get the help you need, all in one app
-        </p>
-        <Link href="/register">
-          <button className="bg-blue-600 text-white px-6 py-3 rounded-full text-lg hover:bg-blue-700">
-            Get started
-          </button>
-        </Link>
+export default function ProfileDashboardPage() {
+  const [profile, setProfile] = useState<{
+    name: string;
+    email: string;
+    university?: string;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
-        <div className="mt-10 flex flex-col items-center md:flex-row md:justify-center gap-16">
-          <Image
-            src="/clock.png"
-            alt="Clock in hand"
-            width={200}
-            height={200}
-            className="rounded-lg"
-          />
+  const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [profileStep, setProfileStep] = useState(1);
+  const [formData, setFormData] = useState({
+    university: "",
+    program: "",
+    yearOfStudy: "",
+    skills: [] as string[],
+  });
 
-          <Image
-            src="/map.png"
-            alt="Clock in hand"
-            width={250}
-            height={200}
-            className="rounded-lg shadow-md"
-          />
-        </div>
-      </section>
+  const router = useRouter();
 
-      {/* Features Section */}
-      <section className="py-16 px-6 max-w-5xl mx-auto">
-        <div className="grid gap-10 sm:grid-cols-1 md:grid-cols-2">
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Smart Map & Task Matching</h3>
-            <p className="text-gray-600">
-              Browse nearby service requests and offers on an interactive map
-            </p>
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    setIsDarkMode(savedTheme === "dark");
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.warn("❌ No token found — redirecting");
+      router.push("/login");
+      return;
+    }
+
+    console.log("✅ JWT token loaded from localStorage:", token);
+
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch(
+          "https://trademinutes-auth.onrender.com/api/auth/profile",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+          const rawText = await res.text();
+          throw new Error(rawText || "Invalid response format");
+        }
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Unauthorized");
+
+        setProfile(data);
+
+        // Optionally open modal if university missing
+        // if (!data.university) setShowProfileDialog(true);
+      } catch (error) {
+        console.error("❌ Profile fetch error:", error);
+        router.push("/login");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [router]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isDarkMode) {
+      root.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      root.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [isDarkMode]);
+
+  if (loading) return null;
+
+  return (
+    <ProtectedLayout>
+      <div
+        className={`${
+          isDarkMode ? "bg-black text-white" : "bg-white text-black"
+        } min-h-screen flex`}
+      >
+        {/* Main content */}
+        <main className="flex-1 p-6">
+          {profile && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Welcome Panel */}
+              <div
+                className={`p-6 rounded-xl shadow-md col-span-2 ${
+                  isDarkMode ? "bg-zinc-900" : "bg-white border border-gray-200"
+                }`}
+              >
+                <h2 className="text-lg font-semibold mb-4">
+                  Welcome, {profile.name}
+                </h2>
+                <p className="text-sm mb-2">
+                  Email: <span className="font-medium">{profile.email}</span>
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Your dashboard metrics will appear below.
+                </p>
+              </div>
+
+              {/* Reviews */}
+              <div
+                className={`p-6 rounded-xl shadow-md ${
+                  isDarkMode ? "bg-zinc-900" : "bg-white border border-gray-200"
+                }`}
+              >
+                <h2 className="text-lg font-semibold mb-4">Reviews</h2>
+                <p className="text-3xl font-bold text-green-600 text-center mb-2">
+                  ⭐4.85
+                </p>
+              </div>
+
+              {/* Map */}
+              <div
+                className={`p-6 rounded-xl shadow-md col-span-2 ${
+                  isDarkMode ? "bg-zinc-900" : "bg-white border border-gray-200"
+                }`}
+              >
+                <h2 className="text-lg font-semibold mb-4">Locations</h2>
+                <div className="h-64 rounded-lg overflow-hidden">
+                  <Map />
+                </div>
+              </div>
+
+              {/* Rewards */}
+              <div
+                className={`p-6 rounded-xl shadow-md ${
+                  isDarkMode ? "bg-zinc-900" : "bg-white border border-gray-200"
+                }`}
+              >
+                <h2 className="text-lg font-semibold mb-4">Rewards</h2>
+                <div
+                  className={`h-24 rounded-lg flex items-center justify-between px-4 ${
+                    isDarkMode ? "bg-zinc-700" : "bg-gray-100"
+                  }`}
+                >
+                  <div>
+                    <p className="text-sm font-semibold">Congratulations</p>
+                    <p className="text-lg font-bold text-green-600">$50</p>
+                  </div>
+                  <Image
+                    src="/reward.jpg"
+                    alt="Reward"
+                    width={64}
+                    height={64}
+                    className="object-contain rounded"
+                  />
+                </div>
+              </div>
+
+              {/* Activity */}
+              <div
+                className={`p-6 rounded-xl shadow-md ${
+                  isDarkMode ? "bg-zinc-900" : "bg-white border border-gray-200"
+                }`}
+              >
+                <h2 className="text-lg font-semibold mb-2">Activity Summary</h2>
+                <p className="text-sm">
+                  You have spent <span className="font-bold">3h 45m</span>{" "}
+                  learning this week.
+                </p>
+                <p className="text-sm text-green-600 mt-1">
+                  +37 Credits Earned
+                </p>
+              </div>
+
+              {/* Wallet */}
+              <div
+                className={`p-6 rounded-xl shadow-md text-center ${
+                  isDarkMode ? "bg-zinc-900" : "bg-white border border-gray-200"
+                }`}
+              >
+                <h2 className="text-lg font-semibold mb-2">Your Credits</h2>
+                <p className="text-4xl font-bold text-violet-600">152 🪙</p>
+                <p className="text-sm text-gray-500">
+                  Use credits to unlock premium content
+                </p>
+              </div>
+
+              {/* Redeemable Rewards */}
+              <div
+                className={`p-6 rounded-xl shadow-md ${
+                  isDarkMode ? "bg-zinc-900" : "bg-white border border-gray-200"
+                } col-span-2`}
+              >
+                <h2 className="text-lg font-semibold mb-4">Redeem Rewards</h2>
+                <div className="space-y-3">
+                  {[
+                    { title: "$10 Discount Coupon", cost: 100 },
+                    { title: "1-on-1 Mentorship Call", cost: 150 },
+                    { title: "Premium Course Access", cost: 200 },
+                  ].map((reward, index) => (
+                    <div
+                      key={index}
+                      className="flex justify-between items-center"
+                    >
+                      <span className="text-sm">{reward.title}</span>
+                      <button className="text-xs bg-violet-600 text-white px-3 py-1 rounded">
+                        Redeem ({reward.cost} 🪙)
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </main>
+
+        {/* ─── Profile Completion Dialog ─────────────────────────────────────────── */}
+        {showProfileDialog && (
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center">
+            <div className="bg-white/90 dark:bg-zinc-900/90 p-6 rounded-lg shadow-xl w-full max-w-xl space-y-4 text-black dark:text-white">
+              <h2 className="text-xl font-semibold">Complete Your Profile</h2>
+
+              {/* Step 1 */}
+              {profileStep === 1 && (
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    placeholder="College/University"
+                    value={formData.university}
+                    onChange={(e) =>
+                      setFormData({ ...formData, university: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border rounded bg-white text-black dark:bg-zinc-800 dark:text-white dark:border-zinc-700"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Program/Major"
+                    value={formData.program}
+                    onChange={(e) =>
+                      setFormData({ ...formData, program: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border rounded bg-white text-black dark:bg-zinc-800 dark:text-white dark:border-zinc-700"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Year of Study (e.g. 2nd Year BSc)"
+                    value={formData.yearOfStudy}
+                    onChange={(e) =>
+                      setFormData({ ...formData, yearOfStudy: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border rounded bg-white text-black dark:bg-zinc-800 dark:text-white dark:border-zinc-700"
+                  />
+                  <div className="text-right">
+                    <button
+                      onClick={() => setProfileStep(2)}
+                      className="bg-violet-600 text-white px-4 py-2 rounded"
+                    >
+                      Next ➝
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2 */}
+              {profileStep === 2 && (
+                <div className="space-y-4">
+                  <SkillTagInput />
+                  <div className="flex justify-between">
+                    <button
+                      onClick={() => setProfileStep(1)}
+                      className="text-sm text-gray-500 dark:text-gray-400 underline"
+                    >
+                      ← Back
+                    </button>
+                    <button
+                      onClick={() => {
+                        console.log("Submit profile:", { ...formData });
+                        setShowProfileDialog(false);
+                      }}
+                      className="bg-green-600 text-white px-4 py-2 rounded"
+                    >
+                      Save Profile
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Time Credit & Scheduling System</h3>
-            <p className="text-gray-600">
-              Earn and spend time credits for each completed or requested task
-            </p>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Trust & Community Profiles</h3>
-            <p className="text-gray-600">
-              Verified profiles show ID, neighborhood status, completed tasks, and skills
-            </p>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Time Credit & Scheduling System</h3>
-            <p className="text-gray-600">
-              Earn and spend time credits for each completed or requested task
-            </p>
-          </div>
-        </div>
-       
-       
-        {/* <div className="text-center mt-16 text-gray-400 text-sm">
-          <p>Trusted by</p>
-          <div className="flex flex-wrap justify-center space-x-4 mt-2">
-            <span>© GlobalBank</span>
-            <span>© Epicurious</span>
-            <span>© Acme Corp</span>
-          </div>
-        </div> */}
-        
-      </section>
-       <HowItWorks />
-        <Benefits />
-       <Pricing />
-        <FAQ />
-      <Footer />
-    </main>
+        )}
+        {/* ─────────────────────────────────────────────────────────────────────── */}
+      </div>
+    </ProtectedLayout>
   );
 }

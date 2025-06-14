@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import ThemeToggle from "@/components/common/ThemeToggle";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -9,30 +10,11 @@ export default function ForgotPasswordPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const [isDebugOpen, setIsDebugOpen] = useState(false);
 
-  const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
   const addLog = (msg: string) =>
     setLogs((prev) => [...prev, `${new Date().toLocaleTimeString()} — ${msg}`]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    setIsDarkMode(saved === "dark");
-  }, []);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (isDarkMode) {
-      root.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      root.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [isDarkMode]);
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,11 +25,14 @@ export default function ForgotPasswordPage() {
 
     try {
       addLog("📡 Sending forgot password request...");
-      const res = await fetch(`${baseURL}/api/auth/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
+      const res = await fetch(
+        "https://trademinutes-auth.onrender.com/api/auth/forgot-password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }
+      );
 
       const text = await res.text();
 
@@ -68,11 +53,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div
-      className={`${
-        isDarkMode ? "bg-black" : "bg-white"
-      } min-h-screen transition-colors duration-300 relative`}
-    >
+    <div className="min-h-screen bg-white dark:bg-black transition-colors duration-300 relative">
       {/* 🐞 Debug Button */}
       <button
         type="button"
@@ -104,23 +85,14 @@ export default function ForgotPasswordPage() {
       </div>
 
       {/* Navbar */}
-      <nav
-        className={`${
-          isDarkMode ? "bg-zinc-900 text-white" : "bg-white text-black"
-        } shadow-md py-4 px-6 flex justify-between items-center`}
-      >
+      <nav className="bg-white dark:bg-zinc-900 text-black dark:text-white shadow-md py-4 px-6 flex justify-between items-center">
         <h1
           className="text-2xl font-bold font-mono cursor-pointer hover:underline"
           onClick={() => router.push("/")}
         >
           TradeMinutes
         </h1>
-        <button
-          onClick={() => setIsDarkMode(!isDarkMode)}
-          className="text-sm rounded border px-3 py-1 border-gray-400 bg-zinc-700 text-white hover:bg-zinc-600"
-        >
-          {isDarkMode ? "☀️ Light" : "🌙 Dark"}
-        </button>
+        <ThemeToggle />
       </nav>
 
       {/* Content */}
@@ -135,11 +107,7 @@ export default function ForgotPasswordPage() {
         </div>
 
         {/* Right: Form */}
-        <div
-          className={`rounded-md p-8 w-full max-w-sm ${
-            isDarkMode ? "bg-zinc-900 text-white" : "bg-gray-100 text-black"
-          } transition-colors duration-300`}
-        >
+        <div className="rounded-md p-8 w-full max-w-sm bg-gray-100 dark:bg-zinc-900 text-black dark:text-white transition-colors duration-300">
           <h2 className="text-4xl font-bold text-center mb-6 font-mono">
             Forgot Password
           </h2>
@@ -159,11 +127,7 @@ export default function ForgotPasswordPage() {
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={`w-full p-3 mb-4 rounded border ${
-                isDarkMode
-                  ? "bg-zinc-800 border-zinc-700 text-white"
-                  : "bg-white border-gray-300 text-black"
-              }`}
+              className="w-full p-3 mb-4 rounded border bg-white dark:bg-zinc-800 border-gray-300 dark:border-zinc-700 text-black dark:text-white"
               required
               disabled={loading}
             />
@@ -177,11 +141,7 @@ export default function ForgotPasswordPage() {
             </button>
           </form>
 
-          <p
-            className={`text-sm text-center mt-4 ${
-              isDarkMode ? "text-white" : "text-black"
-            }`}
-          >
+          <p className="text-sm text-center mt-4 text-black dark:text-white">
             Remembered your password?{" "}
             <span
               onClick={() => router.push("/login")}
