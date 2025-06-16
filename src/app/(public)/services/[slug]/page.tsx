@@ -47,7 +47,7 @@ const mockServices: Service[] = [
     price: 180,
     image: 'https://miro.medium.com/v2/resize:fit:4800/format:webp/1*WRocACNtWLIzZrxuGOyeBA.jpeg',
     description:
-      'I will provide personalized tutoring for college-level students. With clear explanations and exam strategies, that will help you feel confident and prepared.',
+      'I will provide personalized tutoring for college-level student. With clear explanations and exam strategies, that will help you feel confident and prepared.',
   }
 ];
 
