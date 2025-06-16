@@ -22,7 +22,7 @@ const mockServices: Service[] = [
     {
         id: 3,
         slug: 'walk-your-dog-every-evening',
-        title: 'I will walk your dog every evening',
+        title: 'I will walk your dog every evening ',
         category: 'Pet Service',
         rating: 4.96,
         reviews: 48,
