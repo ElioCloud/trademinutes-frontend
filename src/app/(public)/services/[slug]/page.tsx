@@ -32,7 +32,7 @@ const mockServices: Service[] = [
         price: 200,
         image: 'https://cdn.pixabay.com/photo/2015/11/17/13/13/puppy-1047521_1280.jpg',
         description:
-            'Your dog will enjoy a peaceful 30-minute walk with me every evening. I’m experienced and love pets!',
+            'Your dog will enjoy a peaceful 30-minute walk with me. I’m experienced and love pets!',
     },
     {
     id: 4,
