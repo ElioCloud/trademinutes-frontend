@@ -42,7 +42,7 @@ const mockServices: Service[] = [
     rating: 4.92,
     reviews: 62,
     review: '',
-    user: 'bob',
+    user: 'Alice',
     avatar: 'https://images.pexels.com/photos/1130626/pexels-photo-1130626.jpeg',
     price: 180,
     image: 'https://miro.medium.com/v2/resize:fit:4800/format:webp/1*WRocACNtWLIzZrxuGOyeBA.jpeg',

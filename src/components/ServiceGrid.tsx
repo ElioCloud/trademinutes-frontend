@@ -13,7 +13,7 @@ const services = [
     category: 'Tutoring & Study',
     rating: 4.88,
     reviews: 24,
-    user: 'Bob',
+    user: 'Alice',
     avatar: 'https://images.pexels.com/photos/277576/pexels-photo-277576.jpeg',
     price: 60,
     image: 'https://miro.medium.com/v2/resize:fit:4800/format:webp/1*WRocACNtWLIzZrxuGOyeBA.jpeg',
