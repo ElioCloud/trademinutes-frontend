@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
 
     try {
       addLog('📡 Sending forgot password request...');
-      const res = await fetch('https://trademinutes-auth.onrender.com/api/auth/forgot-password', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

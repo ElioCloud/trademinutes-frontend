@@ -18,9 +18,10 @@ export default function UserProfileSummaryPage() {
   const [profile, setProfile] = useState<{
     name: string;
     email: string;
-    phone: string;
-    lastLogin: string;
-    device: string;
+    College?: string;
+    Program?: string;
+    YearOfStudy?: string;
+    skills?: string[];
   } | null>(null);
 
   const [loading, setLoading] = useState(true);
@@ -47,12 +48,12 @@ export default function UserProfileSummaryPage() {
     const fetchProfile = async () => {
       try {
         const res = await fetch(
-          "https://trademinutes-auth.onrender.com/api/auth/profile",
+          `${process.env.NEXT_PUBLIC_API_URL}/api/auth/profile`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-
+      
         // Basic content-type guard
         const contentType = res.headers.get("content-type") || "";
         if (!contentType.includes("application/json")) {
@@ -120,7 +121,7 @@ export default function UserProfileSummaryPage() {
 
               <h2 className="text-lg font-semibold mb-1">{profile.name}</h2>
 
-              {/* Hard-coded last login info (example) */}
+              {/* Last login info */}
               <p className="text-xs text-gray-400 mb-2">
                 Last login: 12 Jun 2025, 22:10
                 <br />
@@ -128,16 +129,36 @@ export default function UserProfileSummaryPage() {
               </p>
 
               {/* Academic details */}
-              <p className="text-sm">🎓 University of Toronto</p>
+              <p className="text-sm">🎓 {profile.College || "Not specified"}</p>
               <p className="text-sm text-gray-500 mb-2">
-                User Email: {profile.email}
+                Program: {profile.Program || "Not specified"}
               </p>
               <p className="text-sm text-gray-500 mb-2">
-                College Email: alex.j@utoronto.ca
+                Year: {profile.YearOfStudy || "Not specified"}
+              </p>
+              <p className="text-sm text-gray-500 mb-2">
+                Email: {profile.email}
               </p>
 
-              {/* Small status pill */}
-              <div className="flex items-center gap-2 mb-4">
+              {/* Skills section */}
+              {profile.skills && profile.skills.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium mb-2">Skills:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {profile.skills.map((skill, index) => (
+                      <span
+                        key={index}
+                        className="bg-violet-100 text-violet-800 px-2 py-1 rounded-full text-xs"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Status pill */}
+              <div className="flex items-center gap-2 mb-4 mt-4">
                 <span className="text-sm text-green-600">
                   Credits auto-sync active
                 </span>

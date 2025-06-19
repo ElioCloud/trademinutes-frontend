@@ -13,7 +13,7 @@ export default function Page() {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const res = await fetch("http://localhost:8084/api/tasks/get/all", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks/get/all`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

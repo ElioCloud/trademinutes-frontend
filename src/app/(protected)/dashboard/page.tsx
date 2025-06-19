@@ -77,6 +77,8 @@ export default function ProfileDashboardPage() {
     name: string;
     email: string;
     university?: string;
+    program?: string;
+    yearOfStudy?: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -84,41 +86,41 @@ export default function ProfileDashboardPage() {
   // ─── new state for modal steps ──────────────────────────────────────────────
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [profileStep, setProfileStep] = useState(1);
+  const [formError, setFormError] = useState("");
 
-
- const [formData, setFormData] = useState({
-  university: "",
-  program: "",
-  yearOfStudy: "",
-  skills: [] as string[],
-});
-
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8081/api/profile";
-
-const updateProfile = async () => {
-  const token = localStorage.getItem("token");
-  if (!token) throw new Error("No auth token");
-
-  const res = await fetch(`${API_BASE}/update-info`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      college: formData.university,
-      program: formData.program,
-      yearOfStudy: formData.yearOfStudy,
-      skills: formData.skills,
-    }),
+  const [formData, setFormData] = useState({
+    university: "",
+    program: "",
+    yearOfStudy: "",
+    skills: [] as string[],
   });
 
-  if (!res.ok) {
-    const msg = await res.text();
-    throw new Error(msg || "Update failed");
-  }
-};
+  const API_BASE =
+    process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8081/api/profile";
+
+  const updateProfile = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No auth token");
+
+    const res = await fetch(`${API_BASE}/update-info`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        college: formData.university,
+        program: formData.program,
+        yearOfStudy: formData.yearOfStudy,
+        skills: formData.skills,
+      }),
+    });
+
+    if (!res.ok) {
+      const msg = await res.text();
+      throw new Error(msg || "Update failed");
+    }
+  };
 
   // ────────────────────────────────────────────────────────────────────────────
 
@@ -140,7 +142,7 @@ const updateProfile = async () => {
     const fetchProfile = async () => {
       try {
         const res = await fetch(
-          "http://localhost:8080/api/profile/update-info",
+          `${process.env.NEXT_PUBLIC_API_URL}/api/auth/profile`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -155,13 +157,52 @@ const updateProfile = async () => {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Unauthorized");
 
-        setProfile(data);
+        // Detailed debug logging
+        console.log("=== Profile Data Debug ===");
+        console.log("Raw profile data:", JSON.stringify(data, null, 2));
 
-        // ─── if profile missing university, open dialog ───────────────────────
-        if (!data.university) {
+        // Handle case-sensitive field names from API
+        const profileData = {
+          university: data.university || data.University || data.college || data.College || "",
+          program: data.program || data.Program || data.major || data.Major || "",
+          yearOfStudy: data.yearOfStudy || data.YearOfStudy || data.year || data.Year || ""
+        };
+
+        // Check if the fields exist and are not empty strings
+        const hasUniversity = profileData.university && profileData.university.trim() !== "";
+        const hasProgram = profileData.program && profileData.program.trim() !== "";
+        const hasYearOfStudy = profileData.yearOfStudy && profileData.yearOfStudy.trim() !== "";
+
+        console.log("Processed field values:", profileData);
+
+        console.log("Field status:", {
+          hasUniversity,
+          hasProgram,
+          hasYearOfStudy
+        });
+
+        setProfile({
+          ...data,
+          university: profileData.university,
+          program: profileData.program,
+          yearOfStudy: profileData.yearOfStudy
+        });
+
+        // Only show dialog if any required field is missing or empty
+        if (!hasUniversity || !hasProgram || !hasYearOfStudy) {
+          console.log("Showing profile dialog - Missing fields detected");
           setShowProfileDialog(true);
+          setFormData(prev => ({
+            ...prev,
+            university: profileData.university.trim(),
+            program: profileData.program.trim(),
+            yearOfStudy: profileData.yearOfStudy.trim(),
+            skills: Array.isArray(data.skills) ? data.skills : []
+          }));
+        } else {
+          console.log("All fields present - Not showing dialog");
+          setShowProfileDialog(false);
         }
-        // ──────────────────────────────────────────────────────────────────────
       } catch (error) {
         console.error("❌ Profile fetch error:", error);
         router.push("/login");
@@ -331,36 +372,49 @@ const updateProfile = async () => {
               {/* Step 1: Basic academic info */}
               {profileStep === 1 && (
                 <div className="space-y-3">
+                  {formError && (
+                    <div className="text-red-600 text-sm mb-2">{formError}</div>
+                  )}
                   <input
                     type="text"
                     placeholder="College/University"
                     value={formData.university}
-                    onChange={(e) =>
-                      setFormData({ ...formData, university: e.target.value })
-                    }
+                    onChange={(e) => {
+                      setFormData({ ...formData, university: e.target.value });
+                      if (formError) setFormError("");
+                    }}
                     className="w-full px-3 py-2 border rounded bg-white text-black"
                   />
                   <input
                     type="text"
                     placeholder="Program/Major"
                     value={formData.program}
-                    onChange={(e) =>
-                      setFormData({ ...formData, program: e.target.value })
-                    }
+                    onChange={(e) => {
+                      setFormData({ ...formData, program: e.target.value });
+                      if (formError) setFormError("");
+                    }}
                     className="w-full px-3 py-2 border rounded bg-white text-black"
                   />
                   <input
                     type="text"
                     placeholder="Year of Study (e.g. 2nd Year BSc)"
                     value={formData.yearOfStudy}
-                    onChange={(e) =>
-                      setFormData({ ...formData, yearOfStudy: e.target.value })
-                    }
+                    onChange={(e) => {
+                      setFormData({ ...formData, yearOfStudy: e.target.value });
+                      if (formError) setFormError("");
+                    }}
                     className="w-full px-3 py-2 border rounded bg-white text-black"
                   />
                   <div className="text-right">
                     <button
-                      onClick={() => setProfileStep(2)}
+                      onClick={() => {
+                        if (!formData.university || !formData.program || !formData.yearOfStudy) {
+                          setFormError("Please fill in all fields before continuing.");
+                          return;
+                        }
+                        setFormError("");
+                        setProfileStep(2);
+                      }}
                       className="bg-violet-600 text-white px-4 py-2 rounded"
                     >
                       Next ➝
@@ -373,9 +427,9 @@ const updateProfile = async () => {
               {profileStep === 2 && (
                 <div className="space-y-4">
                   <SkillTagInput
-  tags={formData.skills}
-  setTags={(tags) => setFormData({ ...formData, skills: tags })}
-/> {/* uses local state only */}
+                    tags={formData.skills}
+                    setTags={(tags) => setFormData({ ...formData, skills: tags })}
+                  />
                   <div className="flex justify-between">
                     <button
                       onClick={() => setProfileStep(1)}
@@ -385,16 +439,15 @@ const updateProfile = async () => {
                     </button>
                     <button
                       onClick={async () => {
-  try {
-    await updateProfile();
-    alert("Profile saved ✔");
-    setShowProfileDialog(false);
-    router.refresh?.();        // refresh dashboard if using Next 14
-  } catch (e) {
-    alert((e as Error).message);
-  }
-}}
-
+                        try {
+                          await updateProfile();
+                          alert("Profile saved ✔");
+                          setShowProfileDialog(false);
+                          router.refresh?.();
+                        } catch (e) {
+                          alert((e as Error).message);
+                        }
+                      }}
                       className="bg-green-600 text-white px-4 py-2 rounded"
                     >
                       Save Profile

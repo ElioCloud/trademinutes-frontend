@@ -49,7 +49,7 @@ export default function LoginPage() {
     try {
       addLog("🔌 Connecting to login endpoint...");
       const res = await fetch(
-        "https://trademinutes-auth.onrender.com/api/auth/login",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
