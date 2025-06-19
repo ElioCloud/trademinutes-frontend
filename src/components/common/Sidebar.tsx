@@ -66,6 +66,13 @@ export default function Sidebar() {
             label="My Profile"
             pathname={pathname}
           />
+          <SidebarButton href="/tasks/list" label="Tasks" pathname={pathname} />
+          <SidebarButton
+            href="/tasks/explore"
+            label="Explore Nearby Tasks"
+            pathname={pathname}
+          />
+
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 w-full text-left py-2 px-4 rounded bg-white hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700"

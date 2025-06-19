@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import CategoryTabsWithBreadcrumb from '@/components/CategoriesWithBreadcrumbs';
-import CategoriesGrid from '@/components/CategoriesGrid';
-import TradeMinutesActionSteps from '@/components/ActionSteps';
-import UsersBanner from '@/components/UsersBanner';
-import UserGrid from '@/components/UserGrid';
-import MapUsers from '@/components/UsersNearby';
-import ServiceFilters from '@/components/ServiceFilters';
-import UsersNearbyBanner from '@/components/UsersNearbyBanner';
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import CategoryTabsWithBreadcrumb from "@/components/CategoriesWithBreadcrumbs";
+import CategoriesGrid from "@/components/CategoriesGrid";
+import TradeMinutesActionSteps from "@/components/ActionSteps";
+import UsersBanner from "@/components/UsersBanner";
+import UserGrid from "@/components/UserGrid";
+import MapUsers from "@/components/UsersNearby";
+import ServiceFilters from "@/components/ServiceFilters";
+import UsersNearbyBanner from "@/components/UsersNearbyBanner";
 
 export default function UsersNearby() {
   return (
@@ -24,7 +24,6 @@ export default function UsersNearby() {
         <ServiceFilters />
         <br />
         <MapUsers />
-
       </div>
       <TradeMinutesActionSteps />
       <Footer />
