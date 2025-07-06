@@ -292,51 +292,172 @@ export default function ProfileDashboardPage() {
       >
         {/* Main content */}
         <main className="flex-1 p-6">
-          {/* Full-width colored stats row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 w-full">
-            {/* Total Tasks */}
-            <div className="bg-white rounded-lg shadow-sm p-5 flex items-center gap-4">
-              <div className="bg-[#22c55e]/20 p-3 rounded-full">
-                <svg className="text-[#22c55e] w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
-              </div>
-              <div>
-                <div className="text-xs font-medium uppercase tracking-wide text-gray-500">Total Tasks</div>
-                <div className="text-2xl font-bold text-black">{taskStats.total}</div>
+          {/* Top Grid: Welcome and Listings Activity side by side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            {/* Welcome Card (left) */}
+            <div className="bg-white rounded-2xl p-8 flex flex-col justify-center h-full" style={{ boxShadow: "0 2px 8px 0 rgba(0,0,0,0.06), 0 -2px 8px 0 rgba(0,0,0,0.04)" }}>
+              <h1 className="text-3xl md:text-4xl font-extrabold mb-2 text-gray-900">
+                {`Welcome, ${profile?.Name?.split(' ')[0] || 'User'}`}
+              </h1>
+              <p className="text-base text-gray-500 mb-6">Monitor your recent activity, credits, listings, and appointments at a glance.</p>
+              <div className="grid grid-cols-4 gap-6 mt-4">
+                {/* Total Tasks */}
+                <div className="flex flex-col items-center justify-center">
+                  <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mb-2">
+                    <svg className="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                  </div>
+                  <div className="text-xs text-gray-500">Total Tasks</div>
+                  <div className="text-xl font-bold text-gray-900">{taskStats.total}</div>
+                </div>
+                {/* Total Credits */}
+                <div className="flex flex-col items-center justify-center">
+                  <div className="w-14 h-14 rounded-full bg-purple-50 flex items-center justify-center mb-2">
+                    <svg className="w-7 h-7 text-purple-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><text x="12" y="16" textAnchor="middle" fontSize="12" fill="#a855f7">#</text></svg>
+                  </div>
+                  <div className="text-xs text-gray-500">Total Credits</div>
+                  <div className="text-xl font-bold text-gray-900">{taskStats.credits}</div>
+                </div>
+                {/* Active Listings */}
+                <div className="flex flex-col items-center justify-center">
+                  <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center mb-2">
+                    <svg className="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                  </div>
+                  <div className="text-xs text-gray-500">Active Listings</div>
+                  <div className="text-xl font-bold text-gray-900">3</div>
+                </div>
+                {/* Appointments */}
+                <div className="flex flex-col items-center justify-center">
+                  <div className="w-14 h-14 rounded-full bg-cyan-50 flex items-center justify-center mb-2">
+                    <svg className="w-7 h-7 text-cyan-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M8 12h4l2 2" stroke="#06b6d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </div>
+                  <div className="text-xs text-gray-500">Appointments</div>
+                  <div className="text-xl font-bold text-gray-900">2</div>
+                </div>
               </div>
             </div>
-            {/* Completed */}
-            <div className="bg-white rounded-lg shadow-sm p-5 flex items-center gap-4">
-              <div className="bg-[#3b82f6]/20 p-3 rounded-full">
-                <svg className="text-[#3b82f6] w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+            {/* Listings Activity Card (right) */}
+            <div className="bg-white rounded-2xl p-8 flex flex-col justify-center h-full" style={{ boxShadow: "0 2px 8px 0 rgba(0,0,0,0.06), 0 -2px 8px 0 rgba(0,0,0,0.04)" }}>
+              <h2 className="text-lg font-semibold mb-2">Listings Activity (Last 7 Days)</h2>
+              <div className="h-48 flex items-end gap-8 w-full">
+                {/* Mock data for 7 days */}
+                {[
+                  { day: 'Mon', new: 2, completed: 1, updated: 1 },
+                  { day: 'Tue', new: 1, completed: 2, updated: 0 },
+                  { day: 'Wed', new: 3, completed: 1, updated: 2 },
+                  { day: 'Thu', new: 0, completed: 2, updated: 1 },
+                  { day: 'Fri', new: 2, completed: 0, updated: 1 },
+                  { day: 'Sat', new: 1, completed: 1, updated: 0 },
+                  { day: 'Sun', new: 0, completed: 2, updated: 1 },
+                ].map((d, i) => (
+                  <div key={i} className="flex flex-col items-center flex-1">
+                    {/* Bars */}
+                    <div className="flex flex-col-reverse h-32 justify-end w-full items-center">
+                      <div style={{height: `${d.new * 16}px`}} className="w-4 rounded bg-blue-400 mb-1" title={`New: ${d.new}`}></div>
+                      <div style={{height: `${d.completed * 16}px`}} className="w-4 rounded bg-green-400 mb-1" title={`Completed: ${d.completed}`}></div>
+                      <div style={{height: `${d.updated * 16}px`}} className="w-4 rounded bg-orange-400" title={`Updated: ${d.updated}`}></div>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">{d.day}</div>
+                  </div>
+                ))}
               </div>
-              <div>
-                <div className="text-xs font-medium uppercase tracking-wide text-gray-500">Completed</div>
-                <div className="text-2xl font-bold text-black">{taskStats.recent.length}</div>
-              </div>
-            </div>
-            {/* In Progress */}
-            <div className="bg-white rounded-lg shadow-sm p-5 flex items-center gap-4">
-              <div className="bg-[#f59e42]/20 p-3 rounded-full">
-                <svg className="text-[#f59e42] w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" /></svg>
-              </div>
-              <div>
-                <div className="text-xs font-medium uppercase tracking-wide text-gray-500">In Progress</div>
-                <div className="text-2xl font-bold text-black">{taskStats.total - taskStats.recent.length}</div>
-              </div>
-            </div>
-            {/* Credits Earned */}
-            <div className="bg-white rounded-lg shadow-sm p-5 flex items-center gap-4">
-              <div className="bg-[#a855f7]/20 p-3 rounded-full">
-                <svg className="text-[#a855f7] w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><text x="12" y="16" textAnchor="middle" fontSize="12" fill="#a855f7">#</text></svg>
-              </div>
-              <div>
-                <div className="text-xs font-medium uppercase tracking-wide text-gray-500">Credits Earned</div>
-                <div className="text-2xl font-bold text-black">{taskStats.credits}</div>
+              <div className="flex gap-4 mt-4 text-xs text-gray-500">
+                <div className="flex items-center gap-1"><span className="w-3 h-3 bg-blue-400 rounded inline-block"></span> New</div>
+                <div className="flex items-center gap-1"><span className="w-3 h-3 bg-green-400 rounded inline-block"></span> Completed</div>
+                <div className="flex items-center gap-1"><span className="w-3 h-3 bg-orange-400 rounded inline-block"></span> Updated</div>
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* All widgets and panels removed. Dashboard is now empty. */}
+
+          {/* Main Grid: Left (2/3) and Right (1/3) */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left: Recent Task Activity + Recent Tasks */}
+            <div className="lg:col-span-2 flex flex-col gap-8">
+              {/* Recent Task Activity Chart Placeholder */}
+              
+              {/* Recent Tasks Table */}
+              <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 2px 8px 0 rgba(0,0,0,0.06), 0 -2px 8px 0 rgba(0,0,0,0.04)" }}>
+                <h2 className="text-lg font-semibold mb-2">Recent Tasks</h2>
+                <div className="space-y-4">
+                  {(taskStats.recent.length === 0) ? (
+                    <div className="text-center py-4 text-gray-400">No recent tasks.</div>
+                  ) : (
+                    taskStats.recent.map((t: Task, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center bg-white rounded-xl px-4 py-3 transition-shadow"
+                        style={{ borderLeft: `5px solid ${['#22c55e', '#a855f7', '#0ea5e9', '#f59e42', '#f43f5e'][i % 5]}`, boxShadow: '0 2px 8px 0 rgba(0,0,0,0.06)' }}
+                      >
+                        {/* Avatar/Icon */}
+                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mr-4">
+                          <svg className="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        </div>
+                        {/* Task Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-gray-900 truncate">{t.Title || t.title}</div>
+                          <div className="text-xs text-gray-500">{t.Credits || t.credits} credits</div>
+                        </div>
+                        {/* Status */}
+                        <div className="mr-4">
+                          <span className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Completed</span>
+                        </div>
+                        {/* Actions */}
+                        <div className="flex gap-2">
+                          <button className="w-9 h-9 rounded-full bg-teal-400 flex items-center justify-center text-white hover:bg-teal-500 transition" title="Call">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+                          </button>
+                          <button className="w-9 h-9 rounded-full bg-yellow-400 flex items-center justify-center text-white hover:bg-yellow-500 transition" title="Message">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h12a2 2 0 012 2z" /></svg>
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+            {/* Right: Top Helpers, Profile Completion, Appointments */}
+            <div className="flex flex-col gap-8">
+              {/* People You Contacted */}
+              <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 2px 8px 0 rgba(0,0,0,0.06), 0 -2px 8px 0 rgba(0,0,0,0.04)" }}>
+                <h2 className="text-lg font-semibold mb-2">People You Contacted</h2>
+                <div className="flex gap-4 items-center">
+                  {[
+                    { name: "Sarah Kim", img: "https://images.pexels.com/photos/1130626/pexels-photo-1130626.jpeg?auto=compress&w=80&h=80&fit=crop" },
+                    { name: "Daniel Ortiz", img: "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&w=80&h=80&fit=crop" },
+                    { name: "Ayesha Patel", img: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&w=80&h=80&fit=crop" },
+                    { name: "Michael Chen", img: "https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&w=80&h=80&fit=crop" },
+                    { name: "Olivia Brown", img: "https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&w=80&h=80&fit=crop" },
+                  ].map((user, i) => (
+                    <div key={i} className="flex flex-col items-center">
+                      <img src={user.img} alt={user.name} className="w-12 h-12 rounded-full border-2 border-white shadow mb-1 object-cover" />
+                      <span className="text-xs text-gray-700 text-center max-w-[60px] truncate">{user.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Profile Completion */}
+              <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 2px 8px 0 rgba(0,0,0,0.06), 0 -2px 8px 0 rgba(0,0,0,0.04)" }}>
+                <h2 className="text-lg font-semibold mb-2">Profile Completion</h2>
+                <div className="w-full bg-gray-100 rounded-full h-3 mb-2">
+                  <div className="bg-emerald-400 h-3 rounded-full" style={{width: '80%'}}></div>
+                </div>
+                <div className="text-xs text-gray-500">80% complete</div>
+              </div>
+              {/* Upcoming Appointments */}
+              <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 2px 8px 0 rgba(0,0,0,0.06), 0 -2px 8px 0 rgba(0,0,0,0.04)" }}>
+                <h2 className="text-lg font-semibold mb-2">Upcoming Appointments</h2>
+                <ul className="text-sm space-y-2">
+                  <li className="flex justify-between items-center">
+                    <span>Call with Alex</span>
+                    <span className="text-xs text-gray-500">Tomorrow, 2pm</span>
+                  </li>
+                  <li className="flex justify-between items-center">
+                    <span>Meet Jamie (Task: Gardening)</span>
+                    <span className="text-xs text-gray-500">Friday, 11am</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </main>
 
