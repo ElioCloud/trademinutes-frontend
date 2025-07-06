@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import ProtectedLayout from "@/components/Layout/ProtectedLayout";
-import { FaTasks, FaListAlt } from "react-icons/fa";
+import { FaTasks, FaListAlt, FaBook, FaHashtag } from "react-icons/fa";
 
 const Map = dynamic(() => import("@/components/OpenStreetMap"), { ssr: false });
 
@@ -97,6 +97,7 @@ export default function ProfileDashboardPage() {
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [profileStep, setProfileStep] = useState(1);
   const [formError, setFormError] = useState("");
+  const [profileSaved, setProfileSaved] = useState(false);
 
   const [formData, setFormData] = useState({
     university: "",
@@ -104,6 +105,7 @@ export default function ProfileDashboardPage() {
     yearOfStudy: "",
     skills: [] as string[],
   });
+  const [skillInput, setSkillInput] = useState("");
 
   const API_BASE =
     process.env.NEXT_PUBLIC_PROFILE_API_URL || "http://localhost:8081";
@@ -155,7 +157,7 @@ export default function ProfileDashboardPage() {
     const fetchProfile = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_AUTH_API_URL}/api/auth/profile`,
+          `${process.env.NEXT_PUBLIC_PROFILE_API_URL}/api/profile/get`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -271,6 +273,14 @@ export default function ProfileDashboardPage() {
     }
   }, [isDarkMode]);
 
+  // Helper to add a skill
+  const handleAddSkill = () => {
+    if (skillInput.trim()) {
+      setFormData(prev => ({ ...prev, skills: [...prev.skills, skillInput.trim()] }));
+      setSkillInput("");
+    }
+  };
+
   if (loading) return null;
 
   return (
@@ -282,105 +292,59 @@ export default function ProfileDashboardPage() {
       >
         {/* Main content */}
         <main className="flex-1 p-6">
-          {profile && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Welcome Panel */}
-              <div
-                className={`p-6 rounded-xl shadow-md col-span-2 ${
-                  isDarkMode ? "bg-zinc-900" : "bg-white border border-gray-200"
-                }`}
-              >
-                <h2 className="text-lg font-semibold mb-4">
-                  Welcome, {profile.Name}
-                </h2>
-                <p className="text-sm mb-2">
-                  Email: <span className="font-medium">{profile.Email}</span>
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Your dashboard metrics will appear below.
-                </p>
+          {/* Full-width colored stats row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 w-full">
+            {/* Total Tasks */}
+            <div className="bg-white rounded-lg shadow-sm p-5 flex items-center gap-4">
+              <div className="bg-[#22c55e]/20 p-3 rounded-full">
+                <svg className="text-[#22c55e] w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
               </div>
-
-              {/* --- Analytics Cards --- */}
-              {/* Task Analytics */}
-              <div className="p-6 rounded-xl shadow-md bg-white border border-gray-200 flex flex-col items-center">
-                <FaTasks className="text-2xl text-emerald-600 mb-2" />
-                <h3 className="font-semibold mb-1">Total Tasks</h3>
-                <p className="text-3xl font-bold">{taskStats.total}</p>
-              </div>
-              <div className="p-6 rounded-xl shadow-md bg-white border border-gray-200 flex flex-col items-center">
-                <FaListAlt className="text-2xl text-emerald-600 mb-2" />
-                <h3 className="font-semibold mb-1">Credits Earned</h3>
-                <p className="text-3xl font-bold">{taskStats.credits} 🪙</p>
-              </div>
-              <div className="p-6 rounded-xl shadow-md bg-white border border-gray-200 col-span-2">
-                <h3 className="font-semibold mb-2 flex items-center gap-2"><FaTasks /> Recent Tasks</h3>
-                <ul className="text-sm space-y-1">
-                  {taskStats.recent.length === 0 ? <li>No recent tasks.</li> : taskStats.recent.map((t: Task, i) => (
-                    <li key={i} className="flex justify-between">
-                      <span>{t.Title || t.title}</span>
-                      <span className="text-gray-500">{t.Credits || t.credits} 🪙</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              {/* Profile Analytics */}
-              <div className="p-6 rounded-xl shadow-md bg-white border border-gray-200">
-                <h3 className="font-semibold mb-2 flex items-center gap-2"><FaListAlt /> Profile Completion</h3>
-                <ul className="text-sm space-y-1">
-                  <li>University: <span className="font-medium">{profile.university || "-"}</span></li>
-                  <li>Program: <span className="font-medium">{profile.program || "-"}</span></li>
-                  <li>Year: <span className="font-medium">{profile.yearOfStudy || "-"}</span></li>
-                  <li className="flex items-center">
-                    Skills:
-                    {Array.isArray(profile.skills) && profile.skills.length > 0 ? (
-                      <span className="inline-flex flex-wrap gap-2 ml-2">
-                        {profile.skills.map((skill, i) => {
-                          const colors = [
-                            'bg-violet-100 text-violet-800',
-                            'bg-emerald-100 text-emerald-800',
-                            'bg-yellow-100 text-yellow-800',
-                            'bg-pink-100 text-pink-800',
-                            'bg-blue-100 text-blue-800',
-                            'bg-orange-100 text-orange-800',
-                          ];
-                          const color = colors[i % colors.length];
-                          return (
-                            <span
-                              key={skill}
-                              className={`px-2 py-1 rounded-full text-xs font-medium ${color}`}
-                            >
-                              {skill}
-                            </span>
-                          );
-                        })}
-                      </span>
-                    ) : (
-                      <span className="font-medium ml-2">-</span>
-                    )}
-                  </li>
-                </ul>
-              </div>
-              {/* Map */}
-              <div
-                className={`p-6 rounded-xl shadow-md col-span-2 ${
-                  isDarkMode ? "bg-zinc-900" : "bg-white border border-gray-200"
-                }`}
-              >
-                <h2 className="text-lg font-semibold mb-4">Locations</h2>
-                <div className="h-64 rounded-lg overflow-hidden">
-                  <Map />
-                </div>
+              <div>
+                <div className="text-xs font-medium uppercase tracking-wide text-gray-500">Total Tasks</div>
+                <div className="text-2xl font-bold text-black">{taskStats.total}</div>
               </div>
             </div>
-          )}
+            {/* Completed */}
+            <div className="bg-white rounded-lg shadow-sm p-5 flex items-center gap-4">
+              <div className="bg-[#3b82f6]/20 p-3 rounded-full">
+                <svg className="text-[#3b82f6] w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+              </div>
+              <div>
+                <div className="text-xs font-medium uppercase tracking-wide text-gray-500">Completed</div>
+                <div className="text-2xl font-bold text-black">{taskStats.recent.length}</div>
+              </div>
+            </div>
+            {/* In Progress */}
+            <div className="bg-white rounded-lg shadow-sm p-5 flex items-center gap-4">
+              <div className="bg-[#f59e42]/20 p-3 rounded-full">
+                <svg className="text-[#f59e42] w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" /></svg>
+              </div>
+              <div>
+                <div className="text-xs font-medium uppercase tracking-wide text-gray-500">In Progress</div>
+                <div className="text-2xl font-bold text-black">{taskStats.total - taskStats.recent.length}</div>
+              </div>
+            </div>
+            {/* Credits Earned */}
+            <div className="bg-white rounded-lg shadow-sm p-5 flex items-center gap-4">
+              <div className="bg-[#a855f7]/20 p-3 rounded-full">
+                <svg className="text-[#a855f7] w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><text x="12" y="16" textAnchor="middle" fontSize="12" fill="#a855f7">#</text></svg>
+              </div>
+              <div>
+                <div className="text-xs font-medium uppercase tracking-wide text-gray-500">Credits Earned</div>
+                <div className="text-2xl font-bold text-black">{taskStats.credits}</div>
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* All widgets and panels removed. Dashboard is now empty. */}
+          </div>
         </main>
 
         {/* ─── new profile-completion dialog (2-step) ───────────────────────────── */}
         {showProfileDialog && (
           <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center">
-            <div className="bg-gradient-to-br from-[#f0fdf4] via-white to-[#bbf7d0] p-8 rounded-2xl shadow-2xl w-full max-w-xl space-y-6 text-[#1a1446] border border-[#22c55e]/20">
-              <h2 className="text-2xl font-bold mb-2 flex items-center gap-3">
+            <div className="bg-gradient-to-br from-[#e0fce6] via-white to-[#bbf7d0] p-8 rounded-2xl shadow-2xl w-full max-w-xl space-y-6 text-[#1a1446] border border-[#22c55e]/20">
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
                 <span className="inline-flex items-center justify-center w-10 h-10 bg-[#22c55e] rounded-full">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="block">
                     <path d="M6 12.5l4 4 8-8" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
@@ -388,7 +352,6 @@ export default function ProfileDashboardPage() {
                 </span>
                 Complete Your Profile
               </h2>
-
               {/* Step 1: Basic academic info */}
               {profileStep === 1 && (
                 <div className="space-y-4">
@@ -399,7 +362,7 @@ export default function ProfileDashboardPage() {
                     type="text"
                     placeholder="College/University"
                     value={formData.university}
-                    onChange={(e) => {
+                    onChange={e => {
                       setFormData({ ...formData, university: e.target.value });
                       if (formError) setFormError("");
                     }}
@@ -409,7 +372,7 @@ export default function ProfileDashboardPage() {
                     type="text"
                     placeholder="Program/Major"
                     value={formData.program}
-                    onChange={(e) => {
+                    onChange={e => {
                       setFormData({ ...formData, program: e.target.value });
                       if (formError) setFormError("");
                     }}
@@ -419,7 +382,7 @@ export default function ProfileDashboardPage() {
                     type="text"
                     placeholder="Year of Study (e.g. 2nd Year BSc)"
                     value={formData.yearOfStudy}
-                    onChange={(e) => {
+                    onChange={e => {
                       setFormData({ ...formData, yearOfStudy: e.target.value });
                       if (formError) setFormError("");
                     }}
@@ -428,14 +391,8 @@ export default function ProfileDashboardPage() {
                   <div className="text-right">
                     <button
                       onClick={() => {
-                        if (
-                          !formData.university ||
-                          !formData.program ||
-                          !formData.yearOfStudy
-                        ) {
-                          setFormError(
-                            "Please fill in all fields before continuing."
-                          );
+                        if (!formData.university || !formData.program || !formData.yearOfStudy) {
+                          setFormError("All fields are required.");
                           return;
                         }
                         setFormError("");
@@ -448,29 +405,75 @@ export default function ProfileDashboardPage() {
                   </div>
                 </div>
               )}
-
               {/* Step 2: Skills & interests */}
               {profileStep === 2 && (
                 <div className="space-y-6">
-                  <SkillTagInput
-                    tags={formData.skills}
-                    setTags={(tags) =>
-                      setFormData({ ...formData, skills: tags })
-                    }
-                  />
+                  {formError && (
+                    <div className="text-red-600 text-sm mb-2 font-medium">{formError}</div>
+                  )}
+                  <div>
+                    <label className="text-sm font-medium block mb-1 text-[#15803d]">Skills & Interests</label>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {formData.skills.map((tag) => (
+                        <span
+                          key={tag}
+                          className="bg-[#e0fce6] text-[#15803d] px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 border border-[#22c55e]/30"
+                        >
+                          {tag}
+                          <button
+                            onClick={() => setFormData({ ...formData, skills: formData.skills.filter((t) => t !== tag) })}
+                            className="text-[#22c55e] font-bold leading-none ml-1"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        value={skillInput}
+                        onChange={e => setSkillInput(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleAddSkill();
+                          }
+                        }}
+                        placeholder="e.g. #Python"
+                        className="flex-1 px-5 py-3 border border-gray-200 rounded-full bg-white text-[#1a1446] placeholder-gray-400 text-base focus:border-[#22c55e] outline-none"
+                      />
+                      <button
+                        onClick={handleAddSkill}
+                        className="bg-[#22c55e] hover:bg-[#16a34a] text-white px-6 py-2 rounded-full font-semibold shadow-sm transition"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  </div>
                   <div className="flex justify-between items-center mt-4">
                     <button
-                      onClick={() => setProfileStep(1)}
+                      onClick={() => {
+                        setFormError("");
+                        setProfileStep(1);
+                      }}
                       className="text-sm text-[#22c55e] hover:underline font-medium px-4 py-2 rounded-full bg-[#f0fdf4]"
                     >
                       ← Back
                     </button>
                     <button
                       onClick={async () => {
+                        if (!formData.skills || formData.skills.length === 0) {
+                          setFormError("Please add at least one skill.");
+                          return;
+                        }
                         try {
                           await updateProfile();
-                          setShowProfileDialog(false);
-                          router.refresh?.();
+                          setProfileSaved(true);
+                          setTimeout(() => {
+                            setShowProfileDialog(false);
+                            setProfileSaved(false);
+                            router.refresh?.();
+                          }, 2000);
                         } catch (e) {
                           alert((e as Error).message);
                         }
@@ -480,6 +483,12 @@ export default function ProfileDashboardPage() {
                       Save Profile
                     </button>
                   </div>
+                </div>
+              )}
+              {profileSaved && (
+                <div className="flex items-center gap-2 text-green-700 bg-green-50 border border-green-200 rounded-full px-4 py-2 mb-2 font-medium justify-center">
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M6 12.5l4 4 8-8" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  Profile saved!
                 </div>
               )}
             </div>
