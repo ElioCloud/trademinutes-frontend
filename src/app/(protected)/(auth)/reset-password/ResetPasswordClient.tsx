@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { FiArrowRight } from 'react-icons/fi';
 
 export default function ResetPasswordClient() {
   const router = useRouter();
@@ -10,37 +11,14 @@ export default function ResetPasswordClient() {
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [logs, setLogs] = useState<string[]>([]);
-  const [isDebugOpen, setIsDebugOpen] = useState(false);
-
-  const addLog = (msg: string) =>
-    setLogs((prev) => [...prev, `${new Date().toLocaleTimeString()} — ${msg}`]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    setIsDarkMode(saved === "dark");
-  }, []);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (isDarkMode) {
-      root.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      root.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [isDarkMode]);
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage("");
     setError("");
-    setLogs([]);
+    setSuccess(false);
     setLoading(true);
 
     if (!token) {
@@ -56,174 +34,133 @@ export default function ResetPasswordClient() {
     }
 
     try {
-      addLog("🔄 Sending password reset...");
+      const authUrl = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8080';
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_AUTH_API_URL}/api/auth/reset-password`,
+        `${authUrl}/api/auth/reset-password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token, newPassword: password }),
         }
       );
-
       const text = await res.text();
-
       if (!res.ok) {
-        addLog(`❌ Server error: ${text}`);
         throw new Error(text || "Failed to reset password");
       }
-
-      setMessage("✅ Password reset successful. Redirecting to login...");
-      addLog("✅ Password reset complete");
-      setTimeout(() => router.push("/login"), 2000);
+      setSuccess(true);
+      setTimeout(() => router.push("/login"), 1800);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Something went wrong.";
       setError(msg);
-      addLog(`❌ Reset failed: ${msg}`);
-    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div
-      className={`${
-        isDarkMode ? "bg-black" : "bg-white"
-      } min-h-screen transition-colors duration-300 relative`}
-    >
-      {/* Debug Button */}
-      <button
-        type="button"
-        onClick={() => setIsDebugOpen(!isDebugOpen)}
-        className="fixed bottom-4 right-4 w-12 h-12 bg-black text-white rounded-full shadow-lg flex items-center justify-center z-40 hover:bg-gray-800 transition"
-        title="Toggle Debug"
-      >
-        🐞
-      </button>
-
-      {/* Debug Sidebar */}
-      <div
-        className={`fixed top-0 right-0 h-full w-72 bg-black text-white p-4 text-xs shadow-xl overflow-y-auto transform transition-transform z-30 ${
-          isDebugOpen ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
-        <h2 className="font-bold text-sm mb-2">🧪 Debug Log</h2>
-        {logs.length === 0 ? (
-          <p className="text-gray-400">No logs yet</p>
-        ) : (
-          <ul className="space-y-1">
-            {logs.map((log, i) => (
-              <li key={i} className="text-green-300">
-                {log}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* Navbar */}
-      <nav
-        className={`${
-          isDarkMode ? "bg-zinc-900 text-white" : "bg-white text-black"
-        } shadow-md py-4 px-6 flex justify-between items-center`}
-      >
-        <h1
-          className="text-2xl font-bold font-mono cursor-pointer hover:underline"
-          onClick={() => router.push("/")}
-        >
-          TradeMinutes
-        </h1>
-        <button
-          onClick={() => setIsDarkMode(!isDarkMode)}
-          className="text-sm rounded border px-3 py-1 border-gray-400 bg-zinc-700 text-white hover:bg-zinc-600"
-        >
-          {isDarkMode ? "☀️ Light" : "🌙 Dark"}
-        </button>
-      </nav>
-
-      {/* Content */}
-      <div className="flex flex-col md:flex-row justify-center items-center min-h-[calc(100vh-80px)] px-4 gap-12">
-        {/* Left: Image */}
-        <div className="hidden md:block">
-          <img
-            src="/reset1.png"
-            alt="Reset visual"
-            className="h-[500px] object-contain"
-          />
+    <main className="min-h-screen flex flex-col md:flex-row relative">
+      {/* Loading Overlay */}
+      {(loading || success) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4 bg-white/80 rounded-xl px-8 py-8 shadow-xl min-w-[260px]">
+            {!success ? (
+              <>
+                <svg className="animate-spin text-4xl text-[#22c55e]" width="32" height="32" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="#22c55e" strokeWidth="4" /><path className="opacity-75" fill="#22c55e" d="M4 12a8 8 0 018-8v8z" /></svg>
+                <span className="text-lg font-semibold text-[#1a1446]">Resetting password...</span>
+              </>
+            ) : (
+              <>
+                <svg className="text-5xl text-[#22c55e] animate-pop" width="48" height="48" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#bbf7d0" /><path d="M8 12.5l2.5 2.5L16 9.5" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <span className="text-lg font-semibold text-[#22c55e]">Password reset!</span>
+              </>
+            )}
+          </div>
         </div>
-
-        {/* Right: Form */}
-        <div
-          className={`rounded-md p-8 w-full max-w-sm ${
-            isDarkMode ? "bg-zinc-900 text-white" : "bg-gray-100 text-black"
-          } transition-colors duration-300`}
-        >
-          <h2 className="text-4xl font-bold text-center mb-6 font-mono">
-            Reset Password
-          </h2>
-
-          <form onSubmit={handleReset}>
-            {message && (
-              <p className="text-green-500 text-sm mb-2 text-center">
-                {message}
-              </p>
-            )}
-            {error && (
-              <p className="text-red-500 text-sm mb-2 text-center">{error}</p>
-            )}
-
-            <input
-              type="password"
-              placeholder="New password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={`w-full p-3 mb-3 rounded border ${
-                isDarkMode
-                  ? "bg-zinc-800 border-zinc-700 text-white"
-                  : "bg-white border-gray-300 text-black"
-              }`}
-              required
-              disabled={loading}
-            />
-
-            <input
-              type="password"
-              placeholder="Confirm password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              className={`w-full p-3 mb-4 rounded border ${
-                isDarkMode
-                  ? "bg-zinc-800 border-zinc-700 text-white"
-                  : "bg-white border-gray-300 text-black"
-              }`}
-              required
-              disabled={loading}
-            />
-
+      )}
+      {/* Left: Reset Password Form */}
+      <div className={`flex flex-col justify-center items-center w-full md:w-1/2 min-h-screen px-6 py-12 bg-white relative transition-all duration-200 ${loading || success ? 'blur-sm pointer-events-none select-none' : ''}`}>
+        <div className="w-full max-w-md flex flex-col items-center">
+          <h2 className="text-3xl font-bold text-[#1a1446] mb-2 w-full text-left">Reset Password</h2>
+          <p className="text-gray-500 mb-8 w-full text-left">Enter your new password below.</p>
+          {/* Error Message */}
+          {error && (
+            <div className="w-full mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+              {error}
+            </div>
+          )}
+          <form onSubmit={handleReset} className="space-y-5 w-full">
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium mb-1 text-[#1a1446]">New Password<span className="text-[#22c55e]">*</span></label>
+              <input
+                id="password"
+                type="password"
+                placeholder="Enter new password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-white rounded-full border border-gray-200 px-5 py-3 outline-none text-[#1a1446] placeholder-gray-400 text-base focus:border-[#22c55e]"
+                required
+                disabled={loading || success}
+              />
+            </div>
+            <div>
+              <label htmlFor="confirm" className="block text-sm font-medium mb-1 text-[#1a1446]">Confirm Password<span className="text-[#22c55e]">*</span></label>
+              <input
+                id="confirm"
+                type="password"
+                placeholder="Confirm new password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                className="w-full bg-white rounded-full border border-gray-200 px-5 py-3 outline-none text-[#1a1446] placeholder-gray-400 text-base focus:border-[#22c55e]"
+                required
+                disabled={loading || success}
+              />
+            </div>
             <button
               type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-bold text-white"
+              disabled={loading || success}
+              className="w-full bg-[#22c55e] hover:bg-[#16a34a] text-white font-semibold rounded-full py-3 mt-2 transition-colors duration-150 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Resetting..." : "Reset Password"}
             </button>
           </form>
-
-          <p
-            className={`text-sm text-center mt-4 ${
-              isDarkMode ? "text-white" : "text-black"
-            }`}
-          >
-            Back to{" "}
-            <span
-              onClick={() => router.push("/login")}
-              className="text-blue-500 cursor-pointer hover:underline"
+          <p className="text-center text-sm mt-8 text-[#1a1446]">
+            Remembered your password?{' '}
+            <button
+              type="button"
+              onClick={() => router.push('/login')}
+              className="text-[#22c55e] hover:underline font-medium"
             >
-              Login
-            </span>
+              Log in
+            </button>
           </p>
         </div>
+        <div className="absolute bottom-4 left-0 w-full text-center text-xs text-gray-400">©2024 TradeMinutes. All rights reserved.</div>
       </div>
-    </div>
+      {/* Right: Illustration & Message */}
+      <div className={`hidden md:flex flex-1 items-stretch min-h-screen bg-gradient-to-br from-[#22c55e] via-[#16a34a] to-[#134e2f] relative overflow-hidden transition-all duration-200 ${loading || success ? 'blur-sm pointer-events-none select-none' : ''}`}>
+        {/* Logo at the top */}
+        <div className="absolute top-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
+          <div className="text-3xl font-bold text-white tracking-tight drop-shadow-lg">TradeMinutes</div>
+        </div>
+        {/* Padlock illustration and message */}
+        <div className="flex-1 flex flex-col items-center justify-center relative z-10">
+          <div className="flex flex-col items-center gap-6 mt-8 mb-8">
+            {/* Padlock SVG */}
+            <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="30" y="55" width="60" height="45" rx="12" fill="#fff" stroke="#22c55e" strokeWidth="4"/>
+              <rect x="45" y="35" width="30" height="30" rx="15" fill="#22c55e" stroke="#134e2f" strokeWidth="4"/>
+              <rect x="52" y="80" width="16" height="18" rx="8" fill="#22c55e" stroke="#134e2f" strokeWidth="2"/>
+              <circle cx="60" cy="89" r="4" fill="#fff" />
+            </svg>
+            <div className="text-2xl font-bold text-white text-center drop-shadow-lg">Set a new password!</div>
+            <div className="text-white text-opacity-80 text-center max-w-xs">Choose a strong password to keep your TradeMinutes account secure.</div>
+          </div>
+          {/* Password tip widget at the bottom */}
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 min-w-[260px]">
+            <div className="text-[#bbf7d0] font-semibold flex items-center gap-2"><FiArrowRight /> Password Tip</div>
+            <div className="text-sm text-[#f0fdf4] text-center">Use a unique password with a mix of letters, numbers, and symbols for better security.</div>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
