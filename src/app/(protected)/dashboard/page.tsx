@@ -379,14 +379,21 @@ export default function ProfileDashboardPage() {
         {/* ─── new profile-completion dialog (2-step) ───────────────────────────── */}
         {showProfileDialog && (
           <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center">
-            <div className="bg-white/90 p-6 rounded-lg shadow-xl w-full max-w-xl space-y-4 text-black">
-              <h2 className="text-xl font-semibold">Complete Your Profile</h2>
+            <div className="bg-gradient-to-br from-[#f0fdf4] via-white to-[#bbf7d0] p-8 rounded-2xl shadow-2xl w-full max-w-xl space-y-6 text-[#1a1446] border border-[#22c55e]/20">
+              <h2 className="text-2xl font-bold mb-2 flex items-center gap-3">
+                <span className="inline-flex items-center justify-center w-10 h-10 bg-[#22c55e] rounded-full">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="block">
+                    <path d="M6 12.5l4 4 8-8" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+                Complete Your Profile
+              </h2>
 
               {/* Step 1: Basic academic info */}
               {profileStep === 1 && (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {formError && (
-                    <div className="text-red-600 text-sm mb-2">{formError}</div>
+                    <div className="text-red-600 text-sm mb-2 font-medium">{formError}</div>
                   )}
                   <input
                     type="text"
@@ -396,7 +403,7 @@ export default function ProfileDashboardPage() {
                       setFormData({ ...formData, university: e.target.value });
                       if (formError) setFormError("");
                     }}
-                    className="w-full px-3 py-2 border rounded bg-white text-black"
+                    className="w-full px-5 py-3 border border-gray-200 rounded-full bg-white text-[#1a1446] placeholder-gray-400 text-base focus:border-[#22c55e] outline-none"
                   />
                   <input
                     type="text"
@@ -406,7 +413,7 @@ export default function ProfileDashboardPage() {
                       setFormData({ ...formData, program: e.target.value });
                       if (formError) setFormError("");
                     }}
-                    className="w-full px-3 py-2 border rounded bg-white text-black"
+                    className="w-full px-5 py-3 border border-gray-200 rounded-full bg-white text-[#1a1446] placeholder-gray-400 text-base focus:border-[#22c55e] outline-none"
                   />
                   <input
                     type="text"
@@ -416,7 +423,7 @@ export default function ProfileDashboardPage() {
                       setFormData({ ...formData, yearOfStudy: e.target.value });
                       if (formError) setFormError("");
                     }}
-                    className="w-full px-3 py-2 border rounded bg-white text-black"
+                    className="w-full px-5 py-3 border border-gray-200 rounded-full bg-white text-[#1a1446] placeholder-gray-400 text-base focus:border-[#22c55e] outline-none"
                   />
                   <div className="text-right">
                     <button
@@ -434,7 +441,7 @@ export default function ProfileDashboardPage() {
                         setFormError("");
                         setProfileStep(2);
                       }}
-                      className="bg-violet-600 text-white px-4 py-2 rounded"
+                      className="bg-[#22c55e] hover:bg-[#16a34a] text-white px-6 py-2 rounded-full font-semibold shadow-sm transition"
                     >
                       Next ➝
                     </button>
@@ -444,17 +451,17 @@ export default function ProfileDashboardPage() {
 
               {/* Step 2: Skills & interests */}
               {profileStep === 2 && (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <SkillTagInput
                     tags={formData.skills}
                     setTags={(tags) =>
                       setFormData({ ...formData, skills: tags })
                     }
                   />
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center mt-4">
                     <button
                       onClick={() => setProfileStep(1)}
-                      className="text-sm text-gray-500 underline"
+                      className="text-sm text-[#22c55e] hover:underline font-medium px-4 py-2 rounded-full bg-[#f0fdf4]"
                     >
                       ← Back
                     </button>
@@ -462,14 +469,13 @@ export default function ProfileDashboardPage() {
                       onClick={async () => {
                         try {
                           await updateProfile();
-                          alert("Profile saved ✔");
                           setShowProfileDialog(false);
                           router.refresh?.();
                         } catch (e) {
                           alert((e as Error).message);
                         }
                       }}
-                      className="bg-green-600 text-white px-4 py-2 rounded"
+                      className="bg-[#22c55e] hover:bg-[#16a34a] text-white px-8 py-2 rounded-full font-semibold shadow-sm transition"
                     >
                       Save Profile
                     </button>

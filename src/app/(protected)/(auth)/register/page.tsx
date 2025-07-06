@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { FiMail, FiLock, FiUser } from 'react-icons/fi';
-import { FaCheckCircle } from 'react-icons/fa';
+import { FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -39,9 +39,16 @@ export default function RegisterPage() {
           body: JSON.stringify({ name, email, password }),
         }
       );
-      const data = await res.text();
+      const contentType = res.headers.get("content-type") || "";
+      let errorMsg = "Registration failed";
       if (!res.ok) {
-        throw new Error(data || "Registration failed");
+        if (contentType.includes("application/json")) {
+          const errJson = await res.json();
+          errorMsg = errJson.error || errJson.message || errorMsg;
+        } else {
+          errorMsg = await res.text() || errorMsg;
+        }
+        throw new Error(errorMsg);
       }
       setSuccess(true);
       setTimeout(() => router.push("/login"), 1800);
@@ -56,31 +63,42 @@ export default function RegisterPage() {
 
   return (
     <main className="min-h-screen flex flex-col md:flex-row relative">
-      {/* Loading Overlay */}
-      {loading && (
+      {/* Dialog Overlay for loading, error, and success */}
+      {(loading || error || success) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-4 bg-white/80 rounded-xl px-8 py-8 shadow-xl min-w-[260px]">
-            <svg className="animate-spin text-4xl text-[#22c55e]" width="32" height="32" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="#22c55e" strokeWidth="4" /><path className="opacity-75" fill="#22c55e" d="M4 12a8 8 0 018-8v8z" /></svg>
-            <span className="text-lg font-semibold text-[#1a1446]">Registering...</span>
+          <div className="flex flex-col items-center gap-4 bg-white/80 rounded-xl px-8 py-8 shadow-xl min-w-[320px] max-w-xs">
+            {loading && (
+              <>
+                <svg className="animate-spin text-4xl text-[#22c55e]" width="32" height="32" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="#22c55e" strokeWidth="4" /><path className="opacity-75" fill="#22c55e" d="M4 12a8 8 0 018-8v8z" /></svg>
+                <span className="text-lg font-semibold text-[#1a1446]">Registering...</span>
+              </>
+            )}
+            {error && !loading && (
+              <>
+                <FaExclamationCircle className="text-4xl text-red-500" />
+                <span className="text-lg font-semibold text-red-600 text-center">{error}</span>
+                <button
+                  className="mt-2 px-4 py-2 bg-red-100 text-red-700 rounded-full font-medium hover:bg-red-200 transition"
+                  onClick={() => setError("")}
+                >
+                  Close
+                </button>
+              </>
+            )}
+            {success && !loading && (
+              <>
+                <FaCheckCircle className="text-5xl text-[#22c55e] animate-pop" />
+                <span className="text-lg font-semibold text-[#22c55e] text-center">Registration successful! Redirecting...</span>
+              </>
+            )}
           </div>
         </div>
       )}
       {/* Left: Register Form */}
-      <div className={`flex flex-col justify-center items-center w-full md:w-1/2 min-h-screen px-6 py-12 bg-white relative transition-all duration-200 ${loading || success ? 'blur-sm pointer-events-none select-none' : ''}`}>
+      <div className={`flex flex-col justify-center items-center w-full md:w-1/2 min-h-screen px-6 py-12 bg-white relative transition-all duration-200 ${(loading || error || success) ? 'blur-sm pointer-events-none select-none' : ''}`}>
         <div className="w-full max-w-md flex flex-col items-center">
           <h2 className="text-3xl font-bold text-[#1a1446] mb-2 w-full text-left">Create your TradeMinutes account</h2>
           <p className="text-gray-500 mb-8 w-full text-left">Join the community and start exchanging skills for time credits!</p>
-          {/* Error and Success Messages */}
-          {error && (
-            <div className="w-full mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-              {error}
-            </div>
-          )}
-          {success && (
-            <div className="w-full mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-600 text-sm flex items-center gap-2 justify-center">
-              <FaCheckCircle className="text-lg" /> Registration successful! Redirecting...
-            </div>
-          )}
           <form onSubmit={handleRegister} className="space-y-5 w-full">
             <div>
               <label htmlFor="name" className="block text-sm font-medium mb-1 text-[#1a1446]">Full Name<span className="text-[#22c55e]">*</span></label>
@@ -152,7 +170,7 @@ export default function RegisterPage() {
         <div className="absolute bottom-4 left-0 w-full text-center text-xs text-gray-400">©2024 TradeMinutes. All rights reserved.</div>
       </div>
       {/* Right: Modern Dashboard Card */}
-      <div className={`hidden md:flex flex-1 items-stretch min-h-screen bg-gradient-to-br from-[#22c55e] via-[#16a34a] to-[#134e2f] relative overflow-hidden transition-all duration-200 ${loading || success ? 'blur-sm pointer-events-none select-none' : ''}`}>
+      <div className={`hidden md:flex flex-1 items-stretch min-h-screen bg-gradient-to-br from-[#22c55e] via-[#16a34a] to-[#134e2f] relative overflow-hidden transition-all duration-200 ${(loading || error || success) ? 'blur-sm pointer-events-none select-none' : ''}`}>
         {/* Logo at the top */}
         <div className="absolute top-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
           <div className="text-3xl font-bold text-white tracking-tight drop-shadow-lg">TradeMinutes</div>
