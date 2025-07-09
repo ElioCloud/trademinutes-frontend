@@ -2,159 +2,194 @@
 
 import React, { useEffect, useState } from "react";
 import ProtectedLayout from "@/components/Layout/ProtectedLayout";
+import ServiceGrid from "@/components/ServiceGrid";
+import ServiceFilters from "@/components/ServiceFilters";
+import TaskMap from "@/components/tasks/TasksMap";
+import { FiGrid, FiMap, FiUser, FiPlusCircle, FiSearch } from "react-icons/fi";
 import dynamic from "next/dynamic";
-import Image from "next/image";
-// import TaskMap from "@/components/tasks/TasksMap";
+import { useRouter } from 'next/navigation';
 
-const TaskMap = dynamic(() => import("@/components/tasks/TasksMap"), {
+interface Task {
+  id: number;
+  Title: string;
+  Description: string;
+  Location: string;
+  Latitude: number;
+  longitude: number;
+  LocationType: string;
+  Credits: number;
+  Availability: any[];
+  Type?: string;
+  Status?: string;
+  Author?: {
+    id: string;
+    Name: string;
+    Email: string;
+  };
+}
+
+// Transform API task to ServiceGrid format
+const transformTaskToService = (task: Task) => ({
+  id: task.id,
+  category: task.Type || 'General',
+  title: task.Title,
+  rating: 4.8, // Default rating since API doesn't provide it
+  reviews: Math.floor(Math.random() * 50) + 10, // Mock reviews
+  user: task.Author?.Name || 'Anonymous',
+  avatar: 'https://images.pexels.com/photos/277576/pexels-photo-277576.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2', // Default avatar
+  price: task.Credits,
+  image: 'https://cdn.pixabay.com/photo/2016/11/19/13/06/bed-1839184_1280.jpg', // Default image
+});
+
+// Dynamically import TaskMap to avoid SSR issues
+const DynamicTaskMap = dynamic(() => import("@/components/tasks/TasksMap"), {
   ssr: false,
 });
 
 export default function Page() {
-  const [tasks, setTasks] = useState([]);
+  const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<'map' | 'list'>('map');
-  const [selectedTask, setSelectedTask] = useState<any | null>(null);
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("");
+  // Filter states
+  const [deliveryTime, setDeliveryTime] = useState("");
+  const [budget, setBudget] = useState("");
+  const [level, setLevel] = useState("");
+  const [location, setLocation] = useState("");
+  const [error, setError] = useState("");
+  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
+  const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      return;
-    }
     const fetchTasks = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_TASK_API_URL}/api/tasks/get/all`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        const json = await res.json();
-        setTasks(json.data || json);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("No authentication token found");
         setLoading(false);
+        return;
+      }
+      
+      try {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084";
+        const res = await fetch(`${API_BASE_URL}/api/tasks/get/all`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        
+        const json = await res.json();
+        const tasks = json.data || json;
+        // Transform tasks to service format
+        const transformedServices = tasks.map(transformTaskToService);
+        setServices(transformedServices);
       } catch (err) {
         console.error("Failed to fetch tasks:", err);
+        setError("Failed to load services. Please try again.");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchTasks();
   }, []);
 
-  // Normalize tasks for list view (same as TasksMap)
-  const normalizedTasks = tasks
-    .map((t: any) => ({
-      id: t.ID,
-      title: t.Title,
-      description: t.Description,
-      location: t.Location,
-      latitude: t.Latitude,
-      longitude: t.Longitude,
-      credits: t.Credits,
-      locationType: t.LocationType,
-      createdBy: t.CreatedBy,
-      author: t.Author,
-      availability: t.Availability,
-    }))
-    .filter((task: any) => task.latitude !== 0 && task.longitude !== 0);
-
   return (
     <ProtectedLayout>
-      <div className="flex justify-end mb-4">
-        <button
-          className={`px-4 py-2 rounded-l ${view === 'map' ? 'bg-emerald-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-          onClick={() => setView('map')}
-        >
-          Map View
-        </button>
-        <button
-          className={`px-4 py-2 rounded-r ${view === 'list' ? 'bg-emerald-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-          onClick={() => setView('list')}
-        >
-          List View
-        </button>
-      </div>
-      {loading ? (
-        <div className="text-center text-gray-600">Loading tasks...</div>
-      ) : view === 'map' ? (
-        <TaskMap tasks={tasks} />
-      ) : (
-        <div className="grid gap-4">
-          {normalizedTasks.length === 0 ? (
-            <div className="text-center text-gray-500">No tasks found.</div>
-          ) : (
-            normalizedTasks.map((task: any) => (
-              <div key={task.id} className="bg-white/80 rounded-xl shadow p-4 border border-gray-200 flex flex-col md:flex-row md:items-center gap-4">
-                <div className="flex-1">
-                  <div className="font-semibold text-lg">{task.title}</div>
-                  <div className="text-gray-500 text-sm mb-1">{task.location}</div>
-                  <div className="text-yellow-600 font-medium text-sm mb-1">💰 {task.credits} credits</div>
-                  {task.availability?.length > 0 && (
-                    <div className="text-xs text-gray-500 mb-1">
-                      📅 {task.availability[0].Date} — ⏰ {task.availability[0].TimeFrom} to {task.availability[0].TimeTo}
-                    </div>
-                  )}
-                </div>
-                <button
-                  onClick={() => setSelectedTask(task)}
-                  className="inline-block px-4 py-2 rounded bg-emerald-500 text-white hover:bg-emerald-600 text-sm font-semibold"
-                >
-                  View Task
-                </button>
-              </div>
-            ))
-          )}
-        </div>
-      )}
-      {/* Task Details Modal */}
-      {selectedTask && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md relative">
-            <button
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl font-bold"
-              onClick={() => setSelectedTask(null)}
-              aria-label="Close"
-            >
-              ×
-            </button>
-            <div className="flex items-center gap-3 mb-4">
-              <Image
-                src={selectedTask.createdBy?.avatar?.trim() ? selectedTask.createdBy.avatar : "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
-                width={48}
-                height={48}
-                className="rounded-full object-cover"
-                alt={"avatar"}
-              />
-              <div>
-                <p className="font-semibold text-sm">{selectedTask.author?.Name}</p>
-                <p className="text-xs text-gray-500">{selectedTask.title}</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-y-1 text-[13px] text-gray-600 mb-2">
-              <span className="font-medium">Location</span>
-              <span>{selectedTask.location}</span>
-              <span className="font-medium">Type</span>
-              <span>{selectedTask.locationType || "Unspecified"}</span>
-            </div>
-            {selectedTask.availability?.length > 0 && (
-              <p className="text-xs text-gray-500 mb-1">
-                📅 {selectedTask.availability[0].Date} — ⏰ {selectedTask.availability[0].TimeFrom} to {selectedTask.availability[0].TimeTo}
-              </p>
-            )}
-            <p className="text-xs text-yellow-500 font-medium mb-2">
-              💰 {selectedTask.credits} credits
-            </p>
-            {selectedTask.description && (
-              <p className="text-gray-700 text-sm mb-2">{selectedTask.description}</p>
-            )}
-            <a
-              href={`/tasks/view/${selectedTask.id}`}
-              className="block w-full text-center text-sm py-2 px-3 rounded-lg bg-green-100 mt-2"
-            >
-              Go to Task Page ↗
-            </a>
+      {/* Hero Title & Search Bar */}
+      <div className="flex flex-col items-center justify-center py-12 px-2 md:px-0 w-full">
+        <h1 className="text-4xl md:text-5xl font-bold text-center mb-3">Explore Services</h1>
+        <p className="text-lg text-gray-500 text-center mb-8 max-w-2xl">Find the help you need or offer your skills to others. Search, filter, and discover services in your community.</p>
+        {/* Search Bar */}
+        <div className="w-full max-w-3xl bg-white rounded-2xl shadow flex flex-col md:flex-row items-center p-4 gap-2">
+          <div className="flex items-center flex-1 min-h-[48px]">
+            <FiSearch className="w-6 h-6 text-gray-400 mr-3" />
+            <input
+              type="text"
+              placeholder="Search For Help or Services"
+              className="w-full text-lg text-gray-700 outline-none placeholder-gray-400 bg-transparent min-h-[48px]"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              aria-label="Search for help or services"
+            />
           </div>
+          <div className="w-full md:w-56 border-l md:border-l border-gray-200 md:pl-4 min-h-[48px] flex items-center">
+            <select
+              className="w-full text-lg bg-white text-gray-700 outline-none min-h-[44px] rounded-xl px-2"
+              value={category}
+              onChange={e => setCategory(e.target.value)}
+              aria-label="Category"
+            >
+              <option value="">Category</option>
+              <option>Home Repair</option>
+              <option>Language Exchange</option>
+              <option>Fitness & Wellness</option>
+              <option>Household Help</option>
+              <option>Tutoring & Study</option>
+              <option>Pet Care</option>
+              <option>Tech Help</option>
+              <option>Creative Skills</option>
+            </select>
+          </div>
+          <button
+            className="w-full md:w-40 bg-emerald-500 text-white text-lg font-semibold py-3 rounded-xl hover:bg-emerald-600 transition min-h-[48px] flex items-center justify-center"
+            onClick={() => {
+              if (search.trim()) {
+                router.push(`/services/search?q=${encodeURIComponent(search)}`);
+              }
+            }}
+            aria-label="Search"
+          >
+            Search
+          </button>
         </div>
-      )}
+        <div className="text-sm text-gray-400 mt-3">Popular: Gardening, Dog Walking, Coding Help, Resume Review, Piano Lessons</div>
+      </div>
+      {/* Filters and View Toggle in a single line */}
+      <div className="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
+        {/* Filters left */}
+        {/* Removed duplicate <ServiceFilters /> to keep only the top search bar with the green button */}
+        {/* View Toggle right */}
+        <div className="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1 mt-4 md:mt-0">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              viewMode === 'grid'
+                ? 'bg-emerald-500 text-white shadow-sm'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            <FiGrid size={16} />
+            Grid View
+          </button>
+          <button
+            onClick={() => setViewMode('map')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              viewMode === 'map'
+                ? 'bg-emerald-500 text-white shadow-sm'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            <FiMap size={16} />
+            Map View
+          </button>
+        </div>
+      </div>
+      {/* Service Grid */}
+      <div className="max-w-7xl mx-auto">
+        {loading ? (
+          <div className="text-center text-gray-600 py-20">Loading services...</div>
+        ) : error ? (
+          <div className="text-center text-red-600 py-20">{error}</div>
+        ) : viewMode === 'grid' ? (
+          <ServiceGrid items={services} />
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <DynamicTaskMap tasks={services} />
+          </div>
+        )}
+      </div>
     </ProtectedLayout>
   );
 }
