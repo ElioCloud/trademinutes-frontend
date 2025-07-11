@@ -125,11 +125,8 @@ function TopBar() {
             {userImage && userImage !== "" ? (
               <img src={userImage} alt="avatar" className="w-8 h-8 rounded-full object-cover" />
             ) : (
-              <span className="w-8 h-8 rounded-full bg-emerald-400 flex items-center justify-center text-white font-bold text-lg">
-                {userName.charAt(0)}
-              </span>
+              <img src="https://static.vecteezy.com/system/resources/thumbnails/027/951/137/small_2x/stylish-spectacles-guy-3d-avatar-character-illustrations-png.png" alt="default avatar" className="w-8 h-8 rounded-full object-cover" />
             )}
-            <span className="font-medium text-gray-700">{userName}</span>
             <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
           </button>
           {/* Dropdown menu */}

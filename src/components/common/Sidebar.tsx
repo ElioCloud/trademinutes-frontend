@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { MdDashboard, MdTask, MdExplore, MdMessage } from "react-icons/md";
-import { FiLogOut } from "react-icons/fi";
+import { FiLogOut, FiSettings } from "react-icons/fi";
 import { FaRegCalendarAlt, FaUserAlt } from "react-icons/fa";
 import Link from "next/link";
 import { BellIcon } from "@heroicons/react/24/outline";
@@ -217,7 +217,7 @@ export default function Sidebar() {
             href="/settings"
             label="Settings"
             pathname={pathname}
-            icon={<FiLogOut size={20} />}
+            icon={<FiSettings size={20} />}
           />
         </nav>
       </aside>

@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { FiStar } from 'react-icons/fi';
+import { useRouter } from 'next/navigation';
 
 const services = [
   
@@ -230,61 +231,75 @@ const services = [
 
 const PER_PAGE = 8;
 
-export default function ServiceGrid({ items = services }: { items?: typeof services }) {
+export default function ServiceGrid({ items = services }: { items?: (typeof services[0] & { _id?: string | number, ID?: string | number })[] }) {
+  console.log("ServiceGrid items:", items);
   const [page, setPage] = useState(1);
   const totalPages = Math.ceil(items.length / PER_PAGE);
+  const router = useRouter();
 
   // slice out only the items for the current page
   const paginated = items.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   const goTo = (p: number) => setPage(Math.min(Math.max(p, 1), totalPages));
 
+  const handleCardClick = (serviceId: string | number) => {
+    router.push(`/tasks/view/${String(serviceId)}`);
+  };
+
   return (
     <>
       {/* grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-15">
-        {paginated.map((s, idx) => (
-          <div key={`${s.id}-${idx}`} className="bg-white rounded-lg shadow-sm overflow-hidden border flex flex-col">
-            {/* image */}
-            <Image
-              src={s.image}
-              alt={s.title}
-              width={400}
-              height={260}
-              className="object-cover w-full h-48"
-            />
-
-            {/* content */}
-            <div className="p-4 flex flex-col flex-1">
-              <p className="text-xs text-black">{s.category}</p>
-              <h3 className="font-semibold text-sm mt-1 line-clamp-2 text-black">{s.title}</h3>
-
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-15">
+        {paginated.map((s, idx) => {
+          // Colorful border palette matching the listing page
+          const borderColors = [
+            'border-green-400',
+            'border-blue-400',
+            'border-pink-400',
+            'border-yellow-400',
+            'border-purple-400',
+            'border-orange-400',
+          ];
+          const borderClass = borderColors[idx % borderColors.length];
+          
+          return (
+            <div
+              key={`${s.id}-${idx}`}
+              className={`bg-white rounded-lg p-5 shadow-md hover:shadow-xl relative border-2 ${borderClass} cursor-pointer transition-all duration-200 hover:scale-105`}
+              onClick={() => handleCardClick(s._id || s.id)}
+            >
+              <h3 className="text-lg font-semibold mb-1">{s.title}</h3>
+              <p className="text-xs text-gray-500 mb-1">
+                📂 <strong>{s.category}</strong>
+              </p>
+              
               {/* rating */}
-              <div className="flex items-center text-xs text-black mt-2">
+              <div className="flex items-center text-xs text-gray-500 mb-1">
                 <FiStar className="text-yellow-400 mr-1" />
-                {s.rating}
-                <span className="ml-1">({s.reviews} reviews)</span>
+                {s.rating} ({s.reviews} reviews)
               </div>
 
-              {/* footer */}
-              <div className="flex items-center justify-between mt-auto pt-4 border-t">
-                <div className="flex items-center gap-2">
-                  <Image
-                    src={s.avatar}
-                    alt={s.user}
-                    width={24}
-                    height={24}
-                    className="rounded-full object-cover"
-                  />
-                  <span className="text-xs text-gray-500">{s.user}</span>
-                </div>
+              {/* user info */}
+              <div className="flex items-center gap-2 mb-2">
+                <Image
+                  src={s.avatar}
+                  alt={s.user}
+                  width={20}
+                  height={20}
+                  className="rounded-full object-cover"
+                />
                 <span className="text-xs text-gray-500">
-                  Starting at&nbsp;<strong className="text-black">{s.price} credits</strong>
+                  👤 <strong>{s.user}</strong>
                 </span>
               </div>
+
+              {/* price */}
+              <p className="text-sm font-medium text-gray-700">
+                🪙 {s.price} credits
+              </p>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* pagination controls */}

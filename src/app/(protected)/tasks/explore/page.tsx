@@ -29,8 +29,8 @@ interface Task {
 }
 
 // Transform API task to ServiceGrid format
-const transformTaskToService = (task: Task) => ({
-  id: task.id,
+const transformTaskToService = (task: any) => ({
+  id: task._id || task.id || task.ID, // Ensure id is set for navigation
   category: task.Type || 'General',
   title: task.Title,
   rating: 4.8, // Default rating since API doesn't provide it
@@ -99,8 +99,6 @@ export default function Page() {
     <ProtectedLayout>
       {/* Hero Title & Search Bar */}
       <div className="flex flex-col items-center justify-center py-12 px-2 md:px-0 w-full">
-        <h1 className="text-4xl md:text-5xl font-bold text-center mb-3">Explore Services</h1>
-        <p className="text-lg text-gray-500 text-center mb-8 max-w-2xl">Find the help you need or offer your skills to others. Search, filter, and discover services in your community.</p>
         {/* Search Bar */}
         <div className="w-full max-w-3xl bg-white rounded-2xl shadow flex flex-col md:flex-row items-center p-4 gap-2">
           <div className="flex items-center flex-1 min-h-[48px]">
