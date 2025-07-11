@@ -30,9 +30,13 @@ interface Task {
 
 // Transform API task to ServiceGrid format
 const transformTaskToService = (task: any) => ({
-  id: task._id || task.id || task.ID, // Ensure id is set for navigation
+  id: task.ID || task.id,
   category: task.Category || 'General',
   title: task.Title,
+  description: task.Description,
+  location: task.Location,
+  latitude: typeof task.Latitude === "string" ? Number(task.Latitude) : task.Latitude,
+  longitude: typeof task.Longitude === "string" ? Number(task.Longitude) : task.Longitude,
   rating: 4.8, // Default rating since API doesn't provide it
   reviews: Math.floor(Math.random() * 50) + 10, // Mock reviews
   user: task.Author?.Name || 'Anonymous',
@@ -82,8 +86,10 @@ export default function Page() {
         
         const json = await res.json();
         const tasks = json.data || json;
+        console.log("[Explore] Raw tasks from backend:", tasks);
         // Transform tasks to service format
         const transformedServices = tasks.map(transformTaskToService);
+        console.log("[Explore] Transformed services:", transformedServices);
         setAllTasks(transformedServices);
         setServices(transformedServices);
       } catch (err) {
@@ -116,6 +122,7 @@ export default function Page() {
       );
     }
     
+    console.log("[Explore] Services passed to grid/map:", filteredTasks);
     setServices(filteredTasks);
   }, [search, category, allTasks]);
 

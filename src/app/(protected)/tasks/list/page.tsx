@@ -141,7 +141,7 @@ export default function TaskListPage() {
               const borderClass = borderColors[idx % borderColors.length];
               return (
                 <div
-                  key={task.id}
+                  key={task.id ?? idx}
                   className={`bg-white rounded-lg p-5 shadow-md hover:shadow-xl relative border-2 ${borderClass}`}
                 >
                   <button

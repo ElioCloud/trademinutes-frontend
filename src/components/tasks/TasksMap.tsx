@@ -77,19 +77,30 @@ export default function TaskMap({ tasks }: { tasks: any[] }) {
 
   const normalizedTasks: Task[] = tasks
     .map((t: any) => ({
-      id: t.ID,
-      title: t.Title,
-      description: t.Description,
-      location: t.Location,
-      latitude: t.Latitude,
-      longitude: t.Longitude,
-      credits: t.Credits,
-      locationType: t.LocationType,
-      createdBy: t.CreatedBy,
-      author: t.Author,
-      availability: t.Availability,
-    }))
-    .filter((task) => task.latitude !== 0 && task.longitude !== 0);
+      id: t.id,
+      title: t.title,
+      description: t.description,
+      location: t.location,
+      latitude: t.latitude,
+      longitude: t.longitude,
+      credits: t.price || t.credits,
+      locationType: t.locationType,
+      createdBy: t.createdBy,
+      author: t.author,
+      availability: t.availability,
+    }));
+  console.log("Raw tasks for map:", tasks);
+  const filteredTasks = normalizedTasks.filter(
+    (task) =>
+      typeof task.latitude === "number" &&
+      typeof task.longitude === "number" &&
+      !isNaN(task.latitude) &&
+      !isNaN(task.longitude) &&
+      task.latitude !== 0 &&
+      task.longitude !== 0
+  );
+  console.log("Filtered tasks for map:", filteredTasks);
+  console.log("Map markers to render:", filteredTasks.map(t => ({ lat: t.latitude, lng: t.longitude, id: t.id })));
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -134,7 +145,7 @@ export default function TaskMap({ tasks }: { tasks: any[] }) {
           <Popup>You are here</Popup>
         </Marker>
 
-        {normalizedTasks.map((task) => {
+        {filteredTasks.map((task, idx) => {
           console.log("task", task);
           const avatar = task.createdBy?.avatar?.trim()
             ? task.createdBy.avatar
@@ -143,7 +154,7 @@ export default function TaskMap({ tasks }: { tasks: any[] }) {
 
           return (
             <Marker
-              key={task.id}
+              key={task.id ?? idx}
               position={[task.latitude, task.longitude]}
               icon={avatarIcon(avatar)}
             >
@@ -193,6 +204,32 @@ export default function TaskMap({ tasks }: { tasks: any[] }) {
           );
         })}
       </MapContainer>
+      {/* Floating debug button for coordinates */}
+      <button
+        type="button"
+        style={{
+          position: "fixed",
+          bottom: 24,
+          right: 24,
+          zIndex: 9999,
+          background: "#6366f1",
+          color: "white",
+          borderRadius: "50%",
+          width: 56,
+          height: 56,
+          fontSize: 24,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+          border: "none",
+          cursor: "pointer",
+        }}
+        onClick={() => {
+          const coords = filteredTasks.map((t, i) => `#${i + 1}: (${t.latitude}, ${t.longitude})`).join("\n");
+          alert(coords.length ? coords : "No valid coordinates found.");
+        }}
+        title="Show all marker coordinates"
+      >
+        📍
+      </button>
     </div>
   );
 }

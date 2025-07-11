@@ -155,8 +155,23 @@ export default function CreateTaskModal({
       return;
     }
 
+    // Ensure latitude and longitude are valid numbers
+    const latitude = Number(formData.latitude);
+    const longitude = Number(formData.longitude);
+    if (
+      isNaN(latitude) ||
+      isNaN(longitude) ||
+      latitude === 0 ||
+      longitude === 0
+    ) {
+      showToast("❌ Please select a valid location from the suggestions.", "error");
+      return;
+    }
+
     const payload = {
       ...formData,
+      latitude,
+      longitude,
       category: selectedCategory,
       credits: Number(formData.credits),
     };
@@ -325,6 +340,34 @@ export default function CreateTaskModal({
           </button>
         </form>
       </div>
+      {isOpen && (
+        <button
+          type="button"
+          style={{
+            position: "fixed",
+            bottom: 24,
+            right: 24,
+            zIndex: 9999,
+            background: "#6366f1",
+            color: "white",
+            borderRadius: "50%",
+            width: 56,
+            height: 56,
+            fontSize: 24,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+            border: "none",
+            cursor: "pointer",
+          }}
+          onClick={() => {
+            alert(
+              `Latitude: ${formData.latitude || "N/A"}\nLongitude: ${formData.longitude || "N/A"}`
+            );
+          }}
+          title="Show current coordinates"
+        >
+          📍
+        </button>
+      )}
     </div>
   );
 }
