@@ -75,6 +75,8 @@ export default function TaskMap({ tasks }: { tasks: any[] }) {
     null
   );
 
+  console.log("tasks11", tasks);
+
   const normalizedTasks: Task[] = tasks
     .map((t: any) => ({
       id: t.ID,
@@ -134,7 +136,7 @@ export default function TaskMap({ tasks }: { tasks: any[] }) {
           <Popup>You are here</Popup>
         </Marker>
 
-        {normalizedTasks.map((task) => {
+        {tasks.map((task, index) => {
           console.log("task", task);
           const avatar = task.createdBy?.avatar?.trim()
             ? task.createdBy.avatar
@@ -143,7 +145,7 @@ export default function TaskMap({ tasks }: { tasks: any[] }) {
 
           return (
             <Marker
-              key={task.id}
+              key={index}
               position={[task.latitude, task.longitude]}
               icon={avatarIcon(avatar)}
             >

@@ -7,15 +7,15 @@ import ServiceFilters from "@/components/ServiceFilters";
 import TaskMap from "@/components/tasks/TasksMap";
 import { FiGrid, FiMap, FiUser, FiPlusCircle, FiSearch } from "react-icons/fi";
 import dynamic from "next/dynamic";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 interface Task {
-  id: number;
+  ID: number;
   Title: string;
   Description: string;
   Location: string;
   Latitude: number;
-  longitude: number;
+  Longitude: number;
   LocationType: string;
   Credits: number;
   Availability: any[];
@@ -30,15 +30,19 @@ interface Task {
 
 // Transform API task to ServiceGrid format
 const transformTaskToService = (task: Task) => ({
-  id: task.id,
-  category: task.Type || 'General',
+  id: task.ID,
+  category: task.Type || "General",
   title: task.Title,
   rating: 4.8, // Default rating since API doesn't provide it
   reviews: Math.floor(Math.random() * 50) + 10, // Mock reviews
-  user: task.Author?.Name || 'Anonymous',
-  avatar: 'https://images.pexels.com/photos/277576/pexels-photo-277576.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2', // Default avatar
+  user: task.Author?.Name || "Anonymous",
+  avatar:
+    "https://images.pexels.com/photos/277576/pexels-photo-277576.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2", // Default avatar
   price: task.Credits,
-  image: 'https://cdn.pixabay.com/photo/2016/11/19/13/06/bed-1839184_1280.jpg', // Default image
+  image: "https://cdn.pixabay.com/photo/2016/11/19/13/06/bed-1839184_1280.jpg", // Default image
+  latitude: task.Latitude,
+  longitude: task.Longitude,
+  locationType: task.LocationType,
 });
 
 // Dynamically import TaskMap to avoid SSR issues
@@ -57,7 +61,7 @@ export default function Page() {
   const [level, setLevel] = useState("");
   const [location, setLocation] = useState("");
   const [error, setError] = useState("");
-  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
+  const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
   const router = useRouter();
 
   useEffect(() => {
@@ -68,19 +72,21 @@ export default function Page() {
         setLoading(false);
         return;
       }
-      
+
       try {
-        const API_BASE_URL = process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084";
+        const API_BASE_URL =
+          process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084";
         const res = await fetch(`${API_BASE_URL}/api/tasks/get/all`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        
+
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
-        
+
         const json = await res.json();
         const tasks = json.data || json;
+        console.log("ttt", tasks);
         // Transform tasks to service format
         const transformedServices = tasks.map(transformTaskToService);
         setServices(transformedServices);
@@ -99,8 +105,13 @@ export default function Page() {
     <ProtectedLayout>
       {/* Hero Title & Search Bar */}
       <div className="flex flex-col items-center justify-center py-12 px-2 md:px-0 w-full">
-        <h1 className="text-4xl md:text-5xl font-bold text-center mb-3">Explore Services</h1>
-        <p className="text-lg text-gray-500 text-center mb-8 max-w-2xl">Find the help you need or offer your skills to others. Search, filter, and discover services in your community.</p>
+        <h1 className="text-4xl md:text-5xl font-bold text-center mb-3">
+          Explore Services
+        </h1>
+        <p className="text-lg text-gray-500 text-center mb-8 max-w-2xl">
+          Find the help you need or offer your skills to others. Search, filter,
+          and discover services in your community.
+        </p>
         {/* Search Bar */}
         <div className="w-full max-w-3xl bg-white rounded-2xl shadow flex flex-col md:flex-row items-center p-4 gap-2">
           <div className="flex items-center flex-1 min-h-[48px]">
@@ -110,7 +121,7 @@ export default function Page() {
               placeholder="Search For Help or Services"
               className="w-full text-lg text-gray-700 outline-none placeholder-gray-400 bg-transparent min-h-[48px]"
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
               aria-label="Search for help or services"
             />
           </div>
@@ -118,7 +129,7 @@ export default function Page() {
             <select
               className="w-full text-lg bg-white text-gray-700 outline-none min-h-[44px] rounded-xl px-2"
               value={category}
-              onChange={e => setCategory(e.target.value)}
+              onChange={(e) => setCategory(e.target.value)}
               aria-label="Category"
             >
               <option value="">Category</option>
@@ -144,7 +155,10 @@ export default function Page() {
             Search
           </button>
         </div>
-        <div className="text-sm text-gray-400 mt-3">Popular: Gardening, Dog Walking, Coding Help, Resume Review, Piano Lessons</div>
+        <div className="text-sm text-gray-400 mt-3">
+          Popular: Gardening, Dog Walking, Coding Help, Resume Review, Piano
+          Lessons
+        </div>
       </div>
       {/* Filters and View Toggle in a single line */}
       <div className="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
@@ -153,22 +167,22 @@ export default function Page() {
         {/* View Toggle right */}
         <div className="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1 mt-4 md:mt-0">
           <button
-            onClick={() => setViewMode('grid')}
+            onClick={() => setViewMode("grid")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              viewMode === 'grid'
-                ? 'bg-emerald-500 text-white shadow-sm'
-                : 'text-gray-600 hover:text-gray-800'
+              viewMode === "grid"
+                ? "bg-emerald-500 text-white shadow-sm"
+                : "text-gray-600 hover:text-gray-800"
             }`}
           >
             <FiGrid size={16} />
             Grid View
           </button>
           <button
-            onClick={() => setViewMode('map')}
+            onClick={() => setViewMode("map")}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              viewMode === 'map'
-                ? 'bg-emerald-500 text-white shadow-sm'
-                : 'text-gray-600 hover:text-gray-800'
+              viewMode === "map"
+                ? "bg-emerald-500 text-white shadow-sm"
+                : "text-gray-600 hover:text-gray-800"
             }`}
           >
             <FiMap size={16} />
@@ -179,10 +193,12 @@ export default function Page() {
       {/* Service Grid */}
       <div className="max-w-7xl mx-auto">
         {loading ? (
-          <div className="text-center text-gray-600 py-20">Loading services...</div>
+          <div className="text-center text-gray-600 py-20">
+            Loading services...
+          </div>
         ) : error ? (
           <div className="text-center text-red-600 py-20">{error}</div>
-        ) : viewMode === 'grid' ? (
+        ) : viewMode === "grid" ? (
           <ServiceGrid items={services} />
         ) : (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
