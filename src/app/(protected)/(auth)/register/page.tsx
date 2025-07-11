@@ -56,7 +56,7 @@ export default function RegisterPage() {
     <main className="min-h-screen bg-gradient-to-br from-white via-zinc-100 to-zinc-200 text-gray-900 font-[var(--font-geist-sans)] flex flex-col relative overflow-hidden">
       <Navbar />
       <div className="flex-1 flex flex-col items-center justify-center space-y-10 py-32">
-        <div className="flex flex-col md:flex-row justify-center items-center gap-12 w-full">
+        <div className="lex flex-col md:flex-row justify-center items-center gap-12 w-full">
           {/* Left: Image */}
           <div className="hidden md:block">
             <img
@@ -67,10 +67,14 @@ export default function RegisterPage() {
           </div>
           {/* Right: Register Form */}
           <section className="rounded-xl p-8 w-full max-w-sm bg-white/30 backdrop-blur border border-white/40 shadow-lg text-black">
-            <h2 className="text-4xl font-bold text-center mb-6 font-mono">Register</h2>
+            <h2 className="text-4xl font-bold text-center mb-6 font-mono">
+              Register
+            </h2>
             <form onSubmit={handleRegister}>
               {success && (
-                <p className="text-green-500 text-sm mb-2 text-center">{success}</p>
+                <p className="text-green-500 text-sm mb-2 text-center">
+                  {success}
+                </p>
               )}
               {error && (
                 <p className="text-red-500 text-sm mb-2 text-center">{error}</p>
@@ -111,7 +115,7 @@ export default function RegisterPage() {
               </button>
             </form>
             <p className="text-sm text-center mt-4 text-black">
-              Already have an account?{' '}
+              Already have an account?{" "}
               <span
                 onClick={() => router.push("/login")}
                 className="text-blue-500 cursor-pointer hover:underline"
