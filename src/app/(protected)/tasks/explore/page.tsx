@@ -31,7 +31,7 @@ interface Task {
 // Transform API task to ServiceGrid format
 const transformTaskToService = (task: any) => ({
   id: task._id || task.id || task.ID, // Ensure id is set for navigation
-  category: task.Type || 'General',
+  category: task.Category || 'General',
   title: task.Title,
   rating: 4.8, // Default rating since API doesn't provide it
   reviews: Math.floor(Math.random() * 50) + 10, // Mock reviews
@@ -47,7 +47,8 @@ const DynamicTaskMap = dynamic(() => import("@/components/tasks/TasksMap"), {
 });
 
 export default function Page() {
-  const [services, setServices] = useState<any[]>([]);
+  const [allTasks, setAllTasks] = useState<any[]>([]); // Store all tasks
+  const [services, setServices] = useState<any[]>([]); // Filtered tasks for display
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -83,6 +84,7 @@ export default function Page() {
         const tasks = json.data || json;
         // Transform tasks to service format
         const transformedServices = tasks.map(transformTaskToService);
+        setAllTasks(transformedServices);
         setServices(transformedServices);
       } catch (err) {
         console.error("Failed to fetch tasks:", err);
@@ -94,6 +96,28 @@ export default function Page() {
 
     fetchTasks();
   }, []);
+
+  // Realtime search and category filter
+  useEffect(() => {
+    let filteredTasks = allTasks;
+    
+    // Apply search filter
+    if (search) {
+      filteredTasks = filteredTasks.filter(task =>
+        (task.title && task.title.toLowerCase().includes(search.toLowerCase())) ||
+        (task.description && task.description.toLowerCase().includes(search.toLowerCase()))
+      );
+    }
+    
+    // Apply category filter
+    if (category) {
+      filteredTasks = filteredTasks.filter(task =>
+        task.category && task.category.toLowerCase() === category.toLowerCase()
+      );
+    }
+    
+    setServices(filteredTasks);
+  }, [search, category, allTasks]);
 
   return (
     <ProtectedLayout>
@@ -119,28 +143,22 @@ export default function Page() {
               onChange={e => setCategory(e.target.value)}
               aria-label="Category"
             >
-              <option value="">Category</option>
-              <option>Home Repair</option>
-              <option>Language Exchange</option>
-              <option>Fitness & Wellness</option>
-              <option>Household Help</option>
-              <option>Tutoring & Study</option>
-              <option>Pet Care</option>
-              <option>Tech Help</option>
-              <option>Creative Skills</option>
+              <option value="">Select a category</option>
+              <option>Academic Help</option>
+              <option>Tech & Digital Skills</option>
+              <option>Creative & Arts</option>
+              <option>Personal Development</option>
+              <option>Language & Culture</option>
+              <option>Health & Wellness</option>
+              <option>Handy Skills & Repair</option>
+              <option>Everyday Help</option>
+              <option>Administrative & Misc Help</option>
+              <option>Social & Community</option>
+              <option>Entrepreneurship & Business</option>
+              <option>Specialized Skills</option>
+              <option>Other</option>
             </select>
           </div>
-          <button
-            className="w-full md:w-40 bg-emerald-500 text-white text-lg font-semibold py-3 rounded-xl hover:bg-emerald-600 transition min-h-[48px] flex items-center justify-center"
-            onClick={() => {
-              if (search.trim()) {
-                router.push(`/services/search?q=${encodeURIComponent(search)}`);
-              }
-            }}
-            aria-label="Search"
-          >
-            Search
-          </button>
         </div>
         <div className="text-sm text-gray-400 mt-3">Popular: Gardening, Dog Walking, Coding Help, Resume Review, Piano Lessons</div>
       </div>
