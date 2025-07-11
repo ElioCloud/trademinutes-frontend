@@ -127,7 +127,7 @@ export default function TaskMap({ tasks }: { tasks: any[] }) {
 
   console.log("normalizedTasks", normalizedTasks);
   return (
-    <div className="w-full h-[70vh] rounded-xl overflow-hidden">
+    <div className="w-full h-[70vh] rounded-xl overflow-hidden" style={{ boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.15)" }}>
       <MapContainer
         center={userLocation}
         zoom={13}
@@ -146,64 +146,64 @@ export default function TaskMap({ tasks }: { tasks: any[] }) {
         </Marker>
 
         {filteredTasks.map((task, idx) => {
-          console.log("task", task);
-          const avatar = task.createdBy?.avatar?.trim()
-            ? task.createdBy.avatar
-            : "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-          const name = task.author?.Name;
+            console.log("task", task);
+            const avatar = task.createdBy?.avatar?.trim()
+              ? task.createdBy.avatar
+              : "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+            const name = task.author?.Name;
 
-          return (
-            <Marker
-              key={task.id ?? idx}
-              position={[task.latitude, task.longitude]}
-              icon={avatarIcon(avatar)}
-            >
-              <Popup>
-                <div className="p-2 w-56">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Image
-                      src={avatar}
-                      width={48}
-                      height={48}
-                      className="rounded-full object-cover"
-                      alt={"avatar"}
-                    />
-                    <div>
-                      <p className="font-semibold text-sm">{name}</p>
-                      <p className="text-xs text-gray-500">{task.title}</p>
+            return (
+              <Marker
+                key={task.id ?? idx}
+                position={[task.latitude, task.longitude]}
+                icon={avatarIcon(avatar)}
+              >
+                <Popup>
+                  <div className="p-2 w-56">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Image
+                        src={avatar}
+                        width={48}
+                        height={48}
+                        className="rounded-full object-cover"
+                        alt={"avatar"}
+                      />
+                      <div>
+                        <p className="font-semibold text-sm">{name}</p>
+                        <p className="text-xs text-gray-500">{task.title}</p>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-y-1 text-[11px] text-gray-600 mb-2">
-                    <span className="font-medium">Location</span>
-                    <span>{task.location}</span>
-                    <span className="font-medium">Type</span>
-                    <span>{task.locationType || "Unspecified"}</span>
-                  </div>
+                    <div className="grid grid-cols-2 gap-y-1 text-[11px] text-gray-600 mb-2">
+                      <span className="font-medium">Location</span>
+                      <span>{task.location}</span>
+                      <span className="font-medium">Type</span>
+                      <span>{task.locationType || "Unspecified"}</span>
+                    </div>
 
-                  {task.availability?.length > 0 && (
-                    <p className="text-xs text-gray-500 mb-1">
-                      📅 {task.availability[0].Date} — ⏰{" "}
-                      {task.availability[0].TimeFrom} to{" "}
-                      {task.availability[0].TimeTo}
+                    {task.availability?.length > 0 && (
+                      <p className="text-xs text-gray-500 mb-1">
+                        📅 {task.availability[0].Date} — ⏰{" "}
+                        {task.availability[0].TimeFrom} to{" "}
+                        {task.availability[0].TimeTo}
+                      </p>
+                    )}
+                    <p className="text-xs text-yellow-500 font-medium mb-2">
+                      💰 {task.credits} credits
                     </p>
-                  )}
-                  <p className="text-xs text-yellow-500 font-medium mb-2">
-                    💰 {task.credits} credits
-                  </p>
 
-                  <Link
-                    href={`/tasks/view/${task.id}`}
-                    className="inline-block w-full text-center text-sm py-2 px-3 rounded-lg bg-green-100 "
-                  >
-                    View Task ↗
-                  </Link>
-                </div>
-              </Popup>
-            </Marker>
-          );
-        })}
-      </MapContainer>
+                    <Link
+                      href={`/tasks/view/${task.id}`}
+                      className="inline-block w-full text-center text-sm py-2 px-3 rounded-lg bg-green-100 "
+                    >
+                      View Task ↗
+                    </Link>
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
+        </MapContainer>
       {/* Floating debug button for coordinates */}
       <button
         type="button"

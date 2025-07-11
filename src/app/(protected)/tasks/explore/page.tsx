@@ -129,9 +129,9 @@ export default function Page() {
   return (
     <ProtectedLayout>
       {/* Hero Title & Search Bar */}
-      <div className="flex flex-col items-center justify-center py-12 px-2 md:px-0 w-full">
-        {/* Search Bar */}
-        <div className="w-full max-w-3xl bg-white rounded-2xl shadow flex flex-col md:flex-row items-center p-4 gap-2">
+      <div className="flex flex-col md:flex-row items-center justify-center py-6 px-2 md:px-0 w-full gap-4">
+        {/* Search Bar and Category Dropdown */}
+        <div className="flex flex-1 w-full max-w-3xl bg-white rounded-2xl shadow items-center p-4 gap-2">
           <div className="flex items-center flex-1 min-h-[48px]">
             <FiSearch className="w-6 h-6 text-gray-400 mr-3" />
             <input
@@ -167,17 +167,11 @@ export default function Page() {
             </select>
           </div>
         </div>
-        <div className="text-sm text-gray-400 mt-3">Popular: Gardening, Dog Walking, Coding Help, Resume Review, Piano Lessons</div>
-      </div>
-      {/* Filters and View Toggle in a single line */}
-      <div className="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
-        {/* Filters left */}
-        {/* Removed duplicate <ServiceFilters /> to keep only the top search bar with the green button */}
-        {/* View Toggle right */}
-        <div className="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1 mt-4 md:mt-0">
+        {/* View Toggle Buttons */}
+        <div className="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1 mt-4 md:mt-0 min-w-[260px] w-auto">
           <button
             onClick={() => setViewMode('grid')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`flex-1 min-w-[120px] flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               viewMode === 'grid'
                 ? 'bg-emerald-500 text-white shadow-sm'
                 : 'text-gray-600 hover:text-gray-800'
@@ -188,7 +182,7 @@ export default function Page() {
           </button>
           <button
             onClick={() => setViewMode('map')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`flex-1 min-w-[120px] flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               viewMode === 'map'
                 ? 'bg-emerald-500 text-white shadow-sm'
                 : 'text-gray-600 hover:text-gray-800'
@@ -199,7 +193,7 @@ export default function Page() {
           </button>
         </div>
       </div>
-      {/* Service Grid */}
+         {/* Service Grid */}
       <div className="max-w-7xl mx-auto">
         {loading ? (
           <div className="text-center text-gray-600 py-20">Loading services...</div>
