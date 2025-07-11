@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Sidebar from "../common/Sidebar";
 import { NotificationBell } from "../common/Sidebar";
 import { useSession } from "next-auth/react";
+import { FiPlusCircle } from "react-icons/fi";
 
 interface LayoutProps {
   children: ReactNode;
@@ -41,13 +42,22 @@ export default function ProtectedLayout({ children, headerName }: LayoutProps) {
       <Sidebar />
 
       {/* Main content */}
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-6 ">
         <TopBar />
         {children}
       </main>
     </div>
   );
 }
+
+// Mock data for recent services (replace with real-time data if available)
+const mockServices = [
+  { user: "Sarah Kim", title: "Dog Walking", category: "Pet Care", avatar: "https://images.pexels.com/photos/277576/pexels-photo-277576.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2" },
+  { user: "Daniel Ortiz", title: "Math Tutoring", category: "Tutoring", avatar: "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2" },
+  { user: "Ayesha Patel", title: "Yoga Session", category: "Fitness", avatar: "https://images.pexels.com/photos/721979/pexels-photo-721979.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2" },
+  { user: "Michael Chen", title: "PC Setup", category: "Tech Help", avatar: "https://images.pexels.com/photos/573570/pexels-photo-573570.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2" },
+  { user: "Emma Davis", title: "House Cleaning", category: "Household Help", avatar: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2" },
+];
 
 // TopBar component for search and profile dropdown
 function TopBar() {
@@ -79,14 +89,29 @@ function TopBar() {
   }, [dropdownOpen]);
 
   return (
-    <div className="flex items-center mb-6 gap-8 w-full">
-      {/* Search input (left-aligned) */}
-      <div className="w-full max-w-md">
-        <input
-          type="text"
-          placeholder="Search..."
-          className="w-full px-4 py-2 rounded-full border border-gray-300 bg-white/80 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 text-base text-gray-700"
-        />
+    <div className="flex items-center mb-6 gap-8 w-full  bg-white">
+      {/* Marquee for real-time service activity (replaces search input) */}
+      <div className="w-250 overflow-hidden rounded-full bg-white/80 h-12 flex items-center">
+        <div className="relative w-full h-full flex items-center animate-marquee whitespace-nowrap">
+          {mockServices.concat(mockServices).map((s, i) => (
+            <span key={i} className="flex items-center gap-2 px-6 text-sm text-gray-700 font-medium">
+              <img src={s.avatar} alt={s.user} className="w-7 h-7 rounded-full object-cover border border-gray-200" />
+              <span className="font-semibold text-black">{s.user}</span>
+              added
+              <span className="font-semibold text-emerald-600">{s.title}</span>
+              <span className="text-gray-400">({s.category})</span>
+            </span>
+          ))}
+        </div>
+        <style jsx>{`
+          @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+          }
+          .animate-marquee {
+            animation: marquee 24s linear infinite;
+          }
+        `}</style>
       </div>
       {/* Right controls: Notification, profile */}
       <div className="flex items-center gap-4 ml-auto">

@@ -207,7 +207,7 @@ const services = [
   {
     id: 19,
     category: 'Pet Care',
-    title: 'I will feed and play with your pet while you’re away',
+    title: 'I will feed and play with your pet while you\'re away',
     rating: 4.97,
     reviews: 42,
     user: 'James Wright',
@@ -243,8 +243,8 @@ export default function ServiceGrid({ items = services }: { items?: typeof servi
     <>
       {/* grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-15">
-        {paginated.map((s) => (
-          <div key={s.id} className="bg-white rounded-lg shadow-sm overflow-hidden border flex flex-col">
+        {paginated.map((s, idx) => (
+          <div key={`${s.id}-${idx}`} className="bg-white rounded-lg shadow-sm overflow-hidden border flex flex-col">
             {/* image */}
             <Image
               src={s.image}
@@ -300,7 +300,7 @@ export default function ServiceGrid({ items = services }: { items?: typeof servi
 
     {Array.from({ length: totalPages }).map((_, i) => (
       <button
-        key={i}
+        key={`page-btn-${i + 1}`}
         onClick={() => goTo(i + 1)}
         className={`px-3 py-1 rounded border border-black ${
           page === i + 1
@@ -325,3 +325,5 @@ export default function ServiceGrid({ items = services }: { items?: typeof servi
     </>
   );
 }
+
+export { services };

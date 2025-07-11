@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { MdDashboard, MdTask, MdExplore } from "react-icons/md";
+import { MdDashboard, MdTask, MdExplore, MdMessage } from "react-icons/md";
 import { FiLogOut } from "react-icons/fi";
 import { FaRegCalendarAlt, FaUserAlt } from "react-icons/fa";
 import Link from "next/link";
@@ -171,7 +171,7 @@ export default function Sidebar() {
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-100 via-white to-gray-200">
       <aside
-        className="w-64 min-h-screen p-0 flex flex-col items-stretch bg-white/70 backdrop-blur-lg shadow-xl border-r border-gray-200 rounded-r-3xl"
+        className="w-64 min-h-screen p-0 flex flex-col items-stretch bg-white/70 backdrop-blur-lg shadow-xl shadow-gray-200 border-r border-gray-200"
       >
         <div className="px-6 py-8 flex flex-col items-center gap-4 border-b border-gray-100">
           <h1 className="text-2xl font-extrabold tracking-tight text-gray-800">TradeMinutes.</h1>
@@ -194,6 +194,12 @@ export default function Sidebar() {
             label="My Listings"
             pathname={pathname}
             icon={<MdTask size={22} />}
+          />
+          <SidebarButton
+            href="/messages"
+            label="Messages"
+            pathname={pathname}
+            icon={<MdMessage size={22} />}
           />
           <SidebarButton
             href="/appointments"
