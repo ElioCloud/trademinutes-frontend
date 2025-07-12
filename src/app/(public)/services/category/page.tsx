@@ -15,8 +15,8 @@ export default function CategoryPage() {
       <br/>
       <CategoryTabsWithBreadcrumb />
       <CategoryBanner />
-    <CategoriesGrid />
- <TradeMinutesActionSteps />
+      <CategoriesGrid isCategoryPage={true} />
+      <TradeMinutesActionSteps />
       <Footer />
     </main>
   );
