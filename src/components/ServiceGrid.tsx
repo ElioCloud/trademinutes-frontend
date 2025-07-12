@@ -2,8 +2,37 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { FiStar } from 'react-icons/fi';
 import { useRouter } from 'next/navigation';
+import { FiStar } from 'react-icons/fi';
+
+const categoryEmojis: Record<string, string> = {
+  'Home Repair': '🔧',
+  'Language Exchange': '🗣️',
+  'Fitness & Wellness': '🏋️',
+  'Household Help': '🧹',
+  'Tutoring & Study': '📚',
+  'Pet Care': '🐕',
+  'Tech Help': '💻',
+  'Creative Skills': '🎨',
+  'Cooking': '👨‍🍳',
+  'Event Planning': '🎉',
+  'Music': '🎵',
+  'Photography': '📸',
+  'Childcare': '👶',
+  'Writing': '✍️',
+  'Art & Crafts': '🎭',
+  'Transportation': '🚗',
+  'Massage': '💆',
+  'Plumbing': '🔧',
+  'Electrical': '⚡',
+  'Carpentry': '🔨',
+  'Painting': '🎨',
+  'Yoga': '🧘',
+  'Elderly Assistance': '🧓',
+  'Errand Running': '🏃',
+  'Creative Services': '🎨',
+  'Volunteering': '🤝',
+};
 
 const services = [
   
@@ -232,7 +261,6 @@ const services = [
 const PER_PAGE = 8;
 
 export default function ServiceGrid({ items = services }: { items?: (typeof services[0] & { _id?: string | number, ID?: string | number })[] }) {
-  console.log("ServiceGrid items:", items);
   const [page, setPage] = useState(1);
   const totalPages = Math.ceil(items.length / PER_PAGE);
   const router = useRouter();
@@ -249,38 +277,26 @@ export default function ServiceGrid({ items = services }: { items?: (typeof serv
   return (
     <>
       {/* grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-15">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {paginated.map((s, idx) => {
-          // Colorful border palette matching the listing page
-          const borderColors = [
-            'border-green-400',
-            'border-blue-400',
-            'border-pink-400',
-            'border-yellow-400',
-            'border-purple-400',
-            'border-orange-400',
-          ];
-          const borderClass = borderColors[idx % borderColors.length];
-          
+          const emoji = categoryEmojis[s.category] || '🛠️';
           return (
             <div
               key={`${s.id}-${idx}`}
-              className={`bg-white rounded-lg p-5 shadow-md hover:shadow-xl relative border-2 ${borderClass} cursor-pointer transition-all duration-200 hover:scale-105`}
+              className="group bg-white border border-gray-200 rounded-xl hover:border-emerald-500 hover:shadow-lg transition-all duration-300 flex flex-col items-center text-center p-6 cursor-pointer"
               onClick={() => handleCardClick(s._id || s.id)}
             >
-              <h3 className="text-lg font-semibold mb-1">{s.title}</h3>
-              <p className="text-xs text-gray-500 mb-1">
-                📂 <strong>{s.category}</strong>
-              </p>
-              
-              {/* rating */}
-              <div className="flex items-center text-xs text-gray-500 mb-1">
-                <FiStar className="text-yellow-400 mr-1" />
-                {s.rating} ({s.reviews} reviews)
+              <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-4 text-2xl group-hover:bg-emerald-100 transition-colors duration-300">
+                <span>{emoji}</span>
               </div>
-
-              {/* user info */}
-              <div className="flex items-center gap-2 mb-2">
+              <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-emerald-700 transition-colors duration-300">
+                {s.title}
+              </h3>
+              <p className="text-xs text-gray-500 text-center leading-relaxed mb-2">
+                {s.category}
+              </p>
+              {/* User info */}
+              <div className="flex items-center justify-center gap-2 mb-1">
                 <Image
                   src={s.avatar}
                   alt={s.user}
@@ -288,13 +304,15 @@ export default function ServiceGrid({ items = services }: { items?: (typeof serv
                   height={20}
                   className="rounded-full object-cover"
                 />
-                <span className="text-xs text-gray-500">
-                  👤 <strong>{s.user}</strong>
-                </span>
+                <span className="text-xs text-gray-600 font-medium">{s.user}</span>
               </div>
-
-              {/* price */}
-              <p className="text-sm font-medium text-gray-700">
+              {/* Rating */}
+              <div className="flex items-center justify-center text-xs text-gray-500 mb-1">
+                <FiStar className="text-yellow-400 mr-1" />
+                {s.rating} <span className="ml-1">({s.reviews} reviews)</span>
+              </div>
+              {/* Price */}
+              <p className="text-sm font-medium text-emerald-600 mt-1">
                 🪙 {s.price} credits
               </p>
             </div>
@@ -304,39 +322,38 @@ export default function ServiceGrid({ items = services }: { items?: (typeof serv
 
       {/* pagination controls */}
       {totalPages > 1 && (
-  <div className="flex items-center justify-center gap-2 mt-18 mb-18">
-    <button
-      onClick={() => goTo(page - 1)}
-      disabled={page === 1}
-      className="px-3 py-1 rounded border border-black text-black disabled:opacity-40"
-    >
-      Prev
-    </button>
+        <div className="flex items-center justify-center gap-2 mt-18 mb-18">
+          <button
+            onClick={() => goTo(page - 1)}
+            disabled={page === 1}
+            className="px-3 py-1 rounded-lg border-2 border-gray-300 text-gray-700 bg-white hover:border-emerald-500 hover:text-emerald-600 disabled:opacity-40 disabled:hover:border-gray-300 disabled:hover:text-gray-700 transition-colors duration-200"
+          >
+            Prev
+          </button>
 
-    {Array.from({ length: totalPages }).map((_, i) => (
-      <button
-        key={`page-btn-${i + 1}`}
-        onClick={() => goTo(i + 1)}
-        className={`px-3 py-1 rounded border border-black ${
-          page === i + 1
-            ? 'bg-emerald-600 text-white'
-            : 'bg-white text-black'
-        }`}
-      >
-        {i + 1}
-      </button>
-    ))}
+          {Array.from({ length: totalPages }).map((_, i) => (
+            <button
+              key={`page-btn-${i + 1}`}
+              onClick={() => goTo(i + 1)}
+              className={`px-3 py-1 rounded-lg border-2 transition-colors duration-200 ${
+                page === i + 1
+                  ? 'bg-emerald-600 text-white border-emerald-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:border-emerald-500 hover:text-emerald-600'
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
 
-    <button
-      onClick={() => goTo(page + 1)}
-      disabled={page === totalPages}
-      className="px-3 py-1 rounded border border-black text-black disabled:opacity-40"
-    >
-      Next
-    </button>
-  </div>
-)}
-
+          <button
+            onClick={() => goTo(page + 1)}
+            disabled={page === totalPages}
+            className="px-3 py-1 rounded-lg border-2 border-gray-300 text-gray-700 bg-white hover:border-emerald-500 hover:text-emerald-600 disabled:opacity-40 disabled:hover:border-gray-300 disabled:hover:text-gray-700 transition-colors duration-200"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </>
   );
 }
