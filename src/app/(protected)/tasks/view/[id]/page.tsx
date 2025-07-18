@@ -72,14 +72,28 @@ export default function ViewTaskPage() {
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
   const [alreadyBooked, setAlreadyBooked] = useState(false);
+  const [isBooker, setIsBooker] = useState(false);
+  const [bookerId, setBookerId] = useState("");
+  const [bookingId, setBookingId] = useState("");
+
+  const [reviewText, setReviewText] = useState("");
+  const [rating, setRating] = useState(5);
+  const [submittingReview, setSubmittingReview] = useState(false);
   const API_BASE_URL =
     process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084";
+  const REVIEW_API_BASE_URL =
+    process.env.NEXT_PUBLIC_REVIEW_API_URL || "http://localhost:8085";
   const router = useRouter();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [messageModal, setMessageModal] = useState(false);
+  const [reviewModal, setReviewModal] = useState(false);
   const [firstMessage, setFirstMessage] = useState("");
   const [sendingFirstMessage, setSendingFirstMessage] = useState(false);
-  const [dialog, setDialog] = useState<{ open: boolean; message: string; isError?: boolean }>({ open: false, message: "", isError: false });
+  const [dialog, setDialog] = useState<{
+    open: boolean;
+    message: string;
+    isError?: boolean;
+  }>({ open: false, message: "", isError: false });
 
   useEffect(() => {
     const fetchTask = async () => {
@@ -113,9 +127,14 @@ export default function ViewTaskPage() {
       // Get user ID from profile
       let userId;
       try {
-        const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8080'}/api/auth/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const profileRes = await fetch(
+          `${
+            process.env.NEXT_PUBLIC_AUTH_API_URL || "http://localhost:8080"
+          }/api/auth/profile`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         if (!profileRes.ok) throw new Error("Failed to fetch user profile");
         const profileData = await profileRes.json();
         userId = profileData.ID || profileData.id;
@@ -125,15 +144,35 @@ export default function ViewTaskPage() {
         return;
       }
       try {
-        const res = await fetch(`${API_BASE_URL}/api/bookings?role=booker&id=${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(
+          `${API_BASE_URL}/api/bookings?role=booker&id=${userId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         if (!res.ok) return;
         const json = await res.json();
         const hasBooking = (json.data || json || []).some(
-          (b: any) => (b.TaskID === id || b.taskId === id) && b.status !== "cancelled" && b.status !== "rejected"
+          (b: any) =>
+            (b.TaskID === id || b.taskId === id) &&
+            b.status !== "cancelled" &&
+            b.status !== "rejected"
         );
+        const matchedBooking = (json.data || json || []).find(
+          (b: any) =>
+            (b.TaskID === id || b.taskId === id) &&
+            b.status !== "cancelled" &&
+            b.status !== "rejected" &&
+            b.BookerID == userId
+        );
+
+        const booker = Boolean(matchedBooking);
+        const bookerID = matchedBooking?.BookerID;
+        setBookingId(matchedBooking?.ID);
+
         setAlreadyBooked(hasBooking);
+        setIsBooker(booker);
+        setBookerId(bookerID);
       } catch (err) {
         console.error("Error checking existing booking:", err);
       }
@@ -145,7 +184,10 @@ export default function ViewTaskPage() {
     return (
       <ProtectedLayout headerName="Task Details">
         <div className="min-h-screen bg-white flex justify-center items-center">
-          <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 w-full max-w-3xl border border-gray-200 flex items-center justify-center" style={{ minHeight: 320 }}>
+          <div
+            className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 w-full max-w-3xl border border-gray-200 flex items-center justify-center"
+            style={{ minHeight: 320 }}
+          >
             <span className="text-lg text-gray-600 font-medium">
               {loading ? "Loading task..." : "Task not found."}
             </span>
@@ -156,10 +198,11 @@ export default function ViewTaskPage() {
   }
 
   function getCurrentUserEmail() {
-    const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("token") : null;
     if (!token) return null;
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const payload = JSON.parse(atob(token.split(".")[1]));
       return payload.email;
     } catch {
       return null;
@@ -168,7 +211,7 @@ export default function ViewTaskPage() {
 
   const handleBooking = async () => {
     const token = localStorage.getItem("token");
-    
+
     if (!token || !task) {
       alert("Missing data for booking.");
       return;
@@ -177,7 +220,7 @@ export default function ViewTaskPage() {
     // Extract user email from JWT token and fetch user ID from profile
     let userEmail;
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const payload = JSON.parse(atob(token.split(".")[1]));
       userEmail = payload.email;
     } catch (error) {
       console.error("Error decoding token:", error);
@@ -193,17 +236,22 @@ export default function ViewTaskPage() {
     // Fetch user profile to get the user ID
     let loggedInUserID;
     try {
-      const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8080'}/api/auth/profile`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      
+      const profileRes = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_AUTH_API_URL || "http://localhost:8080"
+        }/api/auth/profile`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
       if (!profileRes.ok) {
         throw new Error("Failed to fetch user profile");
       }
-      
+
       const profileData = await profileRes.json();
       loggedInUserID = profileData.ID || profileData.id;
-      
+
       if (!loggedInUserID) {
         throw new Error("User ID not found in profile");
       }
@@ -251,73 +299,104 @@ export default function ViewTaskPage() {
 
   async function handleSendFirstMessage() {
     if (!task?.author?.email) {
-      setDialog({ open: true, message: "No task owner email found.", isError: true });
+      setDialog({
+        open: true,
+        message: "No task owner email found.",
+        isError: true,
+      });
       return;
     }
-    const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("token") : null;
     const currentUserEmail = getCurrentUserEmail();
     if (!token || !currentUserEmail) {
       setDialog({
         open: true,
         message: `You must be logged in to message.\n\n[DEBUG]\ntoken: ${token}\ncurrentUserEmail: ${currentUserEmail}`,
-        isError: true
+        isError: true,
       });
       return;
     }
     if (!firstMessage.trim()) {
-      setDialog({ open: true, message: "Please enter a message.", isError: true });
+      setDialog({
+        open: true,
+        message: "Please enter a message.",
+        isError: true,
+      });
       return;
     }
     setSendingFirstMessage(true);
     try {
       // 1. Create/find conversation
-      const res = await fetch(`${process.env.NEXT_PUBLIC_MESSAGING_API_URL || 'http://localhost:8085'}/api/conversations`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          type: "direct",
-          name: `Task: ${task.title}`,
-          avatar: task.author.avatar,
-          participants: [currentUserEmail, task.author.email].sort(),
-          taskId: task.id
-        })
-      });
+      const res = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_MESSAGING_API_URL || "http://localhost:8085"
+        }/api/conversations`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            type: "direct",
+            name: `Task: ${task.title}`,
+            avatar: task.author.avatar,
+            participants: [currentUserEmail, task.author.email].sort(),
+            taskId: task.id,
+          }),
+        }
+      );
       if (!res.ok) {
         const errorText = await res.text();
-        setDialog({ open: true, message: `Failed to start conversation: ${errorText}`, isError: true });
+        setDialog({
+          open: true,
+          message: `Failed to start conversation: ${errorText}`,
+          isError: true,
+        });
         setSendingFirstMessage(false);
         return;
       }
       const data = await res.json();
       const conversationId = data.$oid || data || "";
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         sessionStorage.setItem("autoSelectConversationId", conversationId);
       }
       // 2. Send first message
-      const messageRes = await fetch(`${process.env.NEXT_PUBLIC_MESSAGING_API_URL || 'http://localhost:8085'}/api/conversations/${conversationId}/messages`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          content: firstMessage,
-          senderId: currentUserEmail,
-          senderName: (task.author && task.author.name) || "",
-          senderAvatar: (task.author && task.author.avatar) || "",
-          type: "text"
-        })
-      });
+      const messageRes = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_MESSAGING_API_URL || "http://localhost:8085"
+        }/api/conversations/${conversationId}/messages`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            content: firstMessage,
+            senderId: currentUserEmail,
+            senderName: (task.author && task.author.name) || "",
+            senderAvatar: (task.author && task.author.avatar) || "",
+            type: "text",
+          }),
+        }
+      );
       if (!messageRes.ok) {
         const errorText = await messageRes.text();
-        setDialog({ open: true, message: `Failed to send message: ${errorText}`, isError: true });
+        setDialog({
+          open: true,
+          message: `Failed to send message: ${errorText}`,
+          isError: true,
+        });
         setSendingFirstMessage(false);
         return;
       }
-      setDialog({ open: true, message: "Message sent! Redirecting to chat...", isError: false });
+      setDialog({
+        open: true,
+        message: "Message sent! Redirecting to chat...",
+        isError: false,
+      });
       setTimeout(() => {
         setDialog({ open: false, message: "", isError: false });
         setMessageModal(false);
@@ -326,33 +405,112 @@ export default function ViewTaskPage() {
         router.push("/messages");
       }, 1200);
     } catch (err) {
-      setDialog({ open: true, message: `Error: ${err instanceof Error ? err.message : String(err)}` , isError: true });
+      setDialog({
+        open: true,
+        message: `Error: ${err instanceof Error ? err.message : String(err)}`,
+        isError: true,
+      });
       setSendingFirstMessage(false);
     }
   }
+  const handleSubmitReview = async () => {
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+    if (!token || !task || !bookerId) {
+      setDialog({
+        open: true,
+        message: "Missing data: user must be logged in and booking must exist.",
+        isError: true,
+      });
+      return;
+    }
+
+    setSubmittingReview(true);
+
+    try {
+      // Submit review
+      const res = await fetch(
+        `${REVIEW_API_BASE_URL}/api/reviews/${bookingId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            userId: bookerId,
+            rating,
+            review: reviewText,
+          }),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to submit review");
+
+      setDialog({
+        open: true,
+        message: "Review submitted successfully!",
+        isError: false,
+      });
+      setReviewModal(false);
+      setReviewText("");
+      setRating(5);
+    } catch (err: any) {
+      setDialog({
+        open: true,
+        message: err.message || "Error submitting review.",
+        isError: true,
+      });
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   return (
     <ProtectedLayout headerName="Task Details">
       <div className="min-h-screen bg-white flex justify-center items-start mt-20">
         <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 w-full max-w-3xl border border-gray-200 relative mt-8">
           <button
-            onClick={() => router.push('/tasks/explore')}
+            onClick={() => router.push("/tasks/explore")}
             className="flex items-center gap-2 px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full shadow border border-gray-200 text-sm font-medium transition mt-2 mb-10 ml-0"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
             Back to Explore
           </button>
-          <h1 className="text-3xl font-extrabold mb-2 text-emerald-700">{task.title}</h1>
+          <h1 className="text-3xl font-extrabold mb-2 text-emerald-700">
+            {task.title}
+          </h1>
           <p className="text-gray-700 mb-4 text-lg">{task.description}</p>
           <div className="grid gap-3 text-base text-gray-700 mb-6">
             <div>
-              <span className="font-semibold">📍 Location:</span> {task.location} <span className="text-xs text-gray-500">({task.locationType})</span>
+              <span className="font-semibold">📍 Location:</span>{" "}
+              {task.location}{" "}
+              <span className="text-xs text-gray-500">
+                ({task.locationType})
+              </span>
             </div>
             <div>
-              <span className="font-semibold">🗓️ Availability:</span> {task.availability?.[0]?.date} from {task.availability?.[0]?.timeFrom} to {task.availability?.[0]?.timeTo}
+              <span className="font-semibold">🗓️ Availability:</span>{" "}
+              {task.availability?.[0]?.date} from{" "}
+              {task.availability?.[0]?.timeFrom} to{" "}
+              {task.availability?.[0]?.timeTo}
             </div>
             <div>
-              <span className="font-semibold">💰 Credits:</span> <span className="text-yellow-600 font-bold">{task.credits}</span>
+              <span className="font-semibold">💰 Credits:</span>{" "}
+              <span className="text-yellow-600 font-bold">{task.credits}</span>
             </div>
             {task.type && (
               <div>
@@ -368,14 +526,20 @@ export default function ViewTaskPage() {
           {task.author && (
             <div className="flex items-center gap-4 mb-6 p-4 bg-white/70 rounded-xl border border-gray-100">
               <Image
-                src={task.author.avatar?.trim() ? task.author.avatar : "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+                src={
+                  task.author.avatar?.trim()
+                    ? task.author.avatar
+                    : "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                }
                 width={56}
                 height={56}
                 className="rounded-full object-cover border border-gray-200"
                 alt="avatar"
               />
               <div>
-                <div className="font-semibold text-lg text-gray-800">{task.author.name}</div>
+                <div className="font-semibold text-lg text-gray-800">
+                  {task.author.name}
+                </div>
                 <div className="text-gray-500 text-sm">{task.author.email}</div>
               </div>
             </div>
@@ -383,9 +547,20 @@ export default function ViewTaskPage() {
           <button
             onClick={() => setShowConfirmModal(true)}
             disabled={alreadyBooked}
-            className={`inline-block text-center w-full bg-emerald-500 text-white py-3 rounded-xl text-lg font-semibold hover:bg-emerald-600 transition ${alreadyBooked ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`inline-block text-center w-full bg-emerald-500 text-white py-3 rounded-xl text-lg font-semibold hover:bg-emerald-600 transition ${
+              alreadyBooked ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
-            {alreadyBooked ? "Already Booked" : <><span role="img" aria-label="calendar">📅</span> Book Appointment</>}
+            {alreadyBooked ? (
+              "Already Booked"
+            ) : (
+              <>
+                <span role="img" aria-label="calendar">
+                  📅
+                </span>{" "}
+                Book Appointment
+              </>
+            )}
           </button>
           <button
             onClick={() => setMessageModal(true)}
@@ -393,21 +568,87 @@ export default function ViewTaskPage() {
           >
             💬 Message Task Owner
           </button>
+          {isBooker && (
+            <button
+              onClick={() => setReviewModal(true)}
+              className="inline-block text-center w-full bg-blue-500 text-white py-3 rounded-xl text-lg font-semibold hover:bg-blue-600 transition mt-4 mb-2"
+            >
+              Add a review
+            </button>
+          )}
+          {reviewModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+              <div className="bg-white rounded-xl shadow-lg p-6 w-[360px] border border-yellow-500">
+                <h3 className="text-lg font-semibold text-yellow-600 mb-2">
+                  Leave a Review
+                </h3>
+                <textarea
+                  className="w-full border border-gray-300 rounded-lg p-2 mb-3 min-h-[80px]"
+                  placeholder="Write your review..."
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  disabled={submittingReview}
+                />
+                <div className="mb-3">
+                  <label className="text-sm font-medium text-gray-700">
+                    Rating:
+                  </label>
+                  <select
+                    className="ml-2 p-1 border rounded"
+                    value={rating}
+                    onChange={(e) => setRating(Number(e.target.value))}
+                    disabled={submittingReview}
+                  >
+                    {[5, 4, 3, 2, 1].map((r) => (
+                      <option key={r} value={r}>
+                        {r} ⭐
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    onClick={() => {
+                      setReviewModal(false);
+                      setReviewText("");
+                      setRating(5);
+                    }}
+                    disabled={submittingReview}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                    disabled={submittingReview}
+                    onClick={handleSubmitReview}
+                  >
+                    {submittingReview ? "Submitting..." : "Submit"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           {/* First Message Modal */}
           {messageModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
               <div className="bg-white rounded-xl shadow-lg p-8 min-w-[320px] text-center border border-blue-400">
-                <div className="mb-2 text-lg font-semibold text-blue-600">Send a message to the task owner</div>
+                <div className="mb-2 text-lg font-semibold text-blue-600">
+                  Send a message to the task owner
+                </div>
                 <textarea
                   className="w-full border border-gray-300 rounded-lg p-2 mb-4 min-h-[80px]"
                   placeholder="Type your message..."
                   value={firstMessage}
-                  onChange={e => setFirstMessage(e.target.value)}
+                  onChange={(e) => setFirstMessage(e.target.value)}
                   disabled={sendingFirstMessage}
                 />
                 <div className="flex gap-2 justify-center">
                   <button
-                    onClick={() => { setMessageModal(false); setFirstMessage(""); }}
+                    onClick={() => {
+                      setMessageModal(false);
+                      setFirstMessage("");
+                    }}
                     className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
                     disabled={sendingFirstMessage}
                   >
@@ -425,12 +666,31 @@ export default function ViewTaskPage() {
             </div>
           )}
           {dialog.open && (
-            <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black/30`}>
-              <div className={`bg-white rounded-xl shadow-lg p-8 min-w-[320px] text-center border ${dialog.isError ? 'border-red-400' : 'border-green-400'}`}>
-                <div className={`mb-2 text-lg font-semibold ${dialog.isError ? 'text-red-600' : 'text-green-600'}`}>{dialog.isError ? 'Error' : 'Success'}</div>
+            <div
+              className={`fixed inset-0 z-50 flex items-center justify-center bg-black/30`}
+            >
+              <div
+                className={`bg-white rounded-xl shadow-lg p-8 min-w-[320px] text-center border ${
+                  dialog.isError ? "border-red-400" : "border-green-400"
+                }`}
+              >
+                <div
+                  className={`mb-2 text-lg font-semibold ${
+                    dialog.isError ? "text-red-600" : "text-green-600"
+                  }`}
+                >
+                  {dialog.isError ? "Error" : "Success"}
+                </div>
                 <div className="mb-4 text-gray-700">{dialog.message}</div>
                 {!sendingFirstMessage && dialog.isError && (
-                  <button onClick={() => setDialog({ open: false, message: "", isError: false })} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Close</button>
+                  <button
+                    onClick={() =>
+                      setDialog({ open: false, message: "", isError: false })
+                    }
+                    className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  >
+                    Close
+                  </button>
                 )}
               </div>
             </div>
@@ -445,7 +705,9 @@ export default function ViewTaskPage() {
                   <strong>Date:</strong> {task.availability?.[0]?.date || "N/A"}
                 </p>
                 <p className="text-gray-600 mb-6">
-                  <strong>Time:</strong> {task.availability?.[0]?.timeFrom || "-"} to {task.availability?.[0]?.timeTo || "-"}
+                  <strong>Time:</strong>{" "}
+                  {task.availability?.[0]?.timeFrom || "-"} to{" "}
+                  {task.availability?.[0]?.timeTo || "-"}
                 </p>
                 <p className="text-gray-600 mb-6">
                   Are you sure you want to book this appointment?
