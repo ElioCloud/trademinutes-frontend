@@ -287,8 +287,8 @@ export default function CreateTaskModal({
             <option value="" disabled>
               Select type
             </option>
-            <option value="Offer">Offer</option>
-            <option value="Request">Request</option>
+            <option value="offer">Offer</option>
+            <option value="request">Request</option>
           </select>
 
           <div className="flex gap-2">
