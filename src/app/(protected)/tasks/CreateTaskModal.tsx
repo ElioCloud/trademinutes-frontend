@@ -23,6 +23,7 @@ export default function CreateTaskModal({
     longitude: "",
     locationType: "in-person",
     credits: "",
+    type: "",
     availability: [{ date: "", timeFrom: "", timeTo: "" }],
   });
 
@@ -139,13 +140,16 @@ export default function CreateTaskModal({
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setImages(prev => [...prev, ...files]);
-    setPreviews(prev => [...prev, ...files.map(file => URL.createObjectURL(file))]);
+    setImages((prev) => [...prev, ...files]);
+    setPreviews((prev) => [
+      ...prev,
+      ...files.map((file) => URL.createObjectURL(file)),
+    ]);
   };
 
   const handleRemoveImage = (idx: number) => {
-    setImages(prev => prev.filter((_, i) => i !== idx));
-    setPreviews(prev => prev.filter((_, i) => i !== idx));
+    setImages((prev) => prev.filter((_, i) => i !== idx));
+    setPreviews((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const handleSubmit = async (e: any) => {
@@ -216,13 +220,15 @@ export default function CreateTaskModal({
           <select
             name="category"
             value={selectedCategory}
-            onChange={e => setSelectedCategory(e.target.value)}
+            onChange={(e) => setSelectedCategory(e.target.value)}
             className="w-full border border-gray-300 rounded-md px-3 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
             required
           >
             <option value="">Select a category</option>
             {categories.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
             ))}
           </select>
           <input
@@ -271,19 +277,30 @@ export default function CreateTaskModal({
             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
             required
           />
+          <input
+            type="text"
+            name="type"
+            placeholder="Enter offer type "
+            value={formData.type}
+            onChange={handleLocationInput}
+            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            required
+          />
           <div className="flex gap-2">
             <input
               type="date"
               name="date"
               value={formData.availability[0].date}
-              onChange={e => handleAvailabilityChange("date", e.target.value)}
+              onChange={(e) => handleAvailabilityChange("date", e.target.value)}
               className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
               required
             />
             <select
               name="timeFrom"
               value={formData.availability[0].timeFrom}
-              onChange={e => handleAvailabilityChange("timeFrom", e.target.value)}
+              onChange={(e) =>
+                handleAvailabilityChange("timeFrom", e.target.value)
+              }
               className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
               required
             >
@@ -293,7 +310,9 @@ export default function CreateTaskModal({
             <select
               name="timeTo"
               value={formData.availability[0].timeTo}
-              onChange={e => handleAvailabilityChange("timeTo", e.target.value)}
+              onChange={(e) =>
+                handleAvailabilityChange("timeTo", e.target.value)
+              }
               className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
               required
             >
@@ -313,7 +332,11 @@ export default function CreateTaskModal({
             <div className="flex flex-wrap gap-4 mt-2">
               {previews.map((src, idx) => (
                 <div key={src} className="relative w-24 h-24">
-                  <img src={src} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover rounded-md" />
+                  <img
+                    src={src}
+                    alt={`Preview ${idx + 1}`}
+                    className="w-full h-full object-cover rounded-md"
+                  />
                   <button
                     type="button"
                     onClick={() => handleRemoveImage(idx)}
