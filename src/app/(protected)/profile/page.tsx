@@ -24,6 +24,25 @@ import {
   FaPlus,
   FaTrash
 } from "react-icons/fa";
+import { 
+  FiUser, 
+  FiMail, 
+  FiAward, 
+  FiMapPin, 
+  FiTag, 
+  FiStar, 
+  FiCheck, 
+  FiCalendar, 
+  FiDollarSign, 
+  FiEdit,
+  FiClock,
+  FiUsers,
+  FiTrendingUp,
+  FiSave,
+  FiX,
+  FiPlus,
+  FiTrash2
+} from "react-icons/fi";
 import ProfilePictureUpload from "@/components/ProfilePictureUpload";
 
 const MOCK_STATS = [
@@ -443,9 +462,9 @@ export default function UserProfileSummaryPage() {
                     </div>
                     <button
                       onClick={() => setEditingProfilePicture(true)}
-                      className="absolute -top-1 -right-1 w-6 h-6 bg-blue-500 text-white rounded-full border-2 border-white flex items-center justify-center hover:bg-blue-600 transition-colors"
+                      className="absolute -top-1 -right-1 w-6 h-6 bg-gray-500 text-white rounded-full border-2 border-white flex items-center justify-center hover:bg-gray-600 transition-colors"
                     >
-                      <FaEdit className="w-3 h-3" />
+                      <FiEdit className="w-3 h-3" />
                     </button>
                   </div>
                   <div className="text-center">
@@ -460,32 +479,32 @@ export default function UserProfileSummaryPage() {
 
             {/* Profile Stats */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg text-white">
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="flex items-center gap-3">
-                  <FaDollarSign className="w-5 h-5" />
+                  <FiDollarSign className="w-5 h-5 text-gray-600" />
                   <div>
-                    <p className="text-sm opacity-90">Credits</p>
-                    <p className="text-xl font-bold">{profile.Credits || 0}</p>
+                    <p className="text-sm text-gray-600">Credits</p>
+                    <p className="text-xl font-bold text-gray-900">{profile.Credits || 0}</p>
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-lg text-white">
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="flex items-center gap-3">
-                  <FaCheck className="w-5 h-5" />
+                  <FiCheck className="w-5 h-5 text-gray-600" />
                   <div>
-                    <p className="text-sm opacity-90">Tasks Completed</p>
-                    <p className="text-xl font-bold">12</p>
+                    <p className="text-sm text-gray-600">Tasks Completed</p>
+                    <p className="text-xl font-bold text-gray-900">12</p>
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg text-white">
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="flex items-center gap-3">
-                  <FaStar className="w-5 h-5" />
+                  <FiStar className="w-5 h-5 text-gray-600" />
                   <div>
-                    <p className="text-sm opacity-90">Rating</p>
-                    <p className="text-xl font-bold">4.9/5</p>
+                    <p className="text-sm text-gray-600">Rating</p>
+                    <p className="text-xl font-bold text-gray-900">4.9/5</p>
                   </div>
                 </div>
               </div>
@@ -494,7 +513,7 @@ export default function UserProfileSummaryPage() {
             {/* Profile Info */}
             <div className="space-y-3">
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                <FaEnvelope className="w-4 h-4 text-gray-500" />
+                <FiMail className="w-4 h-4 text-gray-500" />
                 <div>
                   <p className="text-xs text-gray-500">Email</p>
                   <p className="text-sm font-medium text-gray-900">{profile.Email}</p>
@@ -503,7 +522,7 @@ export default function UserProfileSummaryPage() {
               
               {profile.College && (
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <FaGraduationCap className="w-4 h-4 text-gray-500" />
+                  <FiAward className="w-4 h-4 text-gray-500" />
                   <div>
                     <p className="text-xs text-gray-500">College</p>
                     <p className="text-sm font-medium text-gray-900">{profile.College}</p>
@@ -512,7 +531,7 @@ export default function UserProfileSummaryPage() {
               )}
               
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                <FaUser className="w-4 h-4 text-gray-500" />
+                <FiUser className="w-4 h-4 text-gray-500" />
                 <div className="flex-1">
                   <p className="text-xs text-gray-500">Program</p>
                   {editingSection === 'program' ? (
@@ -528,16 +547,16 @@ export default function UserProfileSummaryPage() {
                 </div>
                 {editingSection === 'program' ? (
                   <div className="flex gap-1">
-                    <button onClick={handleSave} className="text-green-600 hover:text-green-800">
-                      <FaSave className="w-3 h-3" />
+                    <button onClick={handleSave} className="text-gray-600 hover:text-gray-800">
+                      <FiSave className="w-3 h-3" />
                     </button>
-                    <button onClick={handleCancel} className="text-red-600 hover:text-red-800">
-                      <FaTimes className="w-3 h-3" />
+                    <button onClick={handleCancel} className="text-gray-600 hover:text-gray-800">
+                      <FiX className="w-3 h-3" />
                     </button>
                   </div>
                 ) : (
-                  <button onClick={() => setEditingSection('program')} className="text-blue-600 hover:text-blue-800">
-                    <FaEdit className="w-3 h-3" />
+                  <button onClick={() => setEditingSection('program')} className="text-gray-600 hover:text-gray-800">
+                    <FiEdit className="w-3 h-3" />
                   </button>
                 )}
               </div>
@@ -566,16 +585,16 @@ export default function UserProfileSummaryPage() {
                 </div>
                 {editingSection === 'yearOfStudy' ? (
                   <div className="flex gap-1">
-                    <button onClick={handleSave} className="text-green-600 hover:text-green-800">
-                      <FaSave className="w-3 h-3" />
+                    <button onClick={handleSave} className="text-gray-600 hover:text-gray-800">
+                      <FiSave className="w-3 h-3" />
                     </button>
-                    <button onClick={handleCancel} className="text-red-600 hover:text-red-800">
-                      <FaTimes className="w-3 h-3" />
+                    <button onClick={handleCancel} className="text-gray-600 hover:text-gray-800">
+                      <FiX className="w-3 h-3" />
                     </button>
                   </div>
                 ) : (
-                  <button onClick={() => setEditingSection('yearOfStudy')} className="text-blue-600 hover:text-blue-800">
-                    <FaEdit className="w-3 h-3" />
+                  <button onClick={() => setEditingSection('yearOfStudy')} className="text-gray-600 hover:text-gray-800">
+                    <FiEdit className="w-3 h-3" />
                   </button>
                 )}
               </div>
@@ -585,21 +604,21 @@ export default function UserProfileSummaryPage() {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                  <FaTag className="w-4 h-4" />
+                  <FiTag className="w-4 h-4" />
                   Skills
                 </h3>
                 {editingSection === 'skills' ? (
                   <div className="flex gap-1">
-                    <button onClick={handleSave} className="text-green-600 hover:text-green-800">
-                      <FaSave className="w-3 h-3" />
+                    <button onClick={handleSave} className="text-gray-600 hover:text-gray-800">
+                      <FiSave className="w-3 h-3" />
                     </button>
-                    <button onClick={handleCancel} className="text-red-600 hover:text-red-800">
-                      <FaTimes className="w-3 h-3" />
+                    <button onClick={handleCancel} className="text-gray-600 hover:text-gray-800">
+                      <FiX className="w-3 h-3" />
                     </button>
                   </div>
                 ) : (
-                  <button onClick={() => setEditingSection('skills')} className="text-blue-600 hover:text-blue-800">
-                    <FaEdit className="w-3 h-3" />
+                  <button onClick={() => setEditingSection('skills')} className="text-gray-600 hover:text-gray-800">
+                    <FiEdit className="w-3 h-3" />
                   </button>
                 )}
               </div>
@@ -614,16 +633,16 @@ export default function UserProfileSummaryPage() {
                       placeholder="Add skill"
                       className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                    <button onClick={addSkill} className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600">
-                      <FaPlus className="w-3 h-3" />
+                    <button onClick={addSkill} className="px-2 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600">
+                      <FiPlus className="w-3 h-3" />
                     </button>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {editData.skills.map((skill, idx) => (
                       <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
                         {skill}
-                        <button onClick={() => removeSkill(skill)} className="text-blue-600 hover:text-blue-800">
-                          <FaTimes className="w-2 h-2" />
+                        <button onClick={() => removeSkill(skill)} className="text-gray-600 hover:text-gray-800">
+                          <FiX className="w-2 h-2" />
                         </button>
                       </span>
                     ))}
@@ -647,21 +666,21 @@ export default function UserProfileSummaryPage() {
               <div className="bg-white rounded-xl shadow-sm overflow-hidden p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                  <FaUser className="w-5 h-5 text-blue-500" />
+                  <FiUser className="w-5 h-5 text-gray-600" />
                   About
                 </h3>
                 {editingSection === 'about' ? (
                   <div className="flex gap-2">
-                    <button onClick={handleSave} className="text-green-600 hover:text-green-800">
-                      <FaSave className="w-4 h-4" />
+                    <button onClick={handleSave} className="text-gray-600 hover:text-gray-800">
+                      <FiSave className="w-4 h-4" />
                     </button>
-                    <button onClick={handleCancel} className="text-red-600 hover:text-red-800">
-                      <FaTimes className="w-4 h-4" />
+                    <button onClick={handleCancel} className="text-gray-600 hover:text-gray-800">
+                      <FiX className="w-4 h-4" />
                     </button>
                   </div>
                 ) : (
-                  <button onClick={() => setEditingSection('about')} className="text-blue-600 hover:text-blue-800">
-                    <FaEdit className="w-4 h-4" />
+                  <button onClick={() => setEditingSection('about')} className="text-gray-600 hover:text-gray-800">
+                    <FiEdit className="w-4 h-4" />
                   </button>
                 )}
               </div>
@@ -737,16 +756,16 @@ export default function UserProfileSummaryPage() {
                           placeholder="Add achievement"
                           className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
-                        <button onClick={addAchievement} className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                          <FaPlus className="w-4 h-4" />
+                        <button onClick={addAchievement} className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                          <FiPlus className="w-4 h-4" />
                         </button>
                       </div>
                       <ul className="list-disc ml-6 text-sm text-gray-700 space-y-1">
                         {editData.achievements.map((achievement, index) => (
                           <li key={index} className="flex items-center gap-2">
                             <span className="flex-1">{achievement}</span>
-                            <button onClick={() => removeAchievement(achievement)} className="text-red-600 hover:text-red-800">
-                              <FaTrash className="w-3 h-3" />
+                            <button onClick={() => removeAchievement(achievement)} className="text-gray-600 hover:text-gray-800">
+                              <FiTrash2 className="w-3 h-3" />
                             </button>
                           </li>
                         ))}
@@ -773,16 +792,16 @@ export default function UserProfileSummaryPage() {
                           placeholder="Add badge"
                           className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
-                        <button onClick={addBadge} className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                          <FaPlus className="w-4 h-4" />
+                        <button onClick={addBadge} className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                          <FiPlus className="w-4 h-4" />
                         </button>
                       </div>
                       <div className="flex gap-2">
                         {editData.badges.map((badge, index) => (
                           <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
                             {badge}
-                            <button onClick={() => removeBadge(badge)} className="text-blue-600 hover:text-blue-800">
-                              <FaTimes className="w-2 h-2" />
+                            <button onClick={() => removeBadge(badge)} className="text-gray-600 hover:text-gray-800">
+                              <FiX className="w-2 h-2" />
                             </button>
                           </span>
                         ))}
@@ -803,10 +822,10 @@ export default function UserProfileSummaryPage() {
 
             {/* Today's Schedule */}
             <div className="bg-white rounded-xl shadow-sm overflow-hidden p-6">
-              <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">
-                <FaCalendar className="w-5 h-5 text-green-500" />
-                Today's Tasks
-              </h3>
+                              <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">
+                  <FiCalendar className="w-5 h-5 text-gray-600" />
+                  Today's Tasks
+                </h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
                   <div className="flex flex-col">
@@ -845,10 +864,10 @@ export default function UserProfileSummaryPage() {
           {/* Right: Reviews/Feedback */}
           <div className="w-full md:w-1/4 flex flex-col gap-6">
             <div className="bg-white rounded-xl shadow-sm overflow-hidden p-6">
-              <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">
-                <FaStar className="w-5 h-5 text-yellow-500" />
-                User Reviews
-              </h3>
+                              <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">
+                  <FiStar className="w-5 h-5 text-gray-600" />
+                  User Reviews
+                </h3>
               <div className="flex flex-col gap-4">
                 {reviewsLoading ? (
                   <div className="text-center text-gray-500 py-4">
@@ -959,10 +978,10 @@ export default function UserProfileSummaryPage() {
 
             {/* Quick Stats */}
             <div className="bg-white rounded-xl shadow-sm overflow-hidden p-6">
-              <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">
-                <FaChartLine className="w-5 h-5 text-purple-500" />
-                Quick Stats
-              </h3>
+                              <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">
+                  <FiTrendingUp className="w-5 h-5 text-gray-600" />
+                  Quick Stats
+                </h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Total Reviews</span>
