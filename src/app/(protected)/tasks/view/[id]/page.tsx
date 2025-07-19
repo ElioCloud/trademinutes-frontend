@@ -7,6 +7,7 @@ import Image from "next/image";
 import ProtectedLayout from "@/components/Layout/ProtectedLayout";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { FaArrowLeft, FaMapMarkerAlt, FaClock, FaCoins, FaStar, FaHeart, FaCalendar, FaUser, FaChevronDown, FaChevronUp, FaEnvelope } from "react-icons/fa";
 
 interface Availability {
   date: string;
@@ -94,6 +95,8 @@ export default function ViewTaskPage() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [showDebugDialog, setShowDebugDialog] = useState(false);
   const [bookingDebug, setBookingDebug] = useState<{ open: boolean; message: string }>({ open: false, message: "" });
+  const [expandedReviews, setExpandedReviews] = useState<Set<string>>(new Set());
+  const [showAllReviews, setShowAllReviews] = useState(false);
 
   useEffect(() => {
     const fetchTask = async () => {
@@ -502,87 +505,269 @@ export default function ViewTaskPage() {
   };
 
   return (
-    <ProtectedLayout headerName="Task Details">
-      <div className="min-h-screen bg-white flex flex-col md:flex-row justify-center items-start mt-20 gap-8">
-        {/* Left: Task Details */}
-        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 w-full max-w-3xl border border-gray-200 relative mt-8 flex-1">
-          <button
-            onClick={() => router.push('/tasks/explore')}
-            className="flex items-center gap-2 px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full shadow border border-gray-200 text-sm font-medium transition mt-2 mb-10 ml-0"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-            Back to Explore
-          </button>
-          <h1 className="text-3xl font-extrabold mb-2 text-emerald-700">{task.title}</h1>
-          <p className="text-gray-700 mb-4 text-lg">{task.description}</p>
-          <div className="grid gap-3 text-base text-gray-700 mb-6">
-            <div>
-              <span className="font-semibold">📍 Location:</span> {task.location} <span className="text-xs text-gray-500">({task.locationType})</span>
-            </div>
-            <div>
-              <span className="font-semibold">🗓️ Availability:</span> {task.availability?.[0]?.date} from {task.availability?.[0]?.timeFrom} to {task.availability?.[0]?.timeTo}
-            </div>
-            <div>
-              <span className="font-semibold">💰 Credits:</span> <span className="text-yellow-600 font-bold">{task.credits}</span>
-            </div>
-            {task.type && (
-              <div>
-                <span className="font-semibold">📦 Type:</span> {task.type}
-              </div>
-            )}
-            {task.status && (
-              <div>
-                <span className="font-semibold">📌 Status:</span> {task.status}
-              </div>
-            )}
-          </div>
-          {task.author && (
-            <div className="flex items-center gap-4 mb-6 p-4 bg-white/70 rounded-xl border border-gray-100">
-              <Image
-                src={task.author.avatar?.trim() ? task.author.avatar : "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
-                width={56}
-                height={56}
-                className="rounded-full object-cover border border-gray-200"
-                alt="avatar"
-              />
-              <div>
-                <div className="font-semibold text-lg text-gray-800">{task.author.name}</div>
-                <div className="text-gray-500 text-sm">{task.author.email}</div>
-              </div>
-            </div>
-          )}
-          {/* Book/Cancel Buttons */}
-          {!alreadyBooked ? (
+    <ProtectedLayout>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header with Back Button */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="max-w-7xl mx-auto">
             <button
-              onClick={() => setShowConfirmModal(true)}
-              disabled={alreadyBooked}
-              className={`inline-block text-center w-full bg-emerald-500 text-white py-3 rounded-xl text-lg font-semibold hover:bg-emerald-600 transition ${alreadyBooked ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={() => router.push('/tasks/list')}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition"
             >
-              <><span role="img" aria-label="calendar">📅</span> Book Appointment</>
+              <FaArrowLeft className="w-4 h-4" />
+              Back to My Listings
             </button>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-gray-500">Loading task details...</div>
+            </div>
+          ) : !task ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-gray-500">Task not found</div>
+            </div>
           ) : (
-            <div className="flex gap-4 mt-2 mb-2">
-              <button
-                className="flex-1 bg-gray-300 text-gray-700 py-3 rounded-xl text-lg font-semibold cursor-not-allowed"
-                disabled
-              >
-                Already Booked
-              </button>
-              <button
-                onClick={handleCancelBooking}
-                className="flex-1 bg-red-500 text-white py-3 rounded-xl text-lg font-semibold hover:bg-red-600 transition"
-                disabled={cancelling}
-              >
-                {cancelling ? "Cancelling..." : "Cancel Booking"}
-              </button>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Main Content */}
+              <div className="lg:col-span-2">
+                {/* Cover Image */}
+                <div className="bg-gradient-to-br from-blue-400 to-blue-600 h-64 rounded-2xl relative mb-6">
+                  <div className="absolute inset-0 bg-black/20 rounded-2xl"></div>
+                  <div className="absolute top-4 right-4">
+                    <button className="p-2 bg-white/20 hover:bg-white/30 rounded-full transition">
+                      <FaHeart className="w-5 h-5 text-white" />
+                    </button>
+                  </div>
+                  <div className="absolute bottom-6 left-6 text-white">
+                    <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-2">
+                      {task.type || 'SERVICE'}
+                    </span>
+                    <h1 className="text-3xl font-bold mb-2">{task.title}</h1>
+                    <div className="flex items-center gap-4 text-sm">
+                      <div className="flex items-center gap-1">
+                        <FaCoins className="w-4 h-4" />
+                        <span>{task.credits} credits</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <FaStar className="w-4 h-4 text-yellow-400" />
+                        <span>4.5 (12 reviews)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Task Details */}
+                <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Description</h2>
+                  <p className="text-gray-700 leading-relaxed">{task.description}</p>
+                </div>
+
+                {/* Details Grid */}
+                <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Details</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                      <FaMapMarkerAlt className="w-5 h-5 text-gray-400" />
+                      <div>
+                        <div className="font-medium text-gray-900">{task.location}</div>
+                        <div className="text-sm text-gray-500">{task.locationType}</div>
+                      </div>
+                    </div>
+                    
+                    {task.availability?.length > 0 && (
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <FaClock className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {task.availability[0].timeFrom} - {task.availability[0].timeTo}
+                          </div>
+                          <div className="text-sm text-gray-500">Time Slot</div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                      <FaCoins className="w-5 h-5 text-gray-400" />
+                      <div>
+                        <div className="font-medium text-gray-900">{task.credits} credits</div>
+                        <div className="text-sm text-gray-500">Price</div>
+                      </div>
+                    </div>
+
+                    {task.type && (
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <FaCalendar className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <div className="font-medium text-gray-900">{task.type}</div>
+                          <div className="text-sm text-gray-500">Category</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Author Information */}
+                {task.author && (
+                  <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-4">Service Provider</h2>
+                    <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                      <Image
+                        src={task.author.avatar?.trim() ? task.author.avatar : "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+                        width={64}
+                        height={64}
+                        className="rounded-full object-cover border-2 border-white shadow-sm"
+                        alt={task.author.name}
+                      />
+                      <div className="flex-1">
+                        <div className="font-semibold text-lg text-gray-900">{task.author.name}</div>
+                        <div className="text-gray-500 text-sm">{task.author.email}</div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <FaStar className="w-4 h-4 text-yellow-400" />
+                          <span className="text-sm text-gray-600">4.8 (24 reviews)</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Actions</h2>
+                  <div className="space-y-3">
+                    {!alreadyBooked ? (
+                      <button
+                        onClick={() => setShowConfirmModal(true)}
+                        disabled={alreadyBooked}
+                        className={`w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-xl text-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition ${alreadyBooked ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        <FaCalendar className="w-5 h-5 inline mr-2" />
+                        Book Appointment
+                      </button>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          className="bg-gray-300 text-gray-700 py-4 rounded-xl text-lg font-semibold cursor-not-allowed"
+                          disabled
+                        >
+                          Already Booked
+                        </button>
+                        <button
+                          onClick={handleCancelBooking}
+                          className="bg-red-500 text-white py-4 rounded-xl text-lg font-semibold hover:bg-red-600 transition"
+                          disabled={cancelling}
+                        >
+                          {cancelling ? "Cancelling..." : "Cancel Booking"}
+                        </button>
+                      </div>
+                    )}
+                    
+                    <button
+                      onClick={() => setMessageModal(true)}
+                      className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-4 rounded-xl text-lg font-semibold hover:from-purple-600 hover:to-purple-700 transition"
+                    >
+                      <FaEnvelope className="w-5 h-5 inline mr-2" />
+                      Message Provider
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sidebar - Reviews */}
+              <div className="lg:col-span-1">
+                <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-8">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-semibold text-gray-900">Reviews</h2>
+                    <div className="flex items-center gap-1 text-sm text-gray-500">
+                      <FaStar className="w-4 h-4 text-yellow-400" />
+                      <span>4.5</span>
+                    </div>
+                  </div>
+                  
+                  {reviews.length === 0 ? (
+                    <div className="text-gray-500 text-center py-8">No reviews yet</div>
+                  ) : (
+                    <div className="space-y-4">
+                      {(showAllReviews ? reviews : reviews.slice(0, 3)).map((review, idx) => (
+                        <div key={review.id || idx} className="border border-gray-100 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                                {(review.reviewerName || 'A').charAt(0).toUpperCase()}
+                              </div>
+                              <span className="font-medium text-gray-900 text-sm">
+                                {review.reviewerName || 'Anonymous'}
+                              </span>
+                            </div>
+                            <div className="flex gap-0.5">
+                              {[1,2,3,4,5].map(star => (
+                                <FaStar 
+                                  key={star} 
+                                  className={`w-3 h-3 ${star <= (review.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`} 
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <div className="text-gray-700 text-sm">
+                            {review.comment.length > 100 && !expandedReviews.has(review.id || idx.toString()) ? (
+                              <div>
+                                <span>{review.comment.substring(0, 100)}...</span>
+                                <button
+                                  onClick={() => setExpandedReviews(prev => new Set([...prev, review.id || idx.toString()]))}
+                                  className="text-blue-600 hover:text-blue-700 text-sm font-medium ml-1"
+                                >
+                                  Read more
+                                </button>
+                              </div>
+                            ) : review.comment.length > 100 && expandedReviews.has(review.id || idx.toString()) ? (
+                              <div>
+                                <span>{review.comment}</span>
+                                <button
+                                  onClick={() => setExpandedReviews(prev => {
+                                    const newSet = new Set(prev);
+                                    newSet.delete(review.id || idx.toString());
+                                    return newSet;
+                                  })}
+                                  className="text-blue-600 hover:text-blue-700 text-sm font-medium ml-1"
+                                >
+                                  Show less
+                                </button>
+                              </div>
+                            ) : (
+                              <span>{review.comment}</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {reviews.length > 3 && (
+                        <button
+                          onClick={() => setShowAllReviews(!showAllReviews)}
+                          className="w-full text-center py-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
+                        >
+                          {showAllReviews ? (
+                            <>
+                              <FaChevronUp className="w-4 h-4 inline mr-1" />
+                              Show Less
+                            </>
+                          ) : (
+                            <>
+                              <FaChevronDown className="w-4 h-4 inline mr-1" />
+                              Show All ({reviews.length} reviews)
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
-          <button
-            onClick={() => setMessageModal(true)}
-            className="inline-block text-center w-full bg-blue-500 text-white py-3 rounded-xl text-lg font-semibold hover:bg-blue-600 transition mt-4 mb-2"
-          >
-            💬 Message Task Owner
-          </button>
+        </div>
           {/* First Message Modal */}
           {messageModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
@@ -660,40 +845,10 @@ export default function ViewTaskPage() {
               </div>
             </div>
           )}
-          {/* Leave a Review Button and Modal removed as per new requirements */}
           {reviewSubmitted && (
             <div className="mt-4 text-green-700 font-semibold">Review submitted!</div>
           )}
-          {/* Review Modal removed as per new requirements */}
         </div>
-        {/* Right: Reviews Card */}
-        <div className="w-full max-w-md mt-8 flex-1">
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-emerald-700">Reviews</h2>
-            </div>
-            {reviews.length === 0 ? (
-              <div className="text-gray-500">No reviews for this task yet.</div>
-            ) : (
-              <div className="space-y-4">
-                {reviews.map((review, idx) => (
-                  <div key={review.id || idx} className="border-b border-gray-100 pb-4 mb-4 last:mb-0 last:pb-0 last:border-b-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-semibold text-gray-800">{review.reviewerName || 'Anonymous'}</span>
-                      <span className="flex gap-0.5 ml-2">
-                        {[1,2,3,4,5].map(star => (
-                          <span key={star} className={star <= (review.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}>★</span>
-                        ))}
-                      </span>
-                    </div>
-                    <div className="text-gray-700 text-base">{review.comment}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
       <ToastContainer position="top-right" autoClose={3000} />
       {bookingDebug.open && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.4)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
