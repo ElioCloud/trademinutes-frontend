@@ -284,17 +284,26 @@ export default function CreateTaskModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4">
-      <div className="bg-white max-w-2xl w-full rounded-2xl shadow-2xl p-6 overflow-y-auto max-h-[90vh] relative">
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-4 text-xl font-bold text-gray-500 hover:text-red-500"
-        >
-          &times;
-        </button>
-        <h2 className="text-xl font-bold mb-4 text-purple-700">
-          📝 Create Task
-        </h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+      <div className="bg-white max-w-3xl w-full rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] relative">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-700 text-white p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold">Create New Listing</h2>
+              <p className="text-purple-100 mt-1">Add your service to the marketplace</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-white hover:text-red-200 transition-colors p-2 rounded-full hover:bg-white/10"
+            >
+              <FaTimes className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Cover Image Upload */}
           <div className="space-y-2">
@@ -366,72 +375,82 @@ export default function CreateTaskModal({
             </div>
           </div>
 
-          <select
-            name="category"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full border px-4 py-2 rounded-md"
-            required
-          >
-            <option value="">Select a category</option>
-            {categories.map((cat, idx) => (
-              <option key={idx} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Category *</label>
+            <select
+              name="category"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+              required
+            >
+              <option value="">Select a category</option>
+              {categories.map((cat, idx) => (
+                <option key={idx} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <input
-            type="text"
-            name="title"
-            placeholder="Title"
-            className="w-full border px-4 py-2 rounded-md"
-            value={formData.title}
-            onChange={handleChange}
-            required
-          />
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Title *</label>
+            <input
+              type="text"
+              name="title"
+              placeholder="Enter your service title"
+              className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+              value={formData.title}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-          <textarea
-            name="description"
-            placeholder="Description"
-            rows={2}
-            className="w-full border px-4 py-2 rounded-md"
-            value={formData.description}
-            onChange={handleChange}
-            required
-          />
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Description *</label>
+            <textarea
+              name="description"
+              placeholder="Describe your service in detail"
+              rows={3}
+              className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors resize-none"
+              value={formData.description}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="relative">
-              <input
-                type="text"
-                name="location"
-                placeholder="Enter a Canadian location"
-                className="border px-4 py-2 rounded-xl w-full"
-                value={formData.location}
-                onChange={handleLocationInput}
-                required
-              />
-              {locationSuggestions.length > 0 && (
-                <ul className="absolute z-10 bg-white border rounded-xl mt-1 w-full max-h-48 overflow-y-auto shadow">
-                  {locationSuggestions.map((place) => (
-                    <li
-                      key={place.id}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={() => handleLocationSelect(place)}
-                    >
-                      {place.place_name}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <div className="flex gap-2">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Location *</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  name="location"
+                  placeholder="Enter a Canadian location"
+                  className="border border-gray-300 px-4 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  value={formData.location}
+                  onChange={handleLocationInput}
+                  required
+                />
+                {locationSuggestions.length > 0 && (
+                  <ul className="absolute z-10 bg-white border border-gray-200 rounded-xl mt-1 w-full max-h-48 overflow-y-auto shadow-lg">
+                    {locationSuggestions.map((place) => (
+                      <li
+                        key={place.id}
+                        className="px-4 py-3 hover:bg-purple-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                        onClick={() => handleLocationSelect(place)}
+                      >
+                        {place.place_name}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
               <select
                 name="locationType"
                 value={formData.locationType}
                 onChange={handleChange}
-                className="border px-4 py-2 rounded-xl w-full"
+                className="border border-gray-300 px-4 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
                 required
               >
                 <option value="in-person">In-person</option>
@@ -440,61 +459,74 @@ export default function CreateTaskModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <input
-              type="number"
-              name="credits"
-              placeholder="Credits"
-              className="border px-4 py-2 rounded-xl w-full"
-              value={formData.credits}
-              onChange={handleChange}
-              min={1}
-              required
-            />
-            <input
-              type="date"
-              name="date"
-              className="border px-4 py-2 rounded-xl w-full"
-              value={formData.availability[0].date}
-              onChange={(e) => handleAvailabilityChange("date", e.target.value)}
-              required
-            />
-            <div className="flex gap-2">
-              <select
-                name="timeFrom"
-                className="border px-2 py-2 rounded-xl w-full"
-                value={formData.availability[0].timeFrom}
-                onChange={(e) => handleAvailabilityChange("timeFrom", e.target.value)}
-                required
-              >
-                <option value="">From</option>
-                {generateTimeOptions()}
-              </select>
-              <select
-                name="timeTo"
-                className="border px-2 py-2 rounded-xl w-full"
-                value={formData.availability[0].timeTo}
-                onChange={(e) => handleAvailabilityChange("timeTo", e.target.value)}
-                required
-              >
-                <option value="">To</option>
-                {generateTimeOptions()}
-              </select>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Pricing & Schedule *</label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Credits</label>
+                <input
+                  type="number"
+                  name="credits"
+                  placeholder="Enter credits"
+                  className="border border-gray-300 px-4 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  value={formData.credits}
+                  onChange={handleChange}
+                  min={1}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Date</label>
+                <input
+                  type="date"
+                  name="date"
+                  className="border border-gray-300 px-4 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  value={formData.availability[0].date}
+                  onChange={(e) => handleAvailabilityChange("date", e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Time</label>
+                <div className="flex gap-2">
+                  <select
+                    name="timeFrom"
+                    className="border border-gray-300 px-3 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                    value={formData.availability[0].timeFrom}
+                    onChange={(e) => handleAvailabilityChange("timeFrom", e.target.value)}
+                    required
+                  >
+                    <option value="">From</option>
+                    {generateTimeOptions()}
+                  </select>
+                  <select
+                    name="timeTo"
+                    className="border border-gray-300 px-3 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                    value={formData.availability[0].timeTo}
+                    onChange={(e) => handleAvailabilityChange("timeTo", e.target.value)}
+                    required
+                  >
+                    <option value="">To</option>
+                    {generateTimeOptions()}
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
 
           <button
             type="submit"
             disabled={uploading}
-            className={`w-full py-2 rounded-md font-semibold transition ${
+            className={`w-full py-4 rounded-xl font-semibold transition-all duration-200 ${
               uploading 
                 ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-emerald-600 hover:bg-emerald-700'
+                : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl'
             } text-white`}
           >
-            {uploading ? 'Creating Task...' : 'Create Task'}
+            {uploading ? 'Creating Listing...' : 'Create Listing'}
           </button>
         </form>
+        </div>
       </div>
       {isOpen && (
         <button
