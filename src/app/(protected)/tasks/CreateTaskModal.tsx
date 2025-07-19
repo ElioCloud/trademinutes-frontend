@@ -300,12 +300,12 @@ export default function CreateTaskModal({
               <h2 className="text-2xl font-bold">Create New Listing</h2>
               <p className="text-purple-100 mt-1">Add your service to the marketplace</p>
             </div>
-            <button
-              onClick={onClose}
+        <button
+          onClick={onClose}
               className="text-white hover:text-red-200 transition-colors p-2 rounded-full hover:bg-white/10"
-            >
+        >
               <FaTimes className="w-6 h-6" />
-            </button>
+        </button>
           </div>
         </div>
         
@@ -384,75 +384,75 @@ export default function CreateTaskModal({
 
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">Category *</label>
-            <select
-              name="category"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+          <select
+            name="category"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
               className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-              required
-            >
-              <option value="">Select a category</option>
-              {categories.map((cat, idx) => (
-                <option key={idx} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
+            required
+          >
+            <option value="">Select a category</option>
+            {categories.map((cat, idx) => (
+              <option key={idx} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
           </div>
 
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">Title *</label>
-            <input
-              type="text"
-              name="title"
+          <input
+            type="text"
+            name="title"
               placeholder="Enter your service title"
               className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-              value={formData.title}
-              onChange={handleChange}
-              required
-            />
+            value={formData.title}
+            onChange={handleChange}
+            required
+          />
           </div>
 
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">Description *</label>
-            <textarea
-              name="description"
+          <textarea
+            name="description"
               placeholder="Describe your service in detail"
               rows={3}
               className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors resize-none"
-              value={formData.description}
-              onChange={handleChange}
-              required
-            />
+            value={formData.description}
+            onChange={handleChange}
+            required
+          />
           </div>
 
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">Location *</label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  name="location"
-                  placeholder="Enter a Canadian location"
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="relative">
+              <input
+                type="text"
+                name="location"
+                placeholder="Enter a Canadian location"
                   className="border border-gray-300 px-4 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                  value={formData.location}
-                  onChange={handleLocationInput}
-                  required
-                />
-                {locationSuggestions.length > 0 && (
+                value={formData.location}
+                onChange={handleLocationInput}
+                required
+              />
+              {locationSuggestions.length > 0 && (
                   <ul className="absolute z-10 bg-white border border-gray-200 rounded-xl mt-1 w-full max-h-48 overflow-y-auto shadow-lg">
-                    {locationSuggestions.map((place) => (
-                      <li
-                        key={place.id}
+                  {locationSuggestions.map((place) => (
+                    <li
+                      key={place.id}
                         className="px-4 py-3 hover:bg-purple-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                        onClick={() => handleLocationSelect(place)}
-                      >
-                        {place.place_name}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+                      onClick={() => handleLocationSelect(place)}
+                    >
+                      {place.place_name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
               <select
                 name="locationType"
                 value={formData.locationType}
@@ -471,40 +471,40 @@ export default function CreateTaskModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Credits</label>
-                <input
-                  type="number"
-                  name="credits"
+            <input
+              type="number"
+              name="credits"
                   placeholder="Enter credits"
                   className="border border-gray-300 px-4 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                  value={formData.credits}
-                  onChange={handleChange}
-                  min={1}
-                  required
-                />
+              value={formData.credits}
+              onChange={handleChange}
+              min={1}
+              required
+            />
               </div>
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Time</label>
-                <div className="flex gap-2">
-                  <select
-                    name="timeFrom"
+            <div className="flex gap-2">
+              <select
+                name="timeFrom"
                     className="border border-gray-300 px-3 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                    value={formData.availability[0].timeFrom}
-                    onChange={(e) => handleAvailabilityChange("timeFrom", e.target.value)}
-                    required
-                  >
-                    <option value="">From</option>
-                    {generateTimeOptions()}
-                  </select>
-                  <select
-                    name="timeTo"
+                value={formData.availability[0].timeFrom}
+                onChange={(e) => handleAvailabilityChange("timeFrom", e.target.value)}
+                required
+              >
+                <option value="">From</option>
+                {generateTimeOptions()}
+              </select>
+              <select
+                name="timeTo"
                     className="border border-gray-300 px-3 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                    value={formData.availability[0].timeTo}
-                    onChange={(e) => handleAvailabilityChange("timeTo", e.target.value)}
-                    required
-                  >
-                    <option value="">To</option>
-                    {generateTimeOptions()}
-                  </select>
+                value={formData.availability[0].timeTo}
+                onChange={(e) => handleAvailabilityChange("timeTo", e.target.value)}
+                required
+              >
+                <option value="">To</option>
+                {generateTimeOptions()}
+              </select>
                 </div>
               </div>
             </div>

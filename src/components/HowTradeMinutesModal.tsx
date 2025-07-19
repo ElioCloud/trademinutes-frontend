@@ -28,7 +28,7 @@ const slides: Slide[] = [
     id: 2,
     title: "Step 2: Connect & Swap",
     description: "Once you find the right helper, connect with them and arrange your skill swap. No money involved - just fair exchanges of time and expertise.",
-    image: "https://media.istockphoto.com/id/1397336758/vector/business-concept-illustration-on-the-subject-of-teamwork.jpg?s=612x612&w=0&k=20&c=QmCPzcFzBHt_itlKlCI8I4fWA4_kLw-835DvW3crLTc=",
+    image: "/slide02.png",
     alt: "Connect and swap illustration"
   },
   {
@@ -79,11 +79,10 @@ export default function HowTradeMinutesModal({ isOpen, onClose }: HowTradeMinute
   };
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-lg flex items-center justify-center z-50 p-4">
+      <div className="max-w-4xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-white/30">
-          <h2 className="text-2xl font-bold text-white">How TradeMinutes Works</h2>
+        <div className="flex items-center justify-end p-6">
           <button
             onClick={onClose}
             className="p-2 hover:bg-white/20 rounded-full transition-colors text-white"
@@ -128,34 +127,25 @@ export default function HowTradeMinutesModal({ isOpen, onClose }: HowTradeMinute
             </div>
           </div>
 
-          {/* Navigation Arrows */}
-          <button
-            onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-all"
-          >
-            <FiChevronLeft className="w-6 h-6" />
-          </button>
-          <button
-            onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-all"
-          >
-            <FiChevronRight className="w-6 h-6" />
-          </button>
+
         </div>
 
-        {/* Footer with Dots */}
-        <div className="p-6 border-t border-white/30">
+        {/* Footer with Arrows */}
+        <div className="p-6">
           <div className="flex items-center justify-between">
-            <div className="flex gap-2">
-              {slides.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`w-3 h-3 rounded-full transition-colors ${
-                    index === currentSlide ? 'bg-white' : 'bg-white/50'
-                  }`}
-                />
-              ))}
+            <div className="flex gap-4">
+              <button
+                onClick={prevSlide}
+                className="text-white hover:text-white/80 transition-colors"
+              >
+                <FiChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="text-white hover:text-white/80 transition-colors"
+              >
+                <FiChevronRight className="w-6 h-6" />
+              </button>
             </div>
             <div className="text-sm text-white/80">
               {currentSlide + 1} of {slides.length}

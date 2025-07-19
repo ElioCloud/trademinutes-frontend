@@ -13,15 +13,6 @@ export default function CategoryBanner() {
                 <p className="text-gray-700 text-base mb-6">
                     Explore a variety of skills and services offered by your local community
                 </p>
-
-                <button className="flex items-center gap-2 text-sm font-medium text-gray-800">
-                    <span className="bg-white rounded-full p-2 shadow">
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M6 4l8 6-8 6V4z" />
-                        </svg>
-                    </span>
-                    How TradeMinutes Works
-                </button>
             </div>
 
             {/* Right Illustration */}

@@ -134,7 +134,7 @@ function SearchResultsPage() {
 
           console.log('Filtered services from backend:', filteredServices);
           setResults(filteredServices);
-        } else {
+    } else {
           // For unauthenticated users, fetch real data from public endpoint
           try {
             console.log('Fetching from public endpoint...');
@@ -193,7 +193,7 @@ function SearchResultsPage() {
           } catch (publicErr) {
             console.error('Error fetching public services:', publicErr);
             setError('Search is temporarily unavailable. Please try again later or sign up to access all features.');
-            setResults([]);
+      setResults([]);
           }
         }
       } catch (err) {
@@ -474,9 +474,9 @@ function SearchResultsPage() {
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
+          ))}
+        </div>
+      )}
           </div>
         </div>
       </div>

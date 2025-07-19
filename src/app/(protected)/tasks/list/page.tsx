@@ -191,13 +191,13 @@ export default function TaskListPage() {
               <h1 className="text-3xl font-bold text-gray-900">My Listings</h1>
               <p className="text-gray-500 text-base font-normal mt-1">Manage and create your service listings</p>
             </div>
-            <button
-              onClick={() => setIsModalOpen(true)}
+          <button
+            onClick={() => setIsModalOpen(true)}
               className="flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg text-sm font-semibold shadow-md hover:bg-purple-700 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
-            >
+          >
               <FaPlus className="w-4 h-4 text-white" />
               Create Listing
-            </button>
+          </button>
           </div>
         </div>
 
@@ -268,17 +268,17 @@ export default function TaskListPage() {
                     ) : (
                       <div className={`w-full h-full bg-gradient-to-br ${gradients[idx % gradients.length]}`}></div>
                     )}
-                    <button
-                      onClick={e => {
-                        e.stopPropagation();
-                        setTaskToDelete(task.id);
-                        setShowConfirmModal(true);
-                      }}
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      setTaskToDelete(task.id);
+                      setShowConfirmModal(true);
+                    }}
                       className="absolute top-3 right-3 text-white hover:text-red-400 transition-colors bg-black/20 rounded-full p-2 hover:bg-black/40"
-                      title="Delete"
-                    >
+                    title="Delete"
+                  >
                       <FaTrash className="w-4 h-4" />
-                    </button>
+                  </button>
                   </div>
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-2">
@@ -304,12 +304,12 @@ export default function TaskListPage() {
                         </span>
                       </div>
                       
-                      {task.Availability?.length > 0 && (
+                  {task.Availability?.length > 0 && (
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                           <FaClock className="w-4 h-4 text-gray-400" />
                           <span>{task.Availability[0].TimeFrom} - {task.Availability[0].TimeTo}</span>
                         </div>
-                      )}
+                  )}
                     </div>
                     
                     {/* Rating */}
