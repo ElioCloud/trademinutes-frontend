@@ -101,15 +101,8 @@ function SearchResultsPage() {
           const services = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
           console.log('Services array:', services);
 
-          // Filter out own tasks (same as dashboard explore)
+          // Use all tasks for search (including own tasks)
           let filteredTasks = services;
-          if (currentUserId) {
-            filteredTasks = services.filter(
-              (task: any) =>
-                task.Author?.ID !== currentUserId &&
-                task.Author?.id !== currentUserId
-            );
-          }
 
           // Filter services based on query and category with improved search logic
           const filteredServices = filteredTasks.filter((service: Service) => {
