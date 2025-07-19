@@ -24,6 +24,7 @@ import {
   FaPlus,
   FaTrash
 } from "react-icons/fa";
+import ProfilePictureUpload from "@/components/ProfilePictureUpload";
 
 const MOCK_STATS = [
   { label: "Total Patients", value: 520 },
@@ -117,6 +118,7 @@ export default function UserProfileSummaryPage() {
   const [newBadge, setNewBadge] = useState("");
   const [newHowItWorks, setNewHowItWorks] = useState("");
   const [saving, setSaving] = useState(false);
+  const [editingProfilePicture, setEditingProfilePicture] = useState(false);
 
   const fetchReviewsForMyTasks = async (userId: string) => {
     try {
@@ -340,6 +342,16 @@ export default function UserProfileSummaryPage() {
     }));
   };
 
+  const handleProfilePictureUpload = (imageUrl: string) => {
+    setProfile(prev => prev ? { ...prev, ProfilePictureURL: imageUrl } : null);
+    setEditingProfilePicture(false);
+  };
+
+  const handleProfilePictureRemove = () => {
+    setProfile(prev => prev ? { ...prev, ProfilePictureURL: "" } : null);
+    setEditingProfilePicture(false);
+  };
+
   if (loading || !profile) return null;
 
   return (
@@ -349,24 +361,50 @@ export default function UserProfileSummaryPage() {
           {/* Left: Profile Card */}
           <div className="w-full md:w-1/4 bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col gap-6">
             <div className="flex flex-col items-center gap-4">
-              <div className="relative">
-                <Image 
-                  src={profile.ProfilePictureURL || "/categories-banner.png"} 
-                  alt="User" 
-                  width={96} 
-                  height={96} 
-                  className="rounded-full border-4 border-white shadow-lg object-cover w-24 h-24" 
-                />
-                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
-                  <FaCheck className="w-3 h-3 text-white" />
+              {editingProfilePicture ? (
+                <div className="w-full">
+                  <ProfilePictureUpload
+                    currentImageUrl={profile.ProfilePictureURL}
+                    onImageUpload={handleProfilePictureUpload}
+                    onImageRemove={handleProfilePictureRemove}
+                  />
+                  <div className="flex justify-center gap-2 mt-2">
+                    <button
+                      onClick={() => setEditingProfilePicture(false)}
+                      className="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div className="text-center">
-                <h2 className="text-xl font-bold text-gray-900">{profile.Name || 'TradeMinutes User'}</h2>
-                <p className="text-sm text-gray-500">Marketplace Member</p>
-                <p className="text-xs text-gray-400">User ID: TM-{profile.Email?.split('@')[0]}</p>
-                <p className="text-xs text-gray-400 mt-1">Click the edit icons to update your profile</p>
-              </div>
+              ) : (
+                <>
+                  <div className="relative">
+                    <Image 
+                      src={profile.ProfilePictureURL || "/categories-banner.png"} 
+                      alt="User" 
+                      width={96} 
+                      height={96} 
+                      className="rounded-full border-4 border-white shadow-lg object-cover w-24 h-24" 
+                    />
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+                      <FaCheck className="w-3 h-3 text-white" />
+                    </div>
+                    <button
+                      onClick={() => setEditingProfilePicture(true)}
+                      className="absolute -top-1 -right-1 w-6 h-6 bg-blue-500 text-white rounded-full border-2 border-white flex items-center justify-center hover:bg-blue-600 transition-colors"
+                    >
+                      <FaEdit className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <div className="text-center">
+                    <h2 className="text-xl font-bold text-gray-900">{profile.Name || 'TradeMinutes User'}</h2>
+                    <p className="text-sm text-gray-500">Marketplace Member</p>
+                    <p className="text-xs text-gray-400">User ID: TM-{profile.Email?.split('@')[0]}</p>
+                    <p className="text-xs text-gray-400 mt-1">Click the edit icons to update your profile</p>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Profile Stats */}
