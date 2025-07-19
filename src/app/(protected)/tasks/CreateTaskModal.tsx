@@ -688,7 +688,7 @@ export default function CreateTaskModal({
         {/* Footer with Navigation */}
         <div className="border-t border-gray-200 p-6 bg-gray-50">
           <div className="flex items-center justify-between">
-            {currentStep > 1 && (
+            {currentStep > 1 ? (
               <button
                 type="button"
                 onClick={prevStep}
@@ -697,15 +697,15 @@ export default function CreateTaskModal({
                 <FaArrowLeft className="w-4 h-4" />
                 <span>Previous</span>
               </button>
+            ) : (
+              <div></div>
             )}
-            
-            <div className="flex-1"></div>
             
             {currentStep < 2 ? (
               <button
                 type="button"
                 onClick={nextStep}
-                className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors shadow-lg"
+                className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors shadow-lg font-medium"
               >
                 <span>Next</span>
                 <FaArrowRight className="w-4 h-4" />
@@ -736,34 +736,7 @@ export default function CreateTaskModal({
           </div>
         </div>
       </div>
-      {isOpen && (
-        <button
-          type="button"
-          style={{
-            position: "fixed",
-            bottom: 24,
-            right: 24,
-            zIndex: 9999,
-            background: "#6366f1",
-            color: "white",
-            borderRadius: "50%",
-            width: 56,
-            height: 56,
-            fontSize: 24,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-            border: "none",
-            cursor: "pointer",
-          }}
-          onClick={() => {
-            alert(
-              `Latitude: ${formData.latitude || "N/A"}\nLongitude: ${formData.longitude || "N/A"}`
-            );
-          }}
-          title="Show current coordinates"
-        >
-          📍
-        </button>
-      )}
+
     </div>
   );
 }
