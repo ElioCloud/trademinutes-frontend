@@ -117,6 +117,13 @@ function TopBar({ realTimeActivities, loadingActivities }: { realTimeActivities:
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  
+  // Search functionality
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<RealTimeActivity[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  
   const handleLogout = () => {
     localStorage.removeItem("token");
     router.push("/login");
@@ -127,8 +134,11 @@ function TopBar({ realTimeActivities, loadingActivities }: { realTimeActivities:
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setDropdownOpen(false);
       }
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
     }
-    if (dropdownOpen) {
+    if (dropdownOpen || showSearchResults) {
       document.addEventListener("mousedown", handleClickOutside);
     } else {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -136,7 +146,35 @@ function TopBar({ realTimeActivities, loadingActivities }: { realTimeActivities:
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [dropdownOpen]);
+  }, [dropdownOpen, showSearchResults]);
+
+  // Real-time search functionality
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    const filtered = realTimeActivities.filter(activity => 
+      activity.title.toLowerCase().includes(query) ||
+      activity.user.toLowerCase().includes(query) ||
+      activity.category.toLowerCase().includes(query)
+    );
+
+    setSearchResults(filtered.slice(0, 5)); // Limit to 5 results
+    setShowSearchResults(true);
+  }, [searchQuery, realTimeActivities]);
+
+  const handleSearchResultClick = (activity: RealTimeActivity) => {
+    // Navigate to the task/service page
+    if (activity.id) {
+      router.push(`/tasks/view/${activity.id}`);
+    }
+    setShowSearchResults(false);
+    setSearchQuery("");
+  };
 
   const [profileUserId, setProfileUserId] = useState<string | null>(null);
   const [credits, setCredits] = useState<number | null>(null);
@@ -163,17 +201,59 @@ function TopBar({ realTimeActivities, loadingActivities }: { realTimeActivities:
 
   return (
           <div className="flex items-center mb-6 gap-8 w-full bg-white">
-        {/* Search Bar */}
-        <div className="flex-1 max-w-md">
+        {/* Enhanced Search Bar */}
+        <div className="flex-1 max-w-2xl" ref={searchRef}>
           <div className="relative">
             <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
               type="text"
-              placeholder="Search tasks, services, or users..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => searchQuery.trim() !== "" && setShowSearchResults(true)}
+              placeholder="Search tasks, services, users, or categories..."
+              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm"
             />
+            
+            {/* Search Results Dropdown */}
+            {showSearchResults && searchResults.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
+                {searchResults.map((result, index) => (
+                  <div
+                    key={index}
+                    onClick={() => handleSearchResultClick(result)}
+                    className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                  >
+                    <img 
+                      src={result.avatar} 
+                      alt={result.user} 
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 truncate">{result.title}</p>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <span>{result.user}</span>
+                        <span>•</span>
+                        <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs">
+                          {result.category}
+                        </span>
+                      </div>
+                    </div>
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* No Results Message */}
+            {showSearchResults && searchQuery.trim() !== "" && searchResults.length === 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-4">
+                <p className="text-gray-500 text-center">No results found for "{searchQuery}"</p>
+              </div>
+            )}
           </div>
         </div>
         
