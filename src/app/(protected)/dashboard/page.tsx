@@ -758,7 +758,7 @@ export default function ProfileDashboardPage() {
         </div>
 
         {/* Right Sidebar */}
-        <div className="w-80 bg-white shadow-sm p-6 overflow-y-auto flex-shrink-0">
+        <div className="w-72 bg-white shadow-sm p-4 overflow-y-auto flex-shrink-0">
           {/* Profile & Stats Section */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
