@@ -8,8 +8,15 @@ import {
   FiHeart,
   FiStar,
 } from 'react-icons/fi';
+import { FaMapMarkerAlt, FaClock, FaCoins } from 'react-icons/fa';
 
 // Service type definition
+type Availability = {
+  Date: string;
+  TimeFrom: string;
+  TimeTo: string;
+};
+
 type Service = {
   ID?: string;
   id?: string;
@@ -21,6 +28,12 @@ type Service = {
   credits?: number;
   Category?: string;
   category?: string;
+  Location?: string;
+  location?: string;
+  LocationType?: string;
+  locationType?: string;
+  Availability?: Availability[];
+  availability?: Availability[];
   Author?: {
     Name?: string;
     name?: string;
@@ -178,40 +191,38 @@ export default function TrendingServices() {
 
                       {/* content */}
                       <div className="p-4">
-                        <span className={`inline-block px-2 py-1 ${colors[index % colors.length].bg} ${colors[index % colors.length].text} text-xs font-semibold rounded mb-2`}>
-                          {service.Category || service.category || 'General'}
-                        </span>
-                        <h3 className="font-semibold text-gray-900 mb-2 truncate">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className={`inline-block px-2 py-1 ${colors[index % colors.length].bg} ${colors[index % colors.length].text} text-xs font-semibold rounded`}>
+                            {service.Category || service.category || 'General'}
+                          </span>
+                          <div className="flex items-center gap-1 text-sm font-bold text-green-600">
+                            <FaCoins className="w-4 h-4" />
+                            <span>{service.Credits || service.credits || 0}</span>
+                          </div>
+                        </div>
+                        <h3 className="font-semibold text-gray-900 mb-3">
                           {service.Title || service.title || 'Service Title'}
                         </h3>
                         
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            {(service.Author?.Avatar || service.Author?.ProfilePictureURL || service.author?.avatar || service.author?.profilePictureURL) ? (
-                              <Image 
-                                src={service.Author?.Avatar || service.Author?.ProfilePictureURL || service.author?.avatar || service.author?.profilePictureURL || ''} 
-                                alt={service.Author?.Name || service.author?.name || 'Provider'} 
-                                width={24}
-                                height={24}
-                                className="w-6 h-6 rounded-full object-cover"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                                }}
-                              />
-                            ) : null}
-                            <div className={`w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-semibold ${(service.Author?.Avatar || service.Author?.ProfilePictureURL || service.author?.avatar || service.author?.profilePictureURL) ? 'hidden' : ''}`}>
-                              {(service.Author?.Name || service.Author?.name || service.author?.name || 'P').charAt(0).toUpperCase()}
-                            </div>
-                            <span className="text-sm text-gray-600">
-                              {service.Author?.Name || service.Author?.name || service.author?.name || 'Provider'}
+                        {/* Location and Time Details */}
+                        <div className="space-y-2 mb-3">
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <FaMapMarkerAlt className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                            <span className="truncate max-w-[200px]">{service.Location || service.location || 'Online'}</span>
+                            <span className="text-xs bg-gray-100 px-2 py-1 rounded flex-shrink-0">
+                              {service.LocationType || service.locationType || 'Online'}
                             </span>
                           </div>
-                          <span className="text-lg font-bold text-green-600">
-                            {service.Credits || service.credits || 0} Credits
-                          </span>
+                          
+                          {(service.Availability && service.Availability.length > 0) && (
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                              <FaClock className="w-4 h-4 text-gray-400" />
+                              <span>{service.Availability[0].TimeFrom} - {service.Availability[0].TimeTo}</span>
+                            </div>
+                          )}
                         </div>
                         
+                        {/* Rating */}
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                           <FiStar className="w-4 h-4 text-yellow-400" />
                           <span>

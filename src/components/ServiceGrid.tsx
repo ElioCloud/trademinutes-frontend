@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { FiStar } from 'react-icons/fi';
-import { FaStar, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
+import { FaStar, FaArrowLeft, FaArrowRight, FaMapMarkerAlt, FaClock, FaCoins } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 
@@ -233,6 +233,12 @@ const services = [
 
 const PER_PAGE = 8;
 
+interface Availability {
+  Date: string;
+  TimeFrom: string;
+  TimeTo: string;
+}
+
 interface Service {
   ID?: string;
   id?: string;
@@ -246,6 +252,10 @@ interface Service {
   category?: string;
   Location?: string;
   location?: string;
+  LocationType?: string;
+  locationType?: string;
+  Availability?: Availability[];
+  availability?: Availability[];
   Author?: {
     Name?: string;
     name?: string;
@@ -410,6 +420,9 @@ export default function ServiceGrid({ items = services }: { items?: (Service | t
           const user = s.Author?.Name || s.Author?.name || s.author?.name || s.user || 'Provider';
           const avatar = s.Author?.Avatar || s.Author?.ProfilePictureURL || s.author?.avatar || s.author?.profilePictureURL;
           const price = s.Credits || s.credits || s.price || 0;
+          const location = s.Location || s.location || 'Online';
+          const locationType = s.LocationType || s.locationType || 'Online';
+          const availability = s.Availability || s.availability || [];
           
           // Enhanced image handling for different formats
           let image = s.Images?.[0] || s.image;
@@ -444,41 +457,41 @@ export default function ServiceGrid({ items = services }: { items?: (Service | t
                 <div className="absolute inset-0 bg-black/20"></div>
               </div>
               <div className="p-4">
-                <span className={`inline-block px-2 py-1 ${colors[idx % colors.length].bg} ${colors[idx % colors.length].text} text-xs font-semibold rounded mb-2`}>
-                  {category || 'GENERAL'}
-                </span>
-                <h4 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`inline-block px-2 py-1 ${colors[idx % colors.length].bg} ${colors[idx % colors.length].text} text-xs font-semibold rounded`}>
+                    {category || 'GENERAL'}
+                  </span>
+                  <div className="flex items-center gap-1 text-sm font-bold text-green-600">
+                    <FaCoins className="w-4 h-4" />
+                    <span>{price}</span>
+                  </div>
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-3">
                   {title || 'Service Title'}
                 </h4>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    {avatar ? (
-                      <img 
-                        src={avatar} 
-                        alt={user} 
-                        className="w-6 h-6 rounded-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                    ) : null}
-                    <div className={`w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-semibold ${avatar ? 'hidden' : ''}`}>
-                      {user.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="text-sm text-gray-600">
-                      {user}
+                
+                {/* Location and Time Details */}
+                <div className="space-y-2 mb-3">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <FaMapMarkerAlt className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    <span className="truncate max-w-[200px]">{location}</span>
+                    <span className="text-xs bg-gray-100 px-2 py-1 rounded flex-shrink-0">
+                      {locationType}
                     </span>
                   </div>
-                  <span className="text-lg font-bold text-green-600">
-                    {price} credits
-                  </span>
+                  
+                  {availability.length > 0 && (
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <FaClock className="w-4 h-4 text-gray-400" />
+                      <span>{availability[0].TimeFrom} - {availability[0].TimeTo}</span>
+                    </div>
+                  )}
                 </div>
+                
+                {/* Rating */}
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <FaStar className="w-4 h-4 text-yellow-400" />
-                  <span>
-                    {rating} ({reviews} reviews)
-                  </span>
+                  <span>{rating} ({reviews} reviews)</span>
                 </div>
               </div>
             </div>
