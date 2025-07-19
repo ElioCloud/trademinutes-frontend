@@ -24,7 +24,7 @@ export default function CreateTaskModal({
     longitude: "",
     locationType: "in-person",
     credits: "",
-    availability: [{ date: "", timeFrom: "", timeTo: "" }],
+    availability: [{ timeFrom: "", timeTo: "" }],
   });
 
   const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
@@ -197,13 +197,7 @@ export default function CreateTaskModal({
     e.preventDefault();
     setUploading(true);
 
-    const { date, timeFrom, timeTo } = formData.availability[0];
-
-    if (!date) {
-      showToast("❌ Please select a date.", "error");
-      setUploading(false);
-      return;
-    }
+    const { timeFrom, timeTo } = formData.availability[0];
 
     if (!timeFrom || !timeTo) {
       showToast("❌ Please select both start and end times.", "error");
@@ -460,8 +454,8 @@ export default function CreateTaskModal({
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Pricing & Schedule *</label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <label className="block text-sm font-medium text-gray-700">Pricing & Time *</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Credits</label>
                 <input
@@ -472,17 +466,6 @@ export default function CreateTaskModal({
                   value={formData.credits}
                   onChange={handleChange}
                   min={1}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-600 mb-1">Date</label>
-                <input
-                  type="date"
-                  name="date"
-                  className="border border-gray-300 px-4 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                  value={formData.availability[0].date}
-                  onChange={(e) => handleAvailabilityChange("date", e.target.value)}
                   required
                 />
               </div>
