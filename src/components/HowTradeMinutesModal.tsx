@@ -19,28 +19,21 @@ interface HowTradeMinutesModalProps {
 const slides: Slide[] = [
   {
     id: 1,
-    title: "Step 1: Post a Task",
-    description: "Start by describing what you need help with. Whether it's tutoring, tech support, or household tasks, simply post your request with details about what you're looking for.",
-    image: "/services-banner.png",
-    alt: "Post a task illustration"
-  },
-  {
-    id: 2,
-    title: "Step 2: Browse Helpers",
+    title: "Step 1: Browse Helpers",
     description: "Explore our community of trusted members who offer their skills and time. Read reviews, check ratings, and find the perfect person to help you with your task.",
     image: "/services-banner.png",
     alt: "Browse helpers illustration"
   },
   {
-    id: 3,
-    title: "Step 3: Connect & Swap",
+    id: 2,
+    title: "Step 2: Connect & Swap",
     description: "Once you find the right helper, connect with them and arrange your skill swap. No money involved - just fair exchanges of time and expertise.",
     image: "/services-banner.png",
     alt: "Connect and swap illustration"
   },
   {
-    id: 4,
-    title: "Step 4: Build Community",
+    id: 3,
+    title: "Step 3: Build Community",
     description: "Complete your task, leave reviews, and build lasting connections in your community. TradeMinutes helps you give and receive help while building meaningful relationships.",
     image: "/services-banner.png",
     alt: "Build community illustration"
