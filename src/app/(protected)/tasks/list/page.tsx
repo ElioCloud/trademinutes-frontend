@@ -185,9 +185,15 @@ export default function TaskListPage() {
                     </button>
                   </div>
                   <div className="p-4">
-                    <span className={`inline-block px-2 py-1 ${colors[idx % colors.length].bg} ${colors[idx % colors.length].text} text-xs font-semibold rounded mb-2`}>
-                      {task.Type || task.Category || 'SERVICE'}
-                    </span>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className={`inline-block px-2 py-1 ${colors[idx % colors.length].bg} ${colors[idx % colors.length].text} text-xs font-semibold rounded`}>
+                        {task.Type || task.Category || 'SERVICE'}
+                      </span>
+                      <div className="flex items-center gap-1 text-sm font-bold text-green-600">
+                        <FaCoins className="w-4 h-4" />
+                        <span>{task.Credits}</span>
+                      </div>
+                    </div>
                     <h4 className="font-semibold text-gray-900 mb-2">
                       {task.Title}
                     </h4>
@@ -219,32 +225,7 @@ export default function TaskListPage() {
                       )}
                     </div>
                     
-                    {/* Author and Credits */}
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        {task.Author?.Avatar ? (
-                          <img 
-                            src={task.Author.Avatar} 
-                            alt={task.Author.Name || 'Provider'} 
-                            className="w-6 h-6 rounded-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                              e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                            }}
-                          />
-                        ) : null}
-                        <div className={`w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-semibold ${task.Author?.Avatar ? 'hidden' : ''}`}>
-                          {(task.Author?.Name || 'P').charAt(0).toUpperCase()}
-                        </div>
-                        <span className="text-sm text-gray-600">
-                          {task.Author?.Name || 'Provider'}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1 text-lg font-bold text-green-600">
-                        <FaCoins className="w-4 h-4" />
-                        <span>{task.Credits}</span>
-                      </div>
-                    </div>
+
                     
                     {/* Status and Rating */}
                     <div className="flex items-center justify-between text-sm text-gray-500">
