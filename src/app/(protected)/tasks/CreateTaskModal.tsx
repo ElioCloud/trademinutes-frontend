@@ -656,17 +656,17 @@ export default function CreateTaskModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
       <div className="bg-white max-w-4xl w-full rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] relative">
         {/* Header */}
-        <div className="bg-purple-600 text-white p-6">
+        <div className="bg-white border-b border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold">Create New Listing</h2>
-              <p className="text-purple-100 mt-1">
+              <h2 className="text-2xl font-bold text-gray-900">Create New Listing</h2>
+              <p className="text-gray-600 mt-1">
                 Step {currentStep} of 2: {currentStep === 1 ? 'Basic Information' : 'Pricing Tiers'}
               </p>
             </div>
             <button
               onClick={onClose}
-              className="text-white hover:text-red-200 transition-colors p-2 rounded-full hover:bg-white/10"
+              className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
             >
               <FaTimes className="w-6 h-6" />
             </button>
@@ -674,9 +674,9 @@ export default function CreateTaskModal({
           
           {/* Step Indicator */}
           <div className="flex items-center mt-4 space-x-2">
-            <div className={`w-3 h-3 rounded-full ${currentStep >= 1 ? 'bg-white' : 'bg-white/30'}`}></div>
-            <div className={`flex-1 h-1 rounded ${currentStep >= 2 ? 'bg-white' : 'bg-white/30'}`}></div>
-            <div className={`w-3 h-3 rounded-full ${currentStep >= 2 ? 'bg-white' : 'bg-white/30'}`}></div>
+            <div className={`w-3 h-3 rounded-full ${currentStep >= 1 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
+            <div className={`flex-1 h-1 rounded ${currentStep >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
+            <div className={`w-3 h-3 rounded-full ${currentStep >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
           </div>
         </div>
         
@@ -686,13 +686,13 @@ export default function CreateTaskModal({
         </div>
 
         {/* Footer with Navigation */}
-        <div className="border-t border-gray-200 p-6">
+        <div className="border-t border-gray-200 p-6 bg-gray-50">
           <div className="flex items-center justify-between">
             {currentStep > 1 && (
               <button
                 type="button"
                 onClick={prevStep}
-                className="flex items-center space-x-2 px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
+                className="flex items-center space-x-2 px-6 py-3 border border-gray-300 bg-white text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm"
               >
                 <FaArrowLeft className="w-4 h-4" />
                 <span>Previous</span>
@@ -705,7 +705,7 @@ export default function CreateTaskModal({
               <button
                 type="button"
                 onClick={nextStep}
-                className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors"
+                className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors shadow-lg"
               >
                 <span>Next</span>
                 <FaArrowRight className="w-4 h-4" />
@@ -715,10 +715,10 @@ export default function CreateTaskModal({
                 type="submit"
                 disabled={uploading}
                 onClick={handleSubmit}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg ${
                   uploading 
                     ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl'
+                    : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 hover:shadow-xl'
                 } text-white flex items-center space-x-2`}
               >
                 {uploading ? (
