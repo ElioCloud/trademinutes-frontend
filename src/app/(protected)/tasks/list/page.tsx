@@ -8,6 +8,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
+import { FaHeart, FaStar, FaTrash, FaCalendar, FaMapMarkerAlt, FaClock, FaCoins } from "react-icons/fa";
 
 interface Availability {
   Date: string;
@@ -19,6 +20,7 @@ interface Author {
   id: string;
   Name: string;
   Email: string;
+  Avatar?: string;
 }
 
 interface Task {
@@ -32,6 +34,7 @@ interface Task {
   Credits: number;
   Availability: Availability[];
   Type?: string;
+  Category?: string;
   Status?: string;
   Author?: Author;
 }
@@ -124,6 +127,14 @@ export default function TaskListPage() {
   return (
     <ProtectedLayout>
       <div className="min-h-screen bg-white p-8">
+        <style jsx>{`
+          .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+        `}</style>
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">My Listings</h1>
           <button
@@ -139,54 +150,121 @@ export default function TaskListPage() {
         ) : mappedTasks.length === 0 ? (
           <p>No tasks found.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {mappedTasks.map((task: Task, idx: number) => {
-              // Colorful border palette
-              const borderColors = [
-                'border-green-400',
-                'border-blue-400',
-                'border-pink-400',
-                'border-yellow-400',
-                'border-purple-400',
-                'border-orange-400',
+              const gradients = [
+                'from-blue-400 to-blue-600',
+                'from-purple-400 to-purple-600', 
+                'from-green-400 to-green-600',
+                'from-pink-400 to-pink-600',
+                'from-yellow-400 to-yellow-600',
+                'from-orange-400 to-orange-600'
               ];
-              const borderClass = borderColors[idx % borderColors.length];
+              const colors = [
+                { bg: 'bg-blue-100', text: 'text-blue-600' },
+                { bg: 'bg-purple-100', text: 'text-purple-600' },
+                { bg: 'bg-green-100', text: 'text-green-600' },
+                { bg: 'bg-pink-100', text: 'text-pink-600' },
+                { bg: 'bg-yellow-100', text: 'text-yellow-600' },
+                { bg: 'bg-orange-100', text: 'text-orange-600' }
+              ];
+              
               return (
-                <div
-                  key={task.id ?? idx}
-                  className={`bg-white rounded-lg p-5 shadow-md hover:shadow-xl relative border-2 ${borderClass} transition cursor-pointer`}
-                  onClick={() => router.push(`/tasks/view/${String(task.id)}`)}
-                  style={{ textDecoration: 'none', color: 'inherit' }}
-                >
-                  <button
-                    onClick={e => {
-                      e.stopPropagation();
-                      setTaskToDelete(task.id);
-                      setShowConfirmModal(true);
-                    }}
-                    className="absolute top-3 right-4 text-lg text-red-500 hover:text-red-700 font-bold"
-                    title="Delete"
-                  >
-                    ×
-                  </button>
-                  <h3 className="text-lg font-semibold mb-1">{task.Title}</h3>
-                  <p className="text-sm text-gray-600 mb-2">{task.Description}</p>
-                  <p className="text-xs text-gray-500 mb-1">
-                    📍 <strong>{task.Location}</strong> ({task.LocationType})
-                  </p>
-                  {task.Availability?.length > 0 && (
-                    <p className="text-xs text-gray-500 mb-1">
-                      📅 {task.Availability[0].Date} — ⏰ {task.Availability[0].TimeFrom} to {task.Availability[0].TimeTo}
+                <div key={task.id ?? idx} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push(`/tasks/view/${String(task.id)}`)}>
+                  <div className={`h-32 bg-gradient-to-br ${gradients[idx % gradients.length]} relative`}>
+                    <button
+                      onClick={e => {
+                        e.stopPropagation();
+                        setTaskToDelete(task.id);
+                        setShowConfirmModal(true);
+                      }}
+                      className="absolute top-3 right-3 text-white hover:text-red-400 transition-colors"
+                      title="Delete"
+                    >
+                      <FaTrash className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="p-4">
+                    <span className={`inline-block px-2 py-1 ${colors[idx % colors.length].bg} ${colors[idx % colors.length].text} text-xs font-semibold rounded mb-2`}>
+                      {task.Type || task.Category || 'SERVICE'}
+                    </span>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      {task.Title}
+                    </h4>
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {task.Description}
                     </p>
-                  )}
-                  <p className="text-sm font-medium text-gray-700">
-                    🪙 {task.Credits} credits
-                  </p>
-                  {task.Author && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      👤 Listed by <strong>{task.Author.Name}</strong> ({task.Author.Email})
-                    </p>
-                  )}
+                    
+                    {/* Location and Time Details */}
+                    <div className="space-y-2 mb-3">
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <FaMapMarkerAlt className="w-4 h-4 text-gray-400" />
+                        <span className="truncate">{task.Location}</span>
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                          {task.LocationType}
+                        </span>
+                      </div>
+                      
+                      {task.Availability?.length > 0 && (
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <FaCalendar className="w-4 h-4 text-gray-400" />
+                          <span>{task.Availability[0].Date}</span>
+                        </div>
+                      )}
+                      
+                      {task.Availability?.length > 0 && (
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <FaClock className="w-4 h-4 text-gray-400" />
+                          <span>{task.Availability[0].TimeFrom} - {task.Availability[0].TimeTo}</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Author and Credits */}
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        {task.Author?.Avatar ? (
+                          <img 
+                            src={task.Author.Avatar} 
+                            alt={task.Author.Name || 'Provider'} 
+                            className="w-6 h-6 rounded-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                        ) : null}
+                        <div className={`w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-semibold ${task.Author?.Avatar ? 'hidden' : ''}`}>
+                          {(task.Author?.Name || 'P').charAt(0).toUpperCase()}
+                        </div>
+                        <span className="text-sm text-gray-600">
+                          {task.Author?.Name || 'Provider'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 text-lg font-bold text-green-600">
+                        <FaCoins className="w-4 h-4" />
+                        <span>{task.Credits}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Status and Rating */}
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                      <div className="flex items-center gap-2">
+                        <FaStar className="w-4 h-4 text-yellow-400" />
+                        <span>4.5 (12 reviews)</span>
+                      </div>
+                      {task.Status && (
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          task.Status === 'open' ? 'bg-green-100 text-green-600' :
+                          task.Status === 'in progress' ? 'bg-blue-100 text-blue-600' :
+                          task.Status === 'completed' ? 'bg-gray-100 text-gray-600' :
+                          'bg-yellow-100 text-yellow-600'
+                        }`}>
+                          {task.Status}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               );
             })}
