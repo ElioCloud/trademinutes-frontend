@@ -289,14 +289,10 @@ export default function Services() {
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               How TradeMinutes Works
             </h2>
-            <p className="text-gray-600 mb-6 max-w-md">
-              Get help from trusted community members — no money involved. 
-              Simply post what you need, choose your helper, and swap skills securely.
-            </p>
-            <button className="inline-flex items-center bg-emerald-700 text-white px-5 py-3 rounded-lg hover:bg-emerald-800 transition">
-              Get Started
-              <span className="ml-2">↗</span>
-            </button>
+                          <p className="text-gray-600 mb-6 max-w-md">
+                Get help from trusted community members — no money involved. 
+                Simply post what you need, choose your helper, and swap skills securely.
+              </p>
           </div>
 
           {/* Right icons list */}
