@@ -220,22 +220,10 @@ export default function TaskListPage() {
                     
 
                     
-                    {/* Status and Rating */}
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <div className="flex items-center gap-2">
-                        <FaStar className="w-4 h-4 text-yellow-400" />
-                        <span>4.5 (12 reviews)</span>
-                      </div>
-                      {task.Status && (
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          task.Status === 'open' ? 'bg-green-100 text-green-600' :
-                          task.Status === 'in progress' ? 'bg-blue-100 text-blue-600' :
-                          task.Status === 'completed' ? 'bg-gray-100 text-gray-600' :
-                          'bg-yellow-100 text-yellow-600'
-                        }`}>
-                          {task.Status}
-                        </span>
-                      )}
+                    {/* Rating */}
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <FaStar className="w-4 h-4 text-yellow-400" />
+                      <span>4.5 (12 reviews)</span>
                     </div>
                   </div>
                 </div>
