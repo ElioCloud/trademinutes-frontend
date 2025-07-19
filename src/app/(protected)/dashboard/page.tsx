@@ -130,10 +130,12 @@ type Service = {
   Author?: {
     Name?: string;
     ProfilePictureURL?: string;
+    Avatar?: string;
   };
   author?: {
     name?: string;
     profilePictureURL?: string;
+    avatar?: string;
   };
 };
 
@@ -429,7 +431,7 @@ export default function ProfileDashboardPage() {
               reviewCount: service.reviewCount || service.ReviewCount || service.reviews || service.Reviews || Math.floor(Math.random() * 20) + 5,
               Author: service.Author || service.author || {
                 Name: profile?.Name || 'Provider',
-                ProfilePictureURL: profile?.ProfilePictureURL
+                ProfilePictureURL: service.Author?.Avatar || service.author?.avatar || profile?.ProfilePictureURL
               }
             }))
           });
@@ -852,9 +854,9 @@ export default function ProfileDashboardPage() {
                           </h4>
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
-                              {service.Author?.ProfilePictureURL || service.author?.profilePictureURL ? (
+                              {service.Author?.Avatar || service.Author?.ProfilePictureURL || service.author?.avatar || service.author?.profilePictureURL ? (
                                 <img 
-                                  src={service.Author?.ProfilePictureURL || service.author?.profilePictureURL} 
+                                  src={service.Author?.Avatar || service.Author?.ProfilePictureURL || service.author?.avatar || service.author?.profilePictureURL} 
                                   alt={service.Author?.Name || service.author?.name || 'Provider'} 
                                   className="w-6 h-6 rounded-full object-cover"
                                   onError={(e) => {
@@ -863,7 +865,7 @@ export default function ProfileDashboardPage() {
                                   }}
                                 />
                               ) : null}
-                              <div className={`w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-semibold ${(service.Author?.ProfilePictureURL || service.author?.profilePictureURL) ? 'hidden' : ''}`}>
+                              <div className={`w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-semibold ${(service.Author?.Avatar || service.Author?.ProfilePictureURL || service.author?.avatar || service.author?.profilePictureURL) ? 'hidden' : ''}`}>
                                 {(service.Author?.Name || service.author?.name || profile?.Name || 'P').charAt(0).toUpperCase()}
                               </div>
                               <span className="text-sm text-gray-600">
