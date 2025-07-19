@@ -37,6 +37,7 @@ interface Task {
   Category?: string;
   Status?: string;
   Author?: Author;
+  Images?: string[]; // Add Images field for uploaded images
 }
 
 export default function TaskListPage() {
@@ -215,7 +216,16 @@ export default function TaskListPage() {
                   console.log('Clicking task:', task.id, task.Title);
                   router.push(`/tasks/view/${String(task.id)}`);
                 }}>
-                  <div className={`h-32 bg-gradient-to-br ${gradients[idx % gradients.length]} relative`}>
+                  <div className="h-32 relative">
+                    {task.Images && task.Images.length > 0 ? (
+                      <img
+                        src={task.Images[0]}
+                        alt={task.Title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className={`w-full h-full bg-gradient-to-br ${gradients[idx % gradients.length]}`}></div>
+                    )}
                     <button
                       onClick={e => {
                         e.stopPropagation();
