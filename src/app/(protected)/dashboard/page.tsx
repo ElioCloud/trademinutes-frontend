@@ -144,6 +144,7 @@ export default function ProfileDashboardPage() {
     rating?: number;
     completedServices?: number;
     totalEarnings?: number;
+    ProfilePictureURL?: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -545,6 +546,28 @@ export default function ProfileDashboardPage() {
           {/* Main Content */}
           <div className="flex-1 p-6 overflow-y-auto">
 
+            {/* User Greeting Section */}
+            <div className="mb-8">
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <Image
+                    src={profile?.ProfilePictureURL || "/categories-banner.png"}
+                    alt="Profile"
+                    width={64}
+                    height={64}
+                    className="rounded-full border-4 border-white shadow-lg object-cover"
+                  />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    Welcome back, {profile?.Name || 'User'}!
+                  </h1>
+                  <p className="text-gray-600">
+                    You have {profile?.Credits || 0} credits available
+                  </p>
+                </div>
+              </div>
+            </div>
 
             {/* Performance Metrics */}
             <div className="mb-8">
