@@ -1,0 +1,1 @@
+self.__REACT_LOADABLE_MANIFEST="{\"app/(protected)/dashboard/page.tsx -> @/components/OpenStreetMap\":{\"id\":\"app/(protected)/dashboard/page.tsx -> @/components/OpenStreetMap\",\"files\":[\"static/css/_app-pages-browser_src_components_OpenStreetMap_tsx.css\",\"static/chunks/_app-pages-browser_src_components_OpenStreetMap_tsx.js\"]}}"
