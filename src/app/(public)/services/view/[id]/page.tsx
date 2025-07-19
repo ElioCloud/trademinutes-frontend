@@ -86,7 +86,6 @@ export default function ServiceViewPage() {
   const [selectedPackage, setSelectedPackage] = useState<'Basic' | 'Standard' | 'Premium'>('Basic');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [likes, setLikes] = useState(315);
 
   // Mock packages data
   const packages: Record<string, Package> = {
@@ -226,21 +225,6 @@ export default function ServiceViewPage() {
       console.log("Params.id is falsy:", params.id);
     }
   }, [params.id]);
-
-  const handleLike = () => {
-    setLikes(prev => prev + 1);
-  };
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: service?.Title || 'Service',
-        url: window.location.href
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-    }
-  };
 
   const handleOrder = () => {
     // Navigate to booking page
@@ -535,26 +519,6 @@ export default function ServiceViewPage() {
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-8">
-              {/* Action Icons */}
-              <div className="flex justify-end space-x-4 mb-4">
-                <button
-                  onClick={handleLike}
-                  className="flex items-center space-x-2 text-gray-600 hover:text-red-500"
-                >
-                  <FaHeart className="w-5 h-5" />
-                  <span>{likes}</span>
-                </button>
-                <button
-                  onClick={handleShare}
-                  className="text-gray-600 hover:text-gray-800"
-                >
-                  <FaShare className="w-5 h-5" />
-                </button>
-                <button className="text-gray-600 hover:text-gray-800">
-                  <FaEllipsisH className="w-5 h-5" />
-                </button>
-              </div>
-
               {/* Package Selection */}
               <div className="bg-white rounded-xl p-6 shadow-sm">
                 <div className="flex space-x-1 mb-6">
