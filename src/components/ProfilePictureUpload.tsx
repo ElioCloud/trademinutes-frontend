@@ -95,6 +95,14 @@ export default function ProfilePictureUpload({
       const data = await response.json();
       onImageUpload(data.imageUrl);
       
+      // Trigger a global refresh to update all components that display the profile picture
+      window.dispatchEvent(new CustomEvent('profilePictureUpdated', {
+        detail: { imageUrl: data.imageUrl }
+      }));
+      
+      // Show success message
+      console.log("✅ Profile picture updated successfully and will be reflected across all your listings!");
+      
     } catch (err) {
       console.error('Upload error:', err);
       setError('Failed to upload image. Please try again.');

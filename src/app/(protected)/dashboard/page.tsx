@@ -609,6 +609,16 @@ export default function ProfileDashboardPage() {
       ]
     });
 
+    // Listen for profile picture updates and refresh data
+    const handleProfilePictureUpdate = () => {
+      console.log("🔄 Profile picture updated - refreshing dashboard data");
+      // Refresh profile and services to get updated profile pictures
+      fetchProfile();
+      fetchServices();
+    };
+
+    window.addEventListener('profilePictureUpdated', handleProfilePictureUpdate);
+
     // Set up real-time updates
     const updateInterval = setInterval(() => {
       if (isLive) {
@@ -621,7 +631,10 @@ export default function ProfileDashboardPage() {
       }
     }, 30000);
 
-    return () => clearInterval(updateInterval);
+    return () => {
+      clearInterval(updateInterval);
+      window.removeEventListener('profilePictureUpdated', handleProfilePictureUpdate);
+    };
   }, [router, isLive]);
 
   useEffect(() => {
