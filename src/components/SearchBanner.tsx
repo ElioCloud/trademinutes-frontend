@@ -43,6 +43,7 @@ export default function SearchBanner({ query, category, resultCount }: SearchBan
             {/* Shapes inside banner */}
             <div className="absolute top-0 left-0 w-32 h-32 bg-purple-200 rounded-br-full z-0"></div>
             <div className="absolute bottom-0 right-0 w-48 h-48 bg-lavender-300 rounded-tl-full z-0"></div>
+            <div className="absolute bottom-4 right-4 w-6 h-6 bg-purple-400 rounded-full z-0"></div>
         </section>
     );
 } 
