@@ -8,6 +8,7 @@ import ProtectedLayout from "@/components/Layout/ProtectedLayout";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaArrowLeft, FaMapMarkerAlt, FaClock, FaCoins, FaStar, FaHeart, FaCalendar, FaUser, FaChevronDown, FaChevronUp, FaEnvelope, FaTimes, FaChevronLeft, FaChevronRight, FaExpand } from "react-icons/fa";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 interface Availability {
   date: string;
@@ -118,7 +119,19 @@ export default function ViewTaskPage() {
         });
 
         const json = await res.json();
-        setTask(normalizeTask(json.data || json));
+        console.log("=== TASK VIEW DEBUG ===");
+        console.log("Raw API response:", json);
+        console.log("Task data:", json.data || json);
+        console.log("Images field:", (json.data || json).Images);
+        console.log("Images type:", typeof (json.data || json).Images);
+        console.log("Images length:", (json.data || json).Images?.length);
+        
+        const normalizedTask = normalizeTask(json.data || json);
+        console.log("Normalized task:", normalizedTask);
+        console.log("Normalized Images:", normalizedTask.Images);
+        console.log("Normalized Images length:", normalizedTask.Images?.length);
+        
+        setTask(normalizedTask);
       } catch (err) {
         console.error("Error fetching task:", err);
       } finally {
@@ -549,7 +562,7 @@ export default function ViewTaskPage() {
         <div className="max-w-7xl mx-auto px-6 py-8">
           {loading ? (
             <div className="flex items-center justify-center h-64">
-              <div className="text-gray-500">Loading task details...</div>
+              <LoadingSpinner size="md" text="Loading task details..." />
             </div>
           ) : !task ? (
             <div className="flex items-center justify-center h-64">
@@ -571,26 +584,11 @@ export default function ViewTaskPage() {
                           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
-                        <div className="absolute top-4 right-4">
-                          <button className="p-2 bg-white/20 hover:bg-white/30 rounded-full transition">
-                            <FaHeart className="w-5 h-5 text-white" />
-                          </button>
-                        </div>
                         <div className="absolute bottom-6 left-6 text-white">
                           <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-2">
                             {task.type || 'SERVICE'}
                           </span>
                           <h1 className="text-3xl font-bold mb-2">{task.title}</h1>
-                          <div className="flex items-center gap-4 text-sm">
-                            <div className="flex items-center gap-1">
-                              <FaCoins className="w-4 h-4" />
-                              <span>{task.credits} credits</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <FaStar className="w-4 h-4 text-yellow-400" />
-                              <span>4.5 (12 reviews)</span>
-                            </div>
-                          </div>
                         </div>
                         <div className="absolute top-4 left-4">
                           <button className="p-2 bg-white/20 hover:bg-white/30 rounded-full transition">
@@ -628,26 +626,11 @@ export default function ViewTaskPage() {
                     /* Fallback gradient when no images */
                     <div className="bg-gradient-to-br from-blue-400 to-blue-600 h-64 rounded-2xl relative">
                       <div className="absolute inset-0 bg-black/20 rounded-2xl"></div>
-                      <div className="absolute top-4 right-4">
-                        <button className="p-2 bg-white/20 hover:bg-white/30 rounded-full transition">
-                          <FaHeart className="w-5 h-5 text-white" />
-                        </button>
-                      </div>
                       <div className="absolute bottom-6 left-6 text-white">
                         <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-2">
                           {task.type || 'SERVICE'}
                         </span>
                         <h1 className="text-3xl font-bold mb-2">{task.title}</h1>
-                        <div className="flex items-center gap-4 text-sm">
-                          <div className="flex items-center gap-1">
-                            <FaCoins className="w-4 h-4" />
-                            <span>{task.credits} credits</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <FaStar className="w-4 h-4 text-yellow-400" />
-                            <span>4.5 (12 reviews)</span>
-                          </div>
-                        </div>
                       </div>
                     </div>
                   )}

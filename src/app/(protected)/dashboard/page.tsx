@@ -46,6 +46,7 @@ import {
   FaPhone,
   FaGlobe
 } from "react-icons/fa";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 const Map = dynamic(() => import("@/components/OpenStreetMap"), { ssr: false });
 
@@ -708,10 +709,7 @@ export default function ProfileDashboardPage() {
     return (
       <ProtectedLayout>
         <div className="flex h-screen bg-white items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-[#22c55e] border-solid"></div>
-            <span className="text-lg font-semibold text-[#1a1446]">Loading dashboard...</span>
-          </div>
+          <LoadingSpinner size="lg" text="Loading dashboard..." />
         </div>
       </ProtectedLayout>
     );
@@ -869,9 +867,6 @@ export default function ProfileDashboardPage() {
                             <div className={`w-full h-full bg-gradient-to-br ${gradients[index % gradients.length]}`}></div>
                           )}
                           <div className="absolute inset-0 bg-black/20"></div>
-                          <button className="absolute top-3 right-3 text-white hover:text-red-400 transition-colors bg-black/20 rounded-full p-2 hover:bg-black/40">
-                            <FaHeart className="w-5 h-5" />
-                          </button>
                         </div>
                         <div className="p-4">
                           <span className={`inline-block px-2 py-1 ${colors[index % colors.length].bg} ${colors[index % colors.length].text} text-xs font-semibold rounded mb-2`}>
@@ -922,9 +917,6 @@ export default function ProfileDashboardPage() {
                       <div className="h-32 relative">
                         <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600"></div>
                         <div className="absolute inset-0 bg-black/20"></div>
-                        <button className="absolute top-3 right-3 text-white hover:text-red-400 transition-colors bg-black/20 rounded-full p-2 hover:bg-black/40">
-                          <FaHeart className="w-5 h-5" />
-                        </button>
                       </div>
                       <div className="p-4">
                         <span className="inline-block px-2 py-1 bg-blue-100 text-blue-600 text-xs font-semibold rounded mb-2">TECHNOLOGY</span>
@@ -948,9 +940,6 @@ export default function ProfileDashboardPage() {
                       <div className="h-32 relative">
                         <div className="w-full h-full bg-gradient-to-br from-purple-400 to-purple-600"></div>
                         <div className="absolute inset-0 bg-black/20"></div>
-                        <button className="absolute top-3 right-3 text-white hover:text-red-400 transition-colors bg-black/20 rounded-full p-2 hover:bg-black/40">
-                          <FaHeart className="w-5 h-5" />
-                        </button>
                       </div>
                       <div className="p-4">
                         <span className="inline-block px-2 py-1 bg-purple-100 text-purple-600 text-xs font-semibold rounded mb-2">DESIGN</span>
@@ -974,9 +963,6 @@ export default function ProfileDashboardPage() {
                       <div className="h-32 relative">
                         <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600"></div>
                         <div className="absolute inset-0 bg-black/20"></div>
-                        <button className="absolute top-3 right-3 text-white hover:text-red-400 transition-colors bg-black/20 rounded-full p-2 hover:bg-black/40">
-                          <FaHeart className="w-5 h-5" />
-                        </button>
                       </div>
                       <div className="p-4">
                         <span className="inline-block px-2 py-1 bg-green-100 text-green-600 text-xs font-semibold rounded mb-2">WRITING</span>

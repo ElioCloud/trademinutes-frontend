@@ -10,6 +10,7 @@ import { FiMail, FiLock, FiArrowRight, FiEye, FiEyeOff } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { FaFacebookF, FaApple, FaGithub, FaCheckCircle } from 'react-icons/fa';
 import { ImSpinner2 } from 'react-icons/im';
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -33,7 +34,7 @@ export default function LoginPage() {
   if (checkingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-[#22c55e] border-solid"></div>
+        <LoadingSpinner size="lg" text="Checking authentication..." />
       </div>
     );
   }
@@ -103,10 +104,7 @@ export default function LoginPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-4 bg-white/80 rounded-xl px-8 py-8 shadow-xl min-w-[260px]">
             {!loginSuccess ? (
-              <>
-                <ImSpinner2 className="animate-spin text-4xl text-[#22c55e]" />
-                <span className="text-lg font-semibold text-[#1a1446]">Logging in...</span>
-              </>
+              <LoadingSpinner size="lg" text="Logging in..." />
             ) : (
               <>
                 <FaCheckCircle className="text-5xl text-[#22c55e] animate-pop" />

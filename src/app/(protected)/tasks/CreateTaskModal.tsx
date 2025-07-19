@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { FaUpload, FaTimes, FaImage } from "react-icons/fa";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -516,9 +517,16 @@ export default function CreateTaskModal({
               uploading 
                 ? 'bg-gray-400 cursor-not-allowed' 
                 : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl'
-            } text-white`}
+            } text-white flex items-center justify-center gap-2`}
           >
-            {uploading ? 'Creating Listing...' : 'Create Listing'}
+            {uploading ? (
+              <>
+                <LoadingSpinner size="sm" text="" />
+                Creating Listing...
+              </>
+            ) : (
+              'Create Listing'
+            )}
           </button>
         </form>
         </div>

@@ -9,6 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { FaHeart, FaStar, FaTrash, FaCalendar, FaMapMarkerAlt, FaClock, FaCoins, FaPlus } from "react-icons/fa";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 interface Availability {
   Date: string;
@@ -205,10 +206,7 @@ export default function TaskListPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading your listings...</p>
-            </div>
+            <LoadingSpinner size="lg" text="Loading your listings..." />
           </div>
         ) : tasks.length === 0 ? (
           <div className="text-center py-12">
