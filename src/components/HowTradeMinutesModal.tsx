@@ -80,13 +80,13 @@ export default function HowTradeMinutesModal({ isOpen, onClose }: HowTradeMinute
 
   return (
     <div className="fixed inset-0 bg-white/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+      <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">How TradeMinutes Works</h2>
+        <div className="flex items-center justify-between p-6 border-b border-white/30">
+          <h2 className="text-2xl font-bold text-white">How TradeMinutes Works</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 hover:bg-white/20 rounded-full transition-colors text-white"
           >
             <FiX className="w-6 h-6" />
           </button>
@@ -114,14 +114,14 @@ export default function HowTradeMinutesModal({ isOpen, onClose }: HowTradeMinute
               {/* Text Content */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm font-medium">
+                  <span className="bg-white/20 text-white px-3 py-1 rounded-full text-sm font-medium border border-white/30">
                     Step {slides[currentSlide].id}
                   </span>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900">
+                <h3 className="text-2xl font-bold text-white">
                   {slides[currentSlide].title}
                 </h3>
-                <p className="text-gray-600 text-lg leading-relaxed">
+                <p className="text-white/90 text-lg leading-relaxed">
                   {slides[currentSlide].description}
                 </p>
               </div>
@@ -144,7 +144,7 @@ export default function HowTradeMinutesModal({ isOpen, onClose }: HowTradeMinute
         </div>
 
         {/* Footer with Dots */}
-        <div className="p-6 border-t border-gray-200">
+        <div className="p-6 border-t border-white/30">
           <div className="flex items-center justify-between">
             <div className="flex gap-2">
               {slides.map((_, index) => (
@@ -152,12 +152,12 @@ export default function HowTradeMinutesModal({ isOpen, onClose }: HowTradeMinute
                   key={index}
                   onClick={() => setCurrentSlide(index)}
                   className={`w-3 h-3 rounded-full transition-colors ${
-                    index === currentSlide ? 'bg-emerald-600' : 'bg-gray-300'
+                    index === currentSlide ? 'bg-white' : 'bg-white/50'
                   }`}
                 />
               ))}
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-white/80">
               {currentSlide + 1} of {slides.length}
             </div>
           </div>
