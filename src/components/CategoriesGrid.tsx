@@ -61,7 +61,7 @@ export default function CategoriesGrid() {
         <div className="mb-12">
           <div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Browse talent by category
+              Browse services by category
             </h2>
             <p className="text-gray-600 text-lg">
               Get some Inspirations from 1800+ skills
