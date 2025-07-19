@@ -416,10 +416,12 @@ export default function ServiceViewPage() {
                   <div className="flex items-center space-x-2 mt-1">
                     <div className="flex items-center">
                       {[...Array(5)].map((_, i) => (
-                        <FaStar key={i} className={`w-4 h-4 ${i < Math.floor(rating) ? 'text-yellow-400' : 'text-gray-300'}`} />
+                        <FaStar key={i} className={`w-4 h-4 ${i < Math.floor(service?.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`} />
                       ))}
                     </div>
-                    <span className="text-sm text-gray-600">{rating} ({reviewCount} reviews)</span>
+                    <span className="text-sm text-gray-600">
+                      {service?.rating || 0} ({service?.reviewCount || 0} reviews)
+                    </span>
                   </div>
                 </div>
               </div>
