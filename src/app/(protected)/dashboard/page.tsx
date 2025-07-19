@@ -116,6 +116,8 @@ function SkillTagInput({
 
 // Define Service type for marketplace stats
 type Service = {
+  id?: string;
+  ID?: string;
   Title?: string;
   title?: string;
   Price?: number;
@@ -224,6 +226,14 @@ export default function ProfileDashboardPage() {
   // ────────────────────────────────────────────────────────────────────────────
 
   const router = useRouter();
+
+  // Handle service card click to navigate to task view
+  const handleServiceClick = (service: Service) => {
+    const serviceId = service.id || service.ID;
+    if (serviceId) {
+      router.push(`/tasks/view/${serviceId}`);
+    }
+  };
 
   // --- Analytics state ---
   const [taskStats, setTaskStats] = useState<{ total: number; credits: number; recent: Task[] }>({ total: 0, credits: 0, recent: [] });
@@ -426,6 +436,8 @@ export default function ProfileDashboardPage() {
             total: services.length,
             earnings: services.reduce((sum: number, service: any) => sum + (service.Credits || 0), 0),
             recent: services.slice(0, 3).map((service: any) => ({
+              id: service.ID || service.id,
+              ID: service.ID || service.id,
               Title: service.Title || service.title,
               Price: service.Credits || service.credits || service.Price || service.price,
               Category: service.Category || service.category || 'General',
@@ -855,7 +867,11 @@ export default function ProfileDashboardPage() {
                     const categories = ['TECHNOLOGY', 'DESIGN', 'WRITING'];
                     
                     return (
-                      <div key={index} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1">
+                      <div 
+                        key={index} 
+                        className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1"
+                        onClick={() => handleServiceClick(service)}
+                      >
                         <div className="h-32 relative">
                           {service.Images && service.Images.length > 0 ? (
                             <img
@@ -913,7 +929,10 @@ export default function ProfileDashboardPage() {
                 ) : (
                   // Fallback services when no real data
                   <>
-                    <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1">
+                    <div 
+                      className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1"
+                      onClick={() => router.push('/tasks/explore')}
+                    >
                       <div className="h-32 relative">
                         <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600"></div>
                         <div className="absolute inset-0 bg-black/20"></div>
@@ -936,7 +955,10 @@ export default function ProfileDashboardPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1">
+                    <div 
+                      className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1"
+                      onClick={() => router.push('/tasks/explore')}
+                    >
                       <div className="h-32 relative">
                         <div className="w-full h-full bg-gradient-to-br from-purple-400 to-purple-600"></div>
                         <div className="absolute inset-0 bg-black/20"></div>
@@ -959,7 +981,10 @@ export default function ProfileDashboardPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1">
+                    <div 
+                      className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1"
+                      onClick={() => router.push('/tasks/explore')}
+                    >
                       <div className="h-32 relative">
                         <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600"></div>
                         <div className="absolute inset-0 bg-black/20"></div>
