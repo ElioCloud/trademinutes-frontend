@@ -681,12 +681,12 @@ export default function CreateTaskModal({
         </div>
         
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(95vh-180px)]">
+        <div className="p-6 overflow-y-auto max-h-[calc(95vh-220px)]">
           {currentStep === 1 ? renderStep1() : renderStep2()}
         </div>
 
         {/* Footer with Navigation */}
-        <div className="border-t border-gray-200 p-4 bg-gray-50">
+        <div className="border-t border-gray-200 p-8 bg-gray-50">
           <div className="flex items-center justify-between">
             {currentStep > 1 ? (
               <button
