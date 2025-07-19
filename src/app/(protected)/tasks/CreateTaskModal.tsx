@@ -281,7 +281,7 @@ export default function CreateTaskModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
       <div className="bg-white max-w-3xl w-full rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] relative">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-100 via-pink-100 to-purple-200 text-purple-800 p-6">
+        <div className="bg-purple-600 text-white p-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold">Create New Listing</h2>
