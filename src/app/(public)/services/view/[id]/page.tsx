@@ -59,18 +59,21 @@ type Package = {
 };
 
 type Review = {
-  id: string;
-  reviewer: {
-    name: string;
-    avatar: string;
-    location: string;
+  id?: string;
+  _id?: string;
+  reviewer?: {
+    name?: string;
+    avatar?: string;
+    location?: string;
   };
-  rating: number;
-  text: string;
-  date: string;
-  price: string;
-  duration: string;
-  hasFiles: boolean;
+  rating?: number;
+  text?: string;
+  comment?: string;
+  date?: string;
+  createdAt?: number;
+  price?: string;
+  duration?: string;
+  hasFiles?: boolean;
 };
 
 export default function ServiceViewPage() {
@@ -196,7 +199,11 @@ export default function ServiceViewPage() {
         console.log("Data keys:", Object.keys(data || {}));
         
         setService(data);
-        setReviews(mockReviews); // In real app, fetch from API
+        
+        // Fetch real reviews for this service
+        if (data.Author?.ID || data.Author?.id) {
+          fetchReviews(data.Author.ID || data.Author.id);
+        }
         console.log("=== SERVICE VIEW DEBUG END ===");
       } catch (err) {
         console.error("=== SERVICE VIEW ERROR ===");
@@ -242,6 +249,26 @@ export default function ServiceViewPage() {
   const handleContact = () => {
     // Navigate to messages or open contact modal
     router.push(`/messages?user=${service?.Author?.Name}`);
+  };
+
+  const fetchReviews = async (authorId: string) => {
+    try {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086';
+      const response = await fetch(`${API_BASE_URL}/api/reviews?revieweeId=${authorId}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        const reviewsData = Array.isArray(data) ? data : data.data || [];
+        setReviews(reviewsData);
+        console.log("Fetched reviews:", reviewsData);
+      } else {
+        console.log("No reviews found or error fetching reviews");
+        setReviews([]);
+      }
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      setReviews([]);
+    }
   };
 
   if (loading) {
@@ -442,7 +469,7 @@ export default function ServiceViewPage() {
             {/* Reviews Section */}
             <div className="bg-white rounded-xl p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">What people loved about this freelancer</h2>
+                <h2 className="text-xl font-semibold text-gray-900">What people loved</h2>
                 <div className="flex items-center space-x-4">
                   <span className="text-sm text-gray-600 cursor-pointer hover:text-green-600">See all reviews</span>
                   <div className="flex space-x-2">
@@ -452,39 +479,40 @@ export default function ServiceViewPage() {
                 </div>
               </div>
               
-              {mockReviews.map((review) => (
-                <div key={review.id} className="border-b border-gray-100 pb-6 mb-6 last:border-b-0">
-                  <div className="flex items-start space-x-4">
-                    <Image
-                      src={review.reviewer.avatar}
-                      alt={review.reviewer.name}
-                      width={40}
-                      height={40}
-                      className="rounded-full"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <span className="font-semibold text-gray-900">{review.reviewer.name}</span>
-                        <span className="text-sm text-gray-500">🇸🇪 {review.reviewer.location}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 mb-2">
-                        {[...Array(5)].map((_, i) => (
-                          <FaStar key={i} className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`} />
-                        ))}
-                        <span className="text-sm text-gray-500">{review.date}</span>
-                      </div>
-                      <p className="text-gray-700 mb-2">{review.text}</p>
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <span>Price: {review.price}</span>
-                        <span>Duration: {review.duration}</span>
-                        {review.hasFiles && (
-                          <span className="text-green-600">✓ Has files</span>
-                        )}
+              {reviews.length > 0 ? (
+                reviews.map((review) => (
+                  <div key={review.id || review._id} className="border-b border-gray-100 pb-6 mb-6 last:border-b-0">
+                    <div className="flex items-start space-x-4">
+                      <Image
+                        src={review.reviewer?.avatar || '/api/placeholder/40/40'}
+                        alt={review.reviewer?.name || 'Reviewer'}
+                        width={40}
+                        height={40}
+                        className="rounded-full"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <span className="font-semibold text-gray-900">{review.reviewer?.name || 'Anonymous'}</span>
+                          <span className="text-sm text-gray-500">{review.reviewer?.location || 'Unknown location'}</span>
+                        </div>
+                        <div className="flex items-center space-x-2 mb-2">
+                          {[...Array(5)].map((_, i) => (
+                            <FaStar key={i} className={`w-4 h-4 ${i < (review.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`} />
+                          ))}
+                          <span className="text-sm text-gray-500">
+                            {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'Recently'}
+                          </span>
+                        </div>
+                        <p className="text-gray-700 mb-2">{review.comment || review.text || 'No comment provided'}</p>
                       </div>
                     </div>
                   </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No reviews yet</p>
                 </div>
-              ))}
+              )}
             </div>
 
 
