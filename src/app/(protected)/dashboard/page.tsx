@@ -262,8 +262,8 @@ export default function ProfileDashboardPage() {
         if (parts.length !== 3) {
           return false;
         }
-        // Check if parts are base64 encoded
-        return parts.every(part => /^[A-Za-z0-9+/=]+$/.test(part));
+        // Check if parts are base64 encoded (including URL-safe characters)
+        return parts.every(part => /^[A-Za-z0-9+/=_-]+$/.test(part));
       } catch {
         return false;
       }

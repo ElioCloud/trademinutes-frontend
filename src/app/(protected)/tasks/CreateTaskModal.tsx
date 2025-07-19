@@ -258,6 +258,12 @@ export default function CreateTaskModal({
         console.log(key, value);
       }
 
+      console.log('Sending request to:', `${API_BASE_URL}/api/tasks/create`);
+      console.log('Request headers:', {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data' // Browser will set this automatically
+      });
+
       const res = await fetch(`${API_BASE_URL}/api/tasks/create`, {
         method: "POST",
         headers: {
