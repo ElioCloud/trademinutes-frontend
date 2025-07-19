@@ -539,7 +539,51 @@ export default function ProfileDashboardPage() {
               </div>
             </div>
 
-
+            {/* Quick Actions */}
+            <div className="mb-8">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <button className="flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors">
+                  <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <FaPlus className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium text-gray-900">Create Service</p>
+                    <p className="text-sm text-gray-600">List your skills</p>
+                  </div>
+                </button>
+                
+                <button className="flex items-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-xl transition-colors">
+                  <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                    <FaCalendar className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium text-gray-900">Book Service</p>
+                    <p className="text-sm text-gray-600">Find providers</p>
+                  </div>
+                </button>
+                
+                <button className="flex items-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-xl transition-colors">
+                  <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                    <FaEnvelope className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium text-gray-900">Messages</p>
+                    <p className="text-sm text-gray-600">View conversations</p>
+                  </div>
+                </button>
+                
+                <button className="flex items-center gap-3 p-4 bg-orange-50 hover:bg-orange-100 rounded-xl transition-colors">
+                  <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+                    <FaStar className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium text-gray-900">Reviews</p>
+                    <p className="text-sm text-gray-600">Rate services</p>
+                  </div>
+                </button>
+              </div>
+            </div>
 
             {/* Recent Services */}
             <div className="mb-8">
@@ -737,55 +781,7 @@ export default function ProfileDashboardPage() {
             </div>
           </div>
 
-          {/* Quick Actions Section */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
-              <FaBolt className="w-4 h-4 text-gray-400" />
-            </div>
-            
-            <div className="space-y-3">
-              <button className="w-full flex items-center gap-3 p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
-                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <FaPlus className="w-4 h-4 text-white" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium text-gray-900">Create Service</p>
-                  <p className="text-xs text-gray-600">List your skills</p>
-                </div>
-              </button>
-              
-              <button className="w-full flex items-center gap-3 p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
-                <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                  <FaCalendar className="w-4 h-4 text-white" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium text-gray-900">Book Service</p>
-                  <p className="text-xs text-gray-600">Find providers</p>
-                </div>
-              </button>
-              
-              <button className="w-full flex items-center gap-3 p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
-                <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
-                  <FaEnvelope className="w-4 h-4 text-white" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium text-gray-900">Messages</p>
-                  <p className="text-xs text-gray-600">View conversations</p>
-                </div>
-              </button>
-              
-              <button className="w-full flex items-center gap-3 p-3 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors">
-                <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                  <FaStar className="w-4 h-4 text-white" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium text-gray-900">Reviews</p>
-                  <p className="text-xs text-gray-600">Rate services</p>
-                </div>
-              </button>
-            </div>
-          </div>
+
 
           {/* Recent Activity Section */}
           <div className="mb-8">
