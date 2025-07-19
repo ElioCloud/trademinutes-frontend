@@ -88,15 +88,26 @@ function SearchResultsPage() {
           const services = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
           console.log('Services array:', services);
 
-          // Filter services based on query and category
+          // Filter services based on query and category with improved search logic
           const filteredServices = services.filter((service: Service) => {
             const title = (service.Title || service.title || '').toLowerCase();
             const description = (service.Description || service.description || '').toLowerCase();
             const serviceCategory = (service.Category || service.category || '').toLowerCase();
+            const authorName = (service.Author?.Name || service.Author?.name || service.author?.name || '').toLowerCase();
             const searchQuery = query.toLowerCase();
             const categoryFilter = category.toLowerCase();
 
-            const matchesQuery = title.includes(searchQuery) || description.includes(searchQuery);
+            // Split search query into words for better matching
+            const searchWords = searchQuery.split(' ').filter(word => word.length > 0);
+            
+            // Check if any search word matches title, description, category, or author
+            const matchesQuery = searchWords.some(word => 
+              title.includes(word) || 
+              description.includes(word) || 
+              serviceCategory.includes(word) ||
+              authorName.includes(word)
+            ) || title.includes(searchQuery) || description.includes(searchQuery);
+            
             const matchesCategory = !category || serviceCategory.includes(categoryFilter);
 
             return matchesQuery && matchesCategory;
@@ -105,14 +116,15 @@ function SearchResultsPage() {
           console.log('Filtered services:', filteredServices);
           setResults(filteredServices);
         } else {
-          // For public search, use mock data that matches the search query
+          // For public search, use comprehensive mock data
           const mockServices: Service[] = [
+            // Tech & Digital Skills
             {
               ID: '1',
               Title: 'Python Programming Tutoring',
               Description: 'Expert Python programming help for beginners and intermediate learners. Covering data structures, algorithms, and web development.',
               Credits: 50,
-              Category: 'Academic Help',
+              Category: 'Tech & Digital Skills',
               Location: 'Online',
               Author: { Name: 'Sarah Johnson', Avatar: 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg' },
               Images: ['https://images.pexels.com/photos/267582/pexels-photo-267582.jpeg'],
@@ -122,8 +134,8 @@ function SearchResultsPage() {
             },
             {
               ID: '2',
-              Title: 'Web Development with Python',
-              Description: 'Learn Django and Flask web development. Build real-world projects and understand modern web technologies.',
+              Title: 'Web Development with React',
+              Description: 'Learn modern web development with React.js. Build responsive, interactive user interfaces and single-page applications.',
               Credits: 75,
               Category: 'Tech & Digital Skills',
               Location: 'Online',
@@ -135,9 +147,9 @@ function SearchResultsPage() {
             },
             {
               ID: '3',
-              Title: 'Data Science with Python',
-              Description: 'Master data analysis, machine learning, and visualization using Python libraries like pandas, numpy, and matplotlib.',
-              Credits: 100,
+              Title: 'JavaScript Fundamentals',
+              Description: 'Master JavaScript programming from basics to advanced concepts. Learn ES6+, DOM manipulation, and modern JS frameworks.',
+              Credits: 60,
               Category: 'Tech & Digital Skills',
               Location: 'Online',
               Author: { Name: 'Emma Davis', Avatar: 'https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg' },
@@ -148,9 +160,9 @@ function SearchResultsPage() {
             },
             {
               ID: '4',
-              Title: 'Python for Automation',
-              Description: 'Learn to automate repetitive tasks, web scraping, and file processing with Python scripts.',
-              Credits: 60,
+              Title: 'Mobile App Development',
+              Description: 'Create iOS and Android apps using React Native. Learn cross-platform development and app store deployment.',
+              Credits: 90,
               Category: 'Tech & Digital Skills',
               Location: 'Online',
               Author: { Name: 'Alex Rodriguez', Avatar: 'https://images.pexels.com/photos/8159846/pexels-photo-8159846.jpeg' },
@@ -161,28 +173,241 @@ function SearchResultsPage() {
             },
             {
               ID: '5',
-              Title: 'Python for Beginners',
-              Description: 'Start your programming journey with Python. Learn basics, syntax, and build your first projects.',
-              Credits: 40,
-              Category: 'Academic Help',
+              Title: 'Database Design & SQL',
+              Description: 'Learn database design principles, SQL queries, and database management systems like MySQL and PostgreSQL.',
+              Credits: 55,
+              Category: 'Tech & Digital Skills',
               Location: 'Online',
               Author: { Name: 'Lisa Wang', Avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg' },
               Images: ['https://images.pexels.com/photos/317157/pexels-photo-317157.jpeg'],
               rating: 4.5,
               reviewCount: 12,
               CreatedAt: Date.now() / 1000
+            },
+            // Academic Help
+            {
+              ID: '6',
+              Title: 'Mathematics Tutoring',
+              Description: 'Expert math tutoring for all levels - algebra, calculus, statistics, and advanced mathematics.',
+              Credits: 45,
+              Category: 'Academic Help',
+              Location: 'Online',
+              Author: { Name: 'Dr. Robert Smith', Avatar: 'https://images.pexels.com/photos/3777943/pexels-photo-3777943.jpeg' },
+              Images: ['https://images.pexels.com/photos/5905709/pexels-photo-5905709.jpeg'],
+              rating: 4.9,
+              reviewCount: 42,
+              CreatedAt: Date.now() / 1000
+            },
+            {
+              ID: '7',
+              Title: 'English Literature & Writing',
+              Description: 'Improve your writing skills, essay composition, and literary analysis. Perfect for students and professionals.',
+              Credits: 40,
+              Category: 'Academic Help',
+              Location: 'Online',
+              Author: { Name: 'Prof. Maria Garcia', Avatar: 'https://images.pexels.com/photos/3777946/pexels-photo-3777946.jpeg' },
+              Images: ['https://images.pexels.com/photos/5905712/pexels-photo-5905712.jpeg'],
+              rating: 4.8,
+              reviewCount: 28,
+              CreatedAt: Date.now() / 1000
+            },
+            {
+              ID: '8',
+              Title: 'Science Tutoring',
+              Description: 'Comprehensive science tutoring covering physics, chemistry, biology, and environmental science.',
+              Credits: 50,
+              Category: 'Academic Help',
+              Location: 'Online',
+              Author: { Name: 'Dr. James Wilson', Avatar: 'https://images.pexels.com/photos/3777949/pexels-photo-3777949.jpeg' },
+              Images: ['https://images.pexels.com/photos/5905715/pexels-photo-5905715.jpeg'],
+              rating: 4.7,
+              reviewCount: 35,
+              CreatedAt: Date.now() / 1000
+            },
+            // Creative & Arts
+            {
+              ID: '9',
+              Title: 'Graphic Design & Branding',
+              Description: 'Create stunning visual designs, logos, and brand identities using Adobe Creative Suite and modern design tools.',
+              Credits: 70,
+              Category: 'Creative & Arts',
+              Location: 'Online',
+              Author: { Name: 'Sophie Anderson', Avatar: 'https://images.pexels.com/photos/3777952/pexels-photo-3777952.jpeg' },
+              Images: ['https://images.pexels.com/photos/5905718/pexels-photo-5905718.jpeg'],
+              rating: 4.9,
+              reviewCount: 56,
+              CreatedAt: Date.now() / 1000
+            },
+            {
+              ID: '10',
+              Title: 'Digital Art & Illustration',
+              Description: 'Learn digital painting, illustration techniques, and create amazing artwork using Procreate and Photoshop.',
+              Credits: 65,
+              Category: 'Creative & Arts',
+              Location: 'Online',
+              Author: { Name: 'David Kim', Avatar: 'https://images.pexels.com/photos/3777955/pexels-photo-3777955.jpeg' },
+              Images: ['https://images.pexels.com/photos/5905721/pexels-photo-5905721.jpeg'],
+              rating: 4.8,
+              reviewCount: 33,
+              CreatedAt: Date.now() / 1000
+            },
+            {
+              ID: '11',
+              Title: 'Photography & Editing',
+              Description: 'Master photography techniques, composition, and post-processing with Lightroom and Photoshop.',
+              Credits: 60,
+              Category: 'Creative & Arts',
+              Location: 'Online',
+              Author: { Name: 'Amanda Lee', Avatar: 'https://images.pexels.com/photos/3777958/pexels-photo-3777958.jpeg' },
+              Images: ['https://images.pexels.com/photos/5905724/pexels-photo-5905724.jpeg'],
+              rating: 4.7,
+              reviewCount: 29,
+              CreatedAt: Date.now() / 1000
+            },
+            // Health & Wellness
+            {
+              ID: '12',
+              Title: 'Personal Fitness Training',
+              Description: 'Get personalized workout plans, nutrition guidance, and fitness coaching to achieve your health goals.',
+              Credits: 80,
+              Category: 'Health & Wellness',
+              Location: 'Online',
+              Author: { Name: 'Chris Thompson', Avatar: 'https://images.pexels.com/photos/3777961/pexels-photo-3777961.jpeg' },
+              Images: ['https://images.pexels.com/photos/5905727/pexels-photo-5905727.jpeg'],
+              rating: 4.9,
+              reviewCount: 67,
+              CreatedAt: Date.now() / 1000
+            },
+            {
+              ID: '13',
+              Title: 'Yoga & Meditation',
+              Description: 'Learn yoga poses, breathing techniques, and meditation practices for stress relief and mindfulness.',
+              Credits: 45,
+              Category: 'Health & Wellness',
+              Location: 'Online',
+              Author: { Name: 'Priya Patel', Avatar: 'https://images.pexels.com/photos/3777964/pexels-photo-3777964.jpeg' },
+              Images: ['https://images.pexels.com/photos/5905730/pexels-photo-5905730.jpeg'],
+              rating: 4.8,
+              reviewCount: 38,
+              CreatedAt: Date.now() / 1000
+            },
+            // Language & Culture
+            {
+              ID: '14',
+              Title: 'Spanish Language Learning',
+              Description: 'Learn Spanish from beginner to advanced levels. Practice conversation, grammar, and cultural understanding.',
+              Credits: 50,
+              Category: 'Language & Culture',
+              Location: 'Online',
+              Author: { Name: 'Carlos Mendez', Avatar: 'https://images.pexels.com/photos/3777967/pexels-photo-3777967.jpeg' },
+              Images: ['https://images.pexels.com/photos/5905733/pexels-photo-5905733.jpeg'],
+              rating: 4.7,
+              reviewCount: 25,
+              CreatedAt: Date.now() / 1000
+            },
+            {
+              ID: '15',
+              Title: 'French Conversation',
+              Description: 'Improve your French speaking skills through interactive conversations and cultural immersion.',
+              Credits: 55,
+              Category: 'Language & Culture',
+              Location: 'Online',
+              Author: { Name: 'Marie Dubois', Avatar: 'https://images.pexels.com/photos/3777970/pexels-photo-3777970.jpeg' },
+              Images: ['https://images.pexels.com/photos/5905736/pexels-photo-5905736.jpeg'],
+              rating: 4.6,
+              reviewCount: 19,
+              CreatedAt: Date.now() / 1000
+            },
+            // Handy Skills & Repair
+            {
+              ID: '16',
+              Title: 'Home Repair & Maintenance',
+              Description: 'Learn essential home repair skills, plumbing basics, electrical work, and general maintenance.',
+              Credits: 70,
+              Category: 'Handy Skills & Repair',
+              Location: 'Local',
+              Author: { Name: 'Tom Johnson', Avatar: 'https://images.pexels.com/photos/3777973/pexels-photo-3777973.jpeg' },
+              Images: ['https://images.pexels.com/photos/5905739/pexels-photo-5905739.jpeg'],
+              rating: 4.8,
+              reviewCount: 44,
+              CreatedAt: Date.now() / 1000
+            },
+            {
+              ID: '17',
+              Title: 'Car Maintenance & Repair',
+              Description: 'Learn basic car maintenance, troubleshooting, and repair techniques to save money on vehicle care.',
+              Credits: 75,
+              Category: 'Handy Skills & Repair',
+              Location: 'Local',
+              Author: { Name: 'Mike Brown', Avatar: 'https://images.pexels.com/photos/3777976/pexels-photo-3777976.jpeg' },
+              Images: ['https://images.pexels.com/photos/5905742/pexels-photo-5905742.jpeg'],
+              rating: 4.7,
+              reviewCount: 31,
+              CreatedAt: Date.now() / 1000
+            },
+            // Business & Entrepreneurship
+            {
+              ID: '18',
+              Title: 'Business Strategy & Planning',
+              Description: 'Develop business strategies, create business plans, and learn entrepreneurship fundamentals.',
+              Credits: 85,
+              Category: 'Entrepreneurship & Business',
+              Location: 'Online',
+              Author: { Name: 'Jennifer Adams', Avatar: 'https://images.pexels.com/photos/3777979/pexels-photo-3777979.jpeg' },
+              Images: ['https://images.pexels.com/photos/5905745/pexels-photo-5905745.jpeg'],
+              rating: 4.9,
+              reviewCount: 52,
+              CreatedAt: Date.now() / 1000
+            },
+            {
+              ID: '19',
+              Title: 'Digital Marketing Strategy',
+              Description: 'Learn SEO, social media marketing, content marketing, and digital advertising strategies.',
+              Credits: 80,
+              Category: 'Entrepreneurship & Business',
+              Location: 'Online',
+              Author: { Name: 'Ryan Chen', Avatar: 'https://images.pexels.com/photos/3777982/pexels-photo-3777982.jpeg' },
+              Images: ['https://images.pexels.com/photos/5905748/pexels-photo-5905748.jpeg'],
+              rating: 4.8,
+              reviewCount: 41,
+              CreatedAt: Date.now() / 1000
+            },
+            // Everyday Help
+            {
+              ID: '20',
+              Title: 'Cooking & Meal Planning',
+              Description: 'Learn cooking techniques, meal planning, and healthy recipe creation for busy lifestyles.',
+              Credits: 45,
+              Category: 'Everyday Help',
+              Location: 'Online',
+              Author: { Name: 'Chef Sarah Wilson', Avatar: 'https://images.pexels.com/photos/3777985/pexels-photo-3777985.jpeg' },
+              Images: ['https://images.pexels.com/photos/5905751/pexels-photo-5905751.jpeg'],
+              rating: 4.7,
+              reviewCount: 36,
+              CreatedAt: Date.now() / 1000
             }
           ];
 
-          // Filter mock services based on query and category
+          // Filter mock services based on query and category with improved search logic
           const filteredServices = mockServices.filter((service: Service) => {
             const title = (service.Title || service.title || '').toLowerCase();
             const description = (service.Description || service.description || '').toLowerCase();
             const serviceCategory = (service.Category || service.category || '').toLowerCase();
+            const authorName = (service.Author?.Name || service.Author?.name || service.author?.name || '').toLowerCase();
             const searchQuery = query.toLowerCase();
             const categoryFilter = category.toLowerCase();
 
-            const matchesQuery = title.includes(searchQuery) || description.includes(searchQuery);
+            // Split search query into words for better matching
+            const searchWords = searchQuery.split(' ').filter(word => word.length > 0);
+            
+            // Check if any search word matches title, description, category, or author
+            const matchesQuery = searchWords.some(word => 
+              title.includes(word) || 
+              description.includes(word) || 
+              serviceCategory.includes(word) ||
+              authorName.includes(word)
+            ) || title.includes(searchQuery) || description.includes(searchQuery);
+            
             const matchesCategory = !category || serviceCategory.includes(categoryFilter);
 
             return matchesQuery && matchesCategory;
