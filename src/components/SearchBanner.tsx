@@ -32,7 +32,7 @@ export default function SearchBanner({ query, category, resultCount }: SearchBan
             {/* Right Illustration */}
             <div className="hidden md:block relative z-10 pr-20">
                 <Image
-                    src="/categories-banner.png"
+                    src="https://din-studio.com/wp-content/uploads/2022/12/Packaging-Design.png"
                     alt="Search Illustration"
                     width={250}
                     height={160}
