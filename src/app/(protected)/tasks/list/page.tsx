@@ -206,16 +206,15 @@ export default function TaskListPage() {
                       </div>
                       
                       {task.Availability?.length > 0 && (
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <FaCalendar className="w-4 h-4 text-gray-400" />
-                          <span>{task.Availability[0].Date}</span>
-                        </div>
-                      )}
-                      
-                      {task.Availability?.length > 0 && (
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <FaClock className="w-4 h-4 text-gray-400" />
-                          <span>{task.Availability[0].TimeFrom} - {task.Availability[0].TimeTo}</span>
+                        <div className="flex items-center justify-between text-sm text-gray-500">
+                          <div className="flex items-center gap-2">
+                            <FaCalendar className="w-4 h-4 text-gray-400" />
+                            <span>{task.Availability[0].Date}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <FaClock className="w-4 h-4 text-gray-400" />
+                            <span>{task.Availability[0].TimeFrom} - {task.Availability[0].TimeTo}</span>
+                          </div>
                         </div>
                       )}
                     </div>
