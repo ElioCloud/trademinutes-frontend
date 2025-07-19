@@ -10,13 +10,13 @@ import {
 const steps = [
   {
     icon: <FiPlusCircle size={32} />,
-    title: 'Offer or Request Help',
-    desc: 'Post a task you need done or offer a skill you can share with the community.',
+    title: 'Share Your Expertise',
+    desc: 'Offer your skills and knowledge to help others in your community.',
   },
   {
     icon: <FiSearch size={32} />,
-    title: 'Discover Trusted Neighbors',
-    desc: 'Browse skills offered nearby and choose people with positive reviews.',
+    title: 'Find the Help You Need',
+    desc: 'Browse services and connect with skilled neighbors who can assist you.',
   },
   {
     icon: <FiClock size={32} />,
@@ -25,8 +25,8 @@ const steps = [
   },
   {
     icon: <FiSmile size={32} />,
-    title: 'Grow Together',
-    desc: 'Build connections, save money, and make your community stronger.',
+    title: 'Build Community Connections',
+    desc: 'Create meaningful relationships and strengthen your local network.',
   },
 ];
 
