@@ -10,7 +10,7 @@ interface SearchBannerProps {
 
 export default function SearchBanner({ query, category, resultCount }: SearchBannerProps) {
     return (
-        <section className="relative bg-gradient-to-r from-purple-50 to-lavender-100 rounded-2xl mt-12 mx-auto max-w-7xl pl-30 px-6 py-6 overflow-hidden flex flex-col md:flex-row items-center justify-between">
+        <section className="relative bg-[#FEEFE7] rounded-2xl mt-12 mx-auto max-w-7xl pl-30 px-6 py-6 overflow-hidden flex flex-col md:flex-row items-center justify-between">
             {/* Left Text */}
             <div className="relative z-10 text-left md:max-w-lg">
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -32,7 +32,7 @@ export default function SearchBanner({ query, category, resultCount }: SearchBan
             {/* Right Illustration */}
             <div className="hidden md:block relative z-10 pr-20">
                 <Image
-                    src="https://din-studio.com/wp-content/uploads/2022/12/Packaging-Design.png"
+                    src="/categories-banner.png"
                     alt="Search Illustration"
                     width={250}
                     height={160}
@@ -41,9 +41,8 @@ export default function SearchBanner({ query, category, resultCount }: SearchBan
             </div>
 
             {/* Shapes inside banner */}
-            <div className="absolute top-0 left-0 w-32 h-32 bg-purple-200 rounded-br-full z-0"></div>
-            <div className="absolute bottom-0 right-0 w-48 h-48 bg-lavender-300 rounded-tl-full z-0"></div>
-            <div className="absolute bottom-4 right-4 w-6 h-6 bg-purple-400 rounded-full z-0"></div>
+            <div className="absolute top-0 left-0 w-32 h-32 bg-[#F5D481] rounded-br-full z-0"></div>
+            <div className="absolute bottom-0 right-0 w-48 h-48 bg-[#F5B88C] rounded-tl-full z-0"></div>
         </section>
     );
 } 
