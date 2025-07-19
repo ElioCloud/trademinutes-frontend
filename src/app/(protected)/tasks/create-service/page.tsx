@@ -22,6 +22,7 @@ interface Tier {
 export default function CreateServicePage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 4; // Increased to 4 steps
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -240,13 +241,28 @@ export default function CreateServicePage() {
 
   const nextStep = () => {
     if (currentStep === 1) {
-      // Validate step 1
-      if (!formData.title || !formData.description || !selectedCategory || !formData.location) {
-        alert("❌ Please fill in all required fields.");
+      // Validate step 1 - Basic Info
+      if (!formData.title || !formData.description || !selectedCategory) {
+        alert("❌ Please fill in title, description, and category.");
         return;
       }
       if (!coverImage) {
         alert("❌ Please upload a cover image.");
+        return;
+      }
+    }
+    if (currentStep === 2) {
+      // Validate step 2 - Location & Availability
+      if (!formData.location || !formData.availability[0].timeFrom || !formData.availability[0].timeTo) {
+        alert("❌ Please fill in location and availability details.");
+        return;
+      }
+    }
+    if (currentStep === 3) {
+      // Validate step 3 - Tier Configuration
+      const hasValidTiers = tiers.some(tier => tier.title && tier.description && tier.credits > 0);
+      if (!hasValidTiers) {
+        alert("❌ Please configure at least one tier with title, description, and credits.");
         return;
       }
     }
@@ -349,29 +365,35 @@ export default function CreateServicePage() {
   };
 
   const renderStep1 = () => (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      <div className="text-center mb-8">
+        <h3 className="text-2xl font-semibold text-gray-900">Basic Information</h3>
+        <p className="text-gray-600 mt-2">Start by providing the essential details about your service</p>
+      </div>
+
       {/* Cover Image Upload */}
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Cover Image *</label>
+      <div className="space-y-4">
+        <label className="block text-lg font-medium text-gray-700">Cover Image *</label>
         {coverImagePreview ? (
           <div className="relative">
             <img
               src={coverImagePreview}
               alt="Cover preview"
-              className="w-full h-48 object-cover rounded-lg border"
+              className="w-full h-64 object-cover rounded-xl border"
             />
             <button
               type="button"
               onClick={removeCoverImage}
-              className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+              className="absolute top-4 right-4 bg-red-500 text-white rounded-full p-2 hover:bg-red-600"
             >
-              <FaTimes className="w-3 h-3" />
+              <FaTimes className="w-4 h-4" />
             </button>
           </div>
         ) : (
-          <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition">
-            <FaUpload className="w-12 h-12 text-gray-400 mb-4" />
-            <span className="text-lg text-gray-500">Upload cover image</span>
+          <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-gray-400 transition">
+            <FaUpload className="w-16 h-16 text-gray-400 mb-4" />
+            <span className="text-xl text-gray-500">Upload cover image</span>
+            <span className="text-sm text-gray-400 mt-2">Click to browse or drag and drop</span>
           </label>
         )}
         <input
@@ -384,30 +406,30 @@ export default function CreateServicePage() {
       </div>
 
       {/* Content Images Upload */}
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">
+      <div className="space-y-4">
+        <label className="block text-lg font-medium text-gray-700">
           Content Images (Max 5)
         </label>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {contentImagePreviews.map((preview, index) => (
             <div key={index} className="relative">
               <img
                 src={preview}
                 alt={`Content ${index + 1}`}
-                className="w-full h-32 object-cover rounded-lg border"
+                className="w-full h-40 object-cover rounded-xl border"
               />
               <button
                 type="button"
                 onClick={() => removeContentImage(index)}
-                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
               >
-                <FaTimes className="w-2 h-2" />
+                <FaTimes className="w-3 h-3" />
               </button>
             </div>
           ))}
           {contentImagePreviews.length < 5 && (
-            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition">
-              <FaImage className="w-6 h-6 text-gray-400 mb-2" />
+            <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-gray-400 transition">
+              <FaImage className="w-8 h-8 text-gray-400 mb-2" />
               <span className="text-sm text-gray-500">Add image</span>
               <input
                 type="file"
@@ -421,14 +443,14 @@ export default function CreateServicePage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">Category *</label>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="space-y-4">
+          <label className="block text-lg font-medium text-gray-700">Category *</label>
           <select
             name="category"
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+            className="w-full border border-gray-300 px-6 py-4 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors text-lg"
             required
           >
             <option value="">Select a category</option>
@@ -440,13 +462,13 @@ export default function CreateServicePage() {
           </select>
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">Title *</label>
+        <div className="space-y-4">
+          <label className="block text-lg font-medium text-gray-700">Title *</label>
           <input
             type="text"
             name="title"
             placeholder="Enter your service title"
-            className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+            className="w-full border border-gray-300 px-6 py-4 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors text-lg"
             value={formData.title}
             onChange={handleChange}
             required
@@ -454,28 +476,37 @@ export default function CreateServicePage() {
         </div>
       </div>
 
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Description *</label>
+      <div className="space-y-4">
+        <label className="block text-lg font-medium text-gray-700">Description *</label>
         <textarea
           name="description"
           placeholder="Describe your service in detail"
-          rows={4}
-          className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors resize-none"
+          rows={6}
+          className="w-full border border-gray-300 px-6 py-4 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors resize-none text-lg"
           value={formData.description}
           onChange={handleChange}
           required
         />
       </div>
+    </div>
+  );
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">Location *</label>
+  const renderStep2 = () => (
+    <div className="space-y-8">
+      <div className="text-center mb-8">
+        <h3 className="text-2xl font-semibold text-gray-900">Location & Availability</h3>
+        <p className="text-gray-600 mt-2">Set your service location and availability schedule</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="space-y-4">
+          <label className="block text-lg font-medium text-gray-700">Location *</label>
           <div className="relative">
             <input
               type="text"
               name="location"
               placeholder="Enter a Canadian location"
-              className="border border-gray-300 px-4 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+              className="border border-gray-300 px-6 py-4 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors text-lg"
               value={formData.location}
               onChange={handleLocationInput}
               required
@@ -496,13 +527,13 @@ export default function CreateServicePage() {
           </div>
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">Service Type</label>
+        <div className="space-y-4">
+          <label className="block text-lg font-medium text-gray-700">Service Type</label>
           <select
             name="locationType"
             value={formData.locationType}
             onChange={handleChange}
-            className="border border-gray-300 px-4 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+            className="border border-gray-300 px-6 py-4 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors text-lg"
             required
           >
             <option value="in-person">In-person</option>
@@ -511,35 +542,41 @@ export default function CreateServicePage() {
         </div>
       </div>
 
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Availability Time *</label>
-        <div className="flex gap-4">
-          <select
-            name="timeFrom"
-            className="border border-gray-300 px-4 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-            value={formData.availability[0].timeFrom}
-            onChange={(e) => handleAvailabilityChange("timeFrom", e.target.value)}
-            required
-          >
-            <option value="">From</option>
-            {generateTimeOptions()}
-          </select>
-          <select
-            name="timeTo"
-            className="border border-gray-300 px-4 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-            value={formData.availability[0].timeTo}
-            onChange={(e) => handleAvailabilityChange("timeTo", e.target.value)}
-            required
-          >
-            <option value="">To</option>
-            {generateTimeOptions()}
-          </select>
+      <div className="space-y-4">
+        <label className="block text-lg font-medium text-gray-700">Availability Time *</label>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-2">From</label>
+            <select
+              name="timeFrom"
+              className="border border-gray-300 px-6 py-4 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors text-lg"
+              value={formData.availability[0].timeFrom}
+              onChange={(e) => handleAvailabilityChange("timeFrom", e.target.value)}
+              required
+            >
+              <option value="">Select start time</option>
+              {generateTimeOptions()}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-2">To</label>
+            <select
+              name="timeTo"
+              className="border border-gray-300 px-6 py-4 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors text-lg"
+              value={formData.availability[0].timeTo}
+              onChange={(e) => handleAvailabilityChange("timeTo", e.target.value)}
+              required
+            >
+              <option value="">Select end time</option>
+              {generateTimeOptions()}
+            </select>
+          </div>
         </div>
       </div>
     </div>
   );
 
-  const renderStep2 = () => (
+  const renderStep3 = () => (
     <div className="space-y-8">
       <div className="text-center mb-8">
         <h3 className="text-2xl font-semibold text-gray-900">Configure Service Tiers</h3>
@@ -636,16 +673,139 @@ export default function CreateServicePage() {
     </div>
   );
 
+  const renderStep4 = () => (
+    <div className="space-y-8">
+      <div className="text-center mb-8">
+        <h3 className="text-2xl font-semibold text-gray-900">Review & Submit</h3>
+        <p className="text-gray-600 mt-2">Review your service details before creating</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Basic Info Review */}
+        <div className="space-y-6">
+          <h4 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">Basic Information</h4>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-600">Category</label>
+              <p className="text-lg text-gray-900">{selectedCategory}</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600">Title</label>
+              <p className="text-lg text-gray-900">{formData.title}</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600">Description</label>
+              <p className="text-lg text-gray-900">{formData.description}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Location & Availability Review */}
+        <div className="space-y-6">
+          <h4 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">Location & Availability</h4>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-600">Location</label>
+              <p className="text-lg text-gray-900">{formData.location}</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600">Service Type</label>
+              <p className="text-lg text-gray-900 capitalize">{formData.locationType}</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600">Availability</label>
+              <p className="text-lg text-gray-900">
+                {formData.availability[0].timeFrom} - {formData.availability[0].timeTo}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tiers Review */}
+      <div className="space-y-6">
+        <h4 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">Service Tiers</h4>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {tiers.map((tier, index) => (
+            <div key={index} className="border border-gray-200 rounded-xl p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h5 className="text-lg font-semibold text-gray-900">{tier.name} Tier</h5>
+                <span className="text-2xl font-bold text-purple-600">{tier.credits} Credits</span>
+              </div>
+              {tier.title && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Title</label>
+                  <p className="text-gray-900">{tier.title}</p>
+                </div>
+              )}
+              {tier.description && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Description</label>
+                  <p className="text-gray-900">{tier.description}</p>
+                </div>
+              )}
+              <div className="grid grid-cols-3 gap-2 text-sm">
+                <div className="text-center">
+                  <p className="font-medium text-gray-600">Weekly</p>
+                  <p className="text-gray-900">{tier.weeklyHours}h</p>
+                </div>
+                <div className="text-center">
+                  <p className="font-medium text-gray-600">Daily</p>
+                  <p className="text-gray-900">{tier.dailyHours}h</p>
+                </div>
+                <div className="text-center">
+                  <p className="font-medium text-gray-600">Max Days</p>
+                  <p className="text-gray-900">{tier.maxDays}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Images Review */}
+      {coverImagePreview && (
+        <div className="space-y-4">
+          <h4 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">Images</h4>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-2">Cover Image</label>
+              <img
+                src={coverImagePreview}
+                alt="Cover preview"
+                className="w-full h-32 object-cover rounded-lg border"
+              />
+            </div>
+            {contentImagePreviews.map((preview, index) => (
+              <div key={index}>
+                <label className="block text-sm font-medium text-gray-600 mb-2">Content {index + 1}</label>
+                <img
+                  src={preview}
+                  alt={`Content ${index + 1}`}
+                  className="w-full h-32 object-cover rounded-lg border"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <ProtectedLayout>
-      <div className="max-w-4xl mx-auto">
+      <div className="w-full">
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Create New Service</h1>
               <p className="text-gray-600 mt-2">
-                Step {currentStep} of 2: {currentStep === 1 ? 'Basic Information' : 'Pricing Tiers'}
+                Step {currentStep} of {totalSteps}: {
+                  currentStep === 1 ? 'Basic Information' : 
+                  currentStep === 2 ? 'Location & Availability' :
+                  currentStep === 3 ? 'Service Tiers' : 'Review & Submit'
+                }
               </p>
             </div>
             <Link
@@ -662,12 +822,19 @@ export default function CreateServicePage() {
             <div className={`w-4 h-4 rounded-full ${currentStep >= 1 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
             <div className={`flex-1 h-2 rounded ${currentStep >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
             <div className={`w-4 h-4 rounded-full ${currentStep >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
+            <div className={`flex-1 h-2 rounded ${currentStep >= 3 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
+            <div className={`w-4 h-4 rounded-full ${currentStep >= 3 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
+            <div className={`flex-1 h-2 rounded ${currentStep >= 4 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
+            <div className={`w-4 h-4 rounded-full ${currentStep >= 4 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
           </div>
         </div>
 
         {/* Main Content */}
         <div className="bg-white rounded-2xl shadow-lg p-8">
-          {currentStep === 1 ? renderStep1() : renderStep2()}
+          {currentStep === 1 && renderStep1()}
+          {currentStep === 2 && renderStep2()}
+          {currentStep === 3 && renderStep3()}
+          {currentStep === 4 && renderStep4()}
         </div>
 
         {/* Navigation */}
@@ -685,7 +852,7 @@ export default function CreateServicePage() {
             <div></div>
           )}
           
-          {currentStep < 2 ? (
+          {currentStep < totalSteps ? (
             <button
               type="button"
               onClick={nextStep}
