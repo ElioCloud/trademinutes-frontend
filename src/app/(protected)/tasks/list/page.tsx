@@ -151,16 +151,16 @@ export default function TaskListPage() {
         
         {/* Header Section */}
         <div className="pt-8 pb-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div className="flex items-center gap-4 flex-wrap">
-              <h1 className="text-2xl font-bold text-gray-900">My Listings</h1>
-              <span className="text-gray-500 text-base font-normal">Manage and create your service listings</span>
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">My Listings</h1>
+              <p className="text-gray-500 text-base font-normal mt-1">Manage and create your service listings</p>
             </div>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center gap-2"
+              className="flex items-center gap-2 bg-gradient-to-r from-purple-500 via-pink-400 to-purple-600 text-white px-8 py-4 rounded-full text-base font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
             >
-              <span className="text-lg">➕</span>
+              <span className="text-xl">➕</span>
               Create Listing
             </button>
           </div>
