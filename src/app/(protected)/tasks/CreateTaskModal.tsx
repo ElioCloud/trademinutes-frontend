@@ -24,7 +24,7 @@ export default function CreateTaskModal({
     longitude: "",
     locationType: "in-person",
     credits: "",
-    availability: [{ timeFrom: "", timeTo: "" }],
+    availability: [{ date: new Date().toISOString().split('T')[0], timeFrom: "", timeTo: "" }],
   });
 
   const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
@@ -251,6 +251,12 @@ export default function CreateTaskModal({
       contentImages.forEach((image, index) => {
         formDataToSend.append('contentImages', image);
       });
+
+      // Debug: Log what's being sent
+      console.log('FormData contents:');
+      for (let [key, value] of formDataToSend.entries()) {
+        console.log(key, value);
+      }
 
       const res = await fetch(`${API_BASE_URL}/api/tasks/create`, {
         method: "POST",
