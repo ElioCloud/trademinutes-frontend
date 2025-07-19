@@ -228,42 +228,30 @@ export default function CreateTaskModal({
     const token = localStorage.getItem("token");
 
     try {
-      // Create FormData for multipart upload
-      const formDataToSend = new FormData();
-      
-      // Add basic task data
-      formDataToSend.append('title', formData.title);
-      formDataToSend.append('description', formData.description);
-      formDataToSend.append('location', formData.location);
-      formDataToSend.append('latitude', latitude.toString());
-      formDataToSend.append('longitude', longitude.toString());
-      formDataToSend.append('locationType', formData.locationType);
-      formDataToSend.append('credits', formData.credits);
-      formDataToSend.append('category', selectedCategory);
-      formDataToSend.append('availability', JSON.stringify(formData.availability));
-
-      // Add cover image
-      if (coverImage) {
-        formDataToSend.append('coverImage', coverImage);
-      }
-
-      // Add content images
-      contentImages.forEach((image, index) => {
-        formDataToSend.append('contentImages', image);
-      });
+      // Create JSON payload
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        location: formData.location,
+        latitude: latitude,
+        longitude: longitude,
+        locationType: formData.locationType,
+        credits: Number(formData.credits),
+        category: selectedCategory,
+        availability: formData.availability,
+        // Note: Images are not included for now as backend expects JSON
+      };
 
       // Debug: Log what's being sent
-      console.log('FormData contents:');
-      for (let [key, value] of formDataToSend.entries()) {
-        console.log(key, value);
-      }
+      console.log('JSON payload:', payload);
 
       const res = await fetch(`${API_BASE_URL}/api/tasks/create`, {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: formDataToSend,
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
@@ -307,7 +295,7 @@ export default function CreateTaskModal({
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Cover Image Upload */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Cover Image</label>
+            <label className="block text-sm font-medium text-gray-700">Cover Image (Coming Soon)</label>
             {coverImagePreview ? (
               <div className="relative">
                 <img
@@ -340,7 +328,7 @@ export default function CreateTaskModal({
           {/* Content Images Upload */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
-              Content Images (Optional - Max 5)
+              Content Images (Coming Soon - Optional - Max 5)
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {contentImagePreviews.map((preview, index) => (
