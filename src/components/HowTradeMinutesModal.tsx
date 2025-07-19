@@ -102,9 +102,13 @@ export default function HowTradeMinutesModal({ isOpen, onClose }: HowTradeMinute
                 <img
                   src={slides[currentSlide].image}
                   alt={slides[currentSlide].alt}
-                  className="w-full h-64 object-cover rounded-lg shadow-lg"
+                  className={`w-full h-64 object-cover rounded-lg ${
+                    slides[currentSlide].image.includes('.png') ? '' : 'shadow-lg'
+                  }`}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg"></div>
+                {!slides[currentSlide].image.includes('.png') && (
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg"></div>
+                )}
               </div>
 
               {/* Text Content */}
