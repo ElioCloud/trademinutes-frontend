@@ -389,7 +389,7 @@ export default function CreateServicePage() {
             </button>
           </div>
         ) : (
-          <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-gray-400 transition">
+          <label htmlFor="cover-image" className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-gray-400 transition">
             <FaUpload className="w-16 h-16 text-gray-400 mb-4" />
             <span className="text-xl text-gray-500">Upload cover image</span>
             <span className="text-sm text-gray-400 mt-2">Click to browse or drag and drop</span>
@@ -427,7 +427,7 @@ export default function CreateServicePage() {
             </div>
           ))}
           {contentImagePreviews.length < 5 && (
-            <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-gray-400 transition">
+            <label htmlFor="content-images" className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-gray-400 transition">
               <FaImage className="w-8 h-8 text-gray-400 mb-2" />
               <span className="text-sm text-gray-500">Add image</span>
               <input
@@ -436,6 +436,7 @@ export default function CreateServicePage() {
                 multiple
                 onChange={handleContentImagesChange}
                 className="hidden"
+                id="content-images"
               />
             </label>
           )}
