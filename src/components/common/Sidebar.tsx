@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { MdDashboard, MdTask, MdExplore, MdMessage } from "react-icons/md";
-import { FiLogOut, FiSettings, FiHome, FiSearch, FiList, FiCalendar, FiMessageCircle, FiBell, FiUser } from "react-icons/fi";
+import { FiLogOut, FiSettings, FiHome, FiSearch, FiList, FiCalendar, FiMessageCircle, FiBell, FiUser, FiDollarSign, FiTrendingUp, FiUsers, FiHelpCircle, FiFileText, FiAward, FiBookOpen, FiPlus, FiShield } from "react-icons/fi";
 import { FaRegCalendarAlt, FaUserAlt } from "react-icons/fa";
 import Link from "next/link";
 import { BellIcon } from "@heroicons/react/24/outline";
@@ -197,6 +197,43 @@ export default function Sidebar() {
                 pathname={pathname}
                 icon={<FiList size={22} />}
               />
+              <SidebarButton
+                href="/book-appointment"
+                label="Create Service"
+                pathname={pathname}
+                icon={<FiPlus size={22} />}
+              />
+            </div>
+          </div>
+
+          {/* Business Section */}
+          <div className="mb-4">
+            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-4">Business</h4>
+            <div className="flex flex-col gap-2">
+              <SidebarButton
+                href="/earnings"
+                label="Earnings Dashboard"
+                pathname={pathname}
+                icon={<FiDollarSign size={22} />}
+              />
+              <SidebarButton
+                href="/analytics"
+                label="Service Analytics"
+                pathname={pathname}
+                icon={<FiTrendingUp size={22} />}
+              />
+              <SidebarButton
+                href="/reviews"
+                label="My Reviews"
+                pathname={pathname}
+                icon={<FiAward size={22} />}
+              />
+              <SidebarButton
+                href="/clients"
+                label="Client Directory"
+                pathname={pathname}
+                icon={<FiUsers size={22} />}
+              />
             </div>
           </div>
 
@@ -263,6 +300,43 @@ export default function Sidebar() {
                 label="Settings"
                 pathname={pathname}
                 icon={<FiSettings size={22} />}
+              />
+              <SidebarButton
+                href="/security"
+                label="Security"
+                pathname={pathname}
+                icon={<FiShield size={22} />}
+              />
+            </div>
+          </div>
+
+          {/* Resources Section */}
+          <div className="mb-4">
+            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-4">Resources</h4>
+            <div className="flex flex-col gap-2">
+              <SidebarButton
+                href="/help"
+                label="Help Center"
+                pathname={pathname}
+                icon={<FiHelpCircle size={22} />}
+              />
+              <SidebarButton
+                href="/learning"
+                label="Learning Hub"
+                pathname={pathname}
+                icon={<FiBookOpen size={22} />}
+              />
+              <SidebarButton
+                href="/community"
+                label="Community"
+                pathname={pathname}
+                icon={<FiUsers size={22} />}
+              />
+              <SidebarButton
+                href="/support"
+                label="Contact Support"
+                pathname={pathname}
+                icon={<FiMessageCircle size={22} />}
               />
             </div>
           </div>
