@@ -120,6 +120,12 @@ export default function UserProfileSummaryPage() {
     memberSince: ''
   });
   const [statsLoading, setStatsLoading] = useState(true);
+  const [profileStats, setProfileStats] = useState({
+    credits: 0,
+    tasksCompleted: 0,
+    rating: 0
+  });
+  const [profileStatsLoading, setProfileStatsLoading] = useState(true);
   const router = useRouter();
 
   // Editing states
@@ -147,6 +153,73 @@ export default function UserProfileSummaryPage() {
   const [saving, setSaving] = useState(false);
   const [editingProfilePicture, setEditingProfilePicture] = useState(false);
   const [editingCoverImage, setEditingCoverImage] = useState(false);
+
+  const fetchProfileStats = async (userId: string) => {
+    try {
+      setProfileStatsLoading(true);
+      const TASK_API_BASE = process.env.NEXT_PUBLIC_TASK_API_URL || 'http://localhost:8084';
+      const REVIEW_API_BASE = process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086';
+      const token = localStorage.getItem("token");
+      
+      // Fetch user's tasks to calculate completed tasks
+      const tasksRes = await fetch(`${TASK_API_BASE}/api/tasks/get/user`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      let tasksCompleted = 0;
+      let totalRating = 0;
+      let reviewCount = 0;
+      
+      if (tasksRes.ok) {
+        const tasksData = await tasksRes.json();
+        const tasks = tasksData.data || tasksData || [];
+        
+        // Count completed tasks
+        tasksCompleted = tasks.filter((task: any) => 
+          task.status === 'completed' || task.status === 'Completed'
+        ).length;
+      }
+      
+      // Fetch reviews to calculate average rating
+      try {
+        const reviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`);
+        if (reviewsRes.ok) {
+          const reviewsData = await reviewsRes.json();
+          const reviews = Array.isArray(reviewsData) ? reviewsData : (reviewsData.data || []);
+          
+          reviews.forEach((review: any) => {
+            const rating = review.rating || review.Rating || 0;
+            if (rating > 0) {
+              totalRating += rating;
+              reviewCount++;
+            }
+          });
+        }
+      } catch (reviewErr) {
+        console.error("Error fetching reviews for profile stats:", reviewErr);
+      }
+      
+      // Calculate average rating
+      const averageRating = reviewCount > 0 ? totalRating / reviewCount : 0;
+      
+      setProfileStats({
+        credits: profile?.Credits || 0,
+        tasksCompleted,
+        rating: Math.round(averageRating * 10) / 10 // Round to 1 decimal place
+      });
+      
+    } catch (error) {
+      console.error("Error fetching profile stats:", error);
+      // Set fallback values
+      setProfileStats({
+        credits: profile?.Credits || 0,
+        tasksCompleted: 0,
+        rating: 0
+      });
+    } finally {
+      setProfileStatsLoading(false);
+    }
+  };
 
   const fetchUserStats = async (userId: string) => {
     try {
@@ -350,6 +423,7 @@ export default function UserProfileSummaryPage() {
         if (data.ID) {
           fetchReviewsForMyTasks(data.ID);
           fetchUserStats(data.ID);
+          fetchProfileStats(data.ID);
         }
       } catch (err) {
         console.error("Failed to fetch profile:", err);
@@ -676,7 +750,11 @@ export default function UserProfileSummaryPage() {
                   <FiDollarSign className="w-5 h-5" />
                   <div>
                     <p className="text-sm opacity-90">Credits</p>
-                    <p className="text-xl font-bold">{profile.Credits || 0}</p>
+                    {profileStatsLoading ? (
+                      <div className="animate-pulse bg-white/20 h-6 w-12 rounded"></div>
+                    ) : (
+                      <p className="text-xl font-bold">{profileStats.credits}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -686,7 +764,11 @@ export default function UserProfileSummaryPage() {
                   <FiCheck className="w-5 h-5" />
                   <div>
                     <p className="text-sm opacity-90">Tasks Completed</p>
-                    <p className="text-xl font-bold">12</p>
+                    {profileStatsLoading ? (
+                      <div className="animate-pulse bg-white/20 h-6 w-12 rounded"></div>
+                    ) : (
+                      <p className="text-xl font-bold">{profileStats.tasksCompleted}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -696,7 +778,11 @@ export default function UserProfileSummaryPage() {
                   <FiStar className="w-5 h-5" />
                   <div>
                     <p className="text-sm opacity-90">Rating</p>
-                    <p className="text-xl font-bold">4.9/5</p>
+                    {profileStatsLoading ? (
+                      <div className="animate-pulse bg-white/20 h-6 w-12 rounded"></div>
+                    ) : (
+                      <p className="text-xl font-bold">{profileStats.rating > 0 ? `${profileStats.rating}/5` : 'No ratings'}</p>
+                    )}
                   </div>
                 </div>
               </div>
