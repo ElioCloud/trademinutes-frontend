@@ -61,7 +61,8 @@ function SearchResultsPage() {
 
   useEffect(() => {
     const fetchSearchResults = async () => {
-      if (!query.trim()) {
+      // Only return early if there's no query AND no category
+      if (!query.trim() && !category) {
         setResults([]);
         return;
       }
@@ -116,20 +117,39 @@ function SearchResultsPage() {
             const searchQuery = query.toLowerCase();
             const categoryFilter = category.toLowerCase();
 
-            // Split search query into words for better matching
-            const searchWords = searchQuery.split(' ').filter(word => word.length > 0);
-            
-            // Check if any search word matches title, description, category, or author
-            const matchesQuery = searchWords.some(word => 
-              title.includes(word) || 
-              description.includes(word) || 
-              serviceCategory.includes(word) ||
-              authorName.includes(word)
-            ) || title.includes(searchQuery) || description.includes(searchQuery);
-            
-            const matchesCategory = !category || serviceCategory.includes(categoryFilter);
+            // If only category is selected (no query), show all services in that category
+            if (!query.trim() && category) {
+              return serviceCategory.includes(categoryFilter);
+            }
 
-            return matchesQuery && matchesCategory;
+            // If only query is provided (no category), search across all fields
+            if (query.trim() && !category) {
+              const searchWords = searchQuery.split(' ').filter(word => word.length > 0);
+              return searchWords.some(word => 
+                title.includes(word) || 
+                description.includes(word) || 
+                serviceCategory.includes(word) ||
+                authorName.includes(word)
+              ) || title.includes(searchQuery) || description.includes(searchQuery);
+            }
+
+            // If both query and category are provided, filter by both
+            if (query.trim() && category) {
+              const searchWords = searchQuery.split(' ').filter(word => word.length > 0);
+              const matchesQuery = searchWords.some(word => 
+                title.includes(word) || 
+                description.includes(word) || 
+                serviceCategory.includes(word) ||
+                authorName.includes(word)
+              ) || title.includes(searchQuery) || description.includes(searchQuery);
+              
+              const matchesCategory = serviceCategory.includes(categoryFilter);
+              
+              return matchesQuery && matchesCategory;
+            }
+
+            // If neither query nor category, show all services
+            return true;
           });
 
           console.log('Filtered services from backend:', filteredServices);
@@ -156,7 +176,7 @@ function SearchResultsPage() {
             console.log('Search query:', query);
             console.log('Category filter:', category);
 
-            // If no search query, show all services
+            // If no search query and no category, show all services
             if (!query.trim() && !category) {
               console.log('No search query or category - showing all services');
               setResults(services);
@@ -172,20 +192,39 @@ function SearchResultsPage() {
               const searchQuery = query.toLowerCase();
               const categoryFilter = category.toLowerCase();
 
-              // Split search query into words for better matching
-              const searchWords = searchQuery.split(' ').filter(word => word.length > 0);
-              
-              // Check if any search word matches title, description, category, or author
-              const matchesQuery = searchWords.some(word => 
-                title.includes(word) || 
-                description.includes(word) || 
-                serviceCategory.includes(word) ||
-                authorName.includes(word)
-              ) || title.includes(searchQuery) || description.includes(searchQuery);
-              
-              const matchesCategory = !category || serviceCategory.includes(categoryFilter);
+              // If only category is selected (no query), show all services in that category
+              if (!query.trim() && category) {
+                return serviceCategory.includes(categoryFilter);
+              }
 
-              return matchesQuery && matchesCategory;
+              // If only query is provided (no category), search across all fields
+              if (query.trim() && !category) {
+                const searchWords = searchQuery.split(' ').filter(word => word.length > 0);
+                return searchWords.some(word => 
+                  title.includes(word) || 
+                  description.includes(word) || 
+                  serviceCategory.includes(word) ||
+                  authorName.includes(word)
+                ) || title.includes(searchQuery) || description.includes(searchQuery);
+              }
+
+              // If both query and category are provided, filter by both
+              if (query.trim() && category) {
+                const searchWords = searchQuery.split(' ').filter(word => word.length > 0);
+                const matchesQuery = searchWords.some(word => 
+                  title.includes(word) || 
+                  description.includes(word) || 
+                  serviceCategory.includes(word) ||
+                  authorName.includes(word)
+                ) || title.includes(searchQuery) || description.includes(searchQuery);
+                
+                const matchesCategory = serviceCategory.includes(categoryFilter);
+                
+                return matchesQuery && matchesCategory;
+              }
+
+              // If neither query nor category, show all services
+              return true;
             });
 
             console.log('Public filtered services:', filteredServices);
