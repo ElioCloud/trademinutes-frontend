@@ -539,6 +539,10 @@ export default function ServiceViewPage() {
 
                 {/* Selected Package Details */}
                 <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {packages[selectedPackage].title}
+                  </h3>
+                  
                   <div className="flex items-center justify-between">
                     <span className="text-2xl font-bold text-gray-900">
                       {price} Credits
@@ -547,6 +551,10 @@ export default function ServiceViewPage() {
                       <span>No tax</span>
                     </div>
                   </div>
+                  
+                  <p className="text-gray-600">
+                    {packages[selectedPackage].description}
+                  </p>
                 </div>
 
                 {/* Action Buttons */}
