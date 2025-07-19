@@ -132,51 +132,214 @@ function SearchResultsPage() {
           console.log('Filtered services from backend:', filteredServices);
           setResults(filteredServices);
         } else {
-          // For unauthenticated users, fetch services without authentication
-          try {
-            const response = await fetch(`${API_BASE_URL}/api/tasks/get/all`);
-            
-            if (!response.ok) {
-              throw new Error('Failed to fetch services');
+          // For unauthenticated users, use comprehensive mock data
+          const mockServices: Service[] = [
+            // Tech & Digital Skills
+            {
+              ID: '1',
+              Title: 'Python Programming Tutoring',
+              Description: 'Expert Python programming help for beginners and intermediate learners. Covering data structures, algorithms, and web development.',
+              Credits: 50,
+              Category: 'Tech & Digital Skills',
+              Location: 'Online',
+              Author: { Name: 'Sarah Johnson' },
+              Images: ['https://images.pexels.com/photos/267582/pexels-photo-267582.jpeg'],
+              rating: 4.8,
+              reviewCount: 24,
+              CreatedAt: Date.now() / 1000
+            },
+            {
+              ID: '2',
+              Title: 'Web Development with React',
+              Description: 'Learn modern web development with React.js. Build responsive, interactive user interfaces and single-page applications.',
+              Credits: 75,
+              Category: 'Tech & Digital Skills',
+              Location: 'Online',
+              Author: { Name: 'Mike Chen' },
+              Images: ['https://images.pexels.com/photos/1438081/pexels-photo-1438081.jpeg'],
+              rating: 4.9,
+              reviewCount: 18,
+              CreatedAt: Date.now() / 1000
+            },
+            {
+              ID: '3',
+              Title: 'JavaScript Fundamentals',
+              Description: 'Master JavaScript programming from basics to advanced concepts. Learn ES6+, DOM manipulation, and modern JS frameworks.',
+              Credits: 60,
+              Category: 'Tech & Digital Skills',
+              Location: 'Online',
+              Author: { Name: 'Emma Davis' },
+              Images: ['https://images.pexels.com/photos/1099680/pexels-photo-1099680.jpeg'],
+              rating: 4.7,
+              reviewCount: 31,
+              CreatedAt: Date.now() / 1000
+            },
+            // Academic Help
+            {
+              ID: '4',
+              Title: 'Mathematics Tutoring',
+              Description: 'Expert math tutoring for all levels - algebra, calculus, statistics, and advanced mathematics.',
+              Credits: 45,
+              Category: 'Academic Help',
+              Location: 'Online',
+              Author: { Name: 'Dr. Robert Smith' },
+              Images: ['https://images.pexels.com/photos/5905709/pexels-photo-5905709.jpeg'],
+              rating: 4.9,
+              reviewCount: 42,
+              CreatedAt: Date.now() / 1000
+            },
+            {
+              ID: '5',
+              Title: 'English Literature & Writing',
+              Description: 'Improve your writing skills, essay composition, and literary analysis. Perfect for students and professionals.',
+              Credits: 40,
+              Category: 'Academic Help',
+              Location: 'Online',
+              Author: { Name: 'Prof. Maria Garcia' },
+              Images: ['https://images.pexels.com/photos/5905712/pexels-photo-5905712.jpeg'],
+              rating: 4.8,
+              reviewCount: 28,
+              CreatedAt: Date.now() / 1000
+            },
+            // Creative & Arts
+            {
+              ID: '6',
+              Title: 'Graphic Design & Branding',
+              Description: 'Create stunning visual designs, logos, and brand identities using Adobe Creative Suite and modern design tools.',
+              Credits: 70,
+              Category: 'Creative & Arts',
+              Location: 'Online',
+              Author: { Name: 'Sophie Anderson' },
+              Images: ['https://images.pexels.com/photos/5905718/pexels-photo-5905718.jpeg'],
+              rating: 4.9,
+              reviewCount: 56,
+              CreatedAt: Date.now() / 1000
+            },
+            {
+              ID: '7',
+              Title: 'Digital Art & Illustration',
+              Description: 'Learn digital painting, illustration techniques, and create amazing artwork using Procreate and Photoshop.',
+              Credits: 65,
+              Category: 'Creative & Arts',
+              Location: 'Online',
+              Author: { Name: 'David Kim' },
+              Images: ['https://images.pexels.com/photos/5905721/pexels-photo-5905721.jpeg'],
+              rating: 4.8,
+              reviewCount: 33,
+              CreatedAt: Date.now() / 1000
+            },
+            // Health & Wellness
+            {
+              ID: '8',
+              Title: 'Personal Fitness Training',
+              Description: 'Get personalized workout plans, nutrition guidance, and fitness coaching to achieve your health goals.',
+              Credits: 80,
+              Category: 'Health & Wellness',
+              Location: 'Online',
+              Author: { Name: 'Chris Thompson' },
+              Images: ['https://images.pexels.com/photos/5905727/pexels-photo-5905727.jpeg'],
+              rating: 4.9,
+              reviewCount: 67,
+              CreatedAt: Date.now() / 1000
+            },
+            {
+              ID: '9',
+              Title: 'Yoga & Meditation',
+              Description: 'Learn yoga poses, breathing techniques, and meditation practices for stress relief and mindfulness.',
+              Credits: 45,
+              Category: 'Health & Wellness',
+              Location: 'Online',
+              Author: { Name: 'Priya Patel' },
+              Images: ['https://images.pexels.com/photos/5905730/pexels-photo-5905730.jpeg'],
+              rating: 4.8,
+              reviewCount: 38,
+              CreatedAt: Date.now() / 1000
+            },
+            // Language & Culture
+            {
+              ID: '10',
+              Title: 'Spanish Language Learning',
+              Description: 'Learn Spanish from beginner to advanced levels. Practice conversation, grammar, and cultural understanding.',
+              Credits: 50,
+              Category: 'Language & Culture',
+              Location: 'Online',
+              Author: { Name: 'Carlos Mendez' },
+              Images: ['https://images.pexels.com/photos/5905733/pexels-photo-5905733.jpeg'],
+              rating: 4.7,
+              reviewCount: 25,
+              CreatedAt: Date.now() / 1000
+            },
+            // Handy Skills & Repair
+            {
+              ID: '11',
+              Title: 'Home Repair & Maintenance',
+              Description: 'Learn essential home repair skills, plumbing basics, electrical work, and general maintenance.',
+              Credits: 70,
+              Category: 'Handy Skills & Repair',
+              Location: 'Local',
+              Author: { Name: 'Tom Johnson' },
+              Images: ['https://images.pexels.com/photos/5905739/pexels-photo-5905739.jpeg'],
+              rating: 4.8,
+              reviewCount: 44,
+              CreatedAt: Date.now() / 1000
+            },
+            // Business & Entrepreneurship
+            {
+              ID: '12',
+              Title: 'Business Strategy & Planning',
+              Description: 'Develop business strategies, create business plans, and learn entrepreneurship fundamentals.',
+              Credits: 85,
+              Category: 'Entrepreneurship & Business',
+              Location: 'Online',
+              Author: { Name: 'Jennifer Adams' },
+              Images: ['https://images.pexels.com/photos/5905745/pexels-photo-5905745.jpeg'],
+              rating: 4.9,
+              reviewCount: 52,
+              CreatedAt: Date.now() / 1000
+            },
+            // Everyday Help
+            {
+              ID: '13',
+              Title: 'Cooking & Meal Planning',
+              Description: 'Learn cooking techniques, meal planning, and healthy recipe creation for busy lifestyles.',
+              Credits: 45,
+              Category: 'Everyday Help',
+              Location: 'Online',
+              Author: { Name: 'Chef Sarah Wilson' },
+              Images: ['https://images.pexels.com/photos/5905751/pexels-photo-5905751.jpeg'],
+              rating: 4.7,
+              reviewCount: 36,
+              CreatedAt: Date.now() / 1000
             }
+          ];
 
-            const data = await response.json();
-            console.log('Public search API response:', data);
+          // Filter mock services based on query and category with improved search logic
+          const filteredServices = mockServices.filter((service: Service) => {
+            const title = (service.Title || service.title || '').toLowerCase();
+            const description = (service.Description || service.description || '').toLowerCase();
+            const serviceCategory = (service.Category || service.category || '').toLowerCase();
+            const authorName = (service.Author?.Name || service.Author?.name || service.author?.name || '').toLowerCase();
+            const searchQuery = query.toLowerCase();
+            const categoryFilter = category.toLowerCase();
+
+            // Split search query into words for better matching
+            const searchWords = searchQuery.split(' ').filter(word => word.length > 0);
             
-            const services = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
-            console.log('Public services array:', services);
+            // Check if any search word matches title, description, category, or author
+            const matchesQuery = searchWords.some(word => 
+              title.includes(word) || 
+              description.includes(word) || 
+              serviceCategory.includes(word) ||
+              authorName.includes(word)
+            ) || title.includes(searchQuery) || description.includes(searchQuery);
+            
+            const matchesCategory = !category || serviceCategory.includes(categoryFilter);
 
-            // Filter services based on query and category with improved search logic
-            const filteredServices = services.filter((service: Service) => {
-              const title = (service.Title || service.title || '').toLowerCase();
-              const description = (service.Description || service.description || '').toLowerCase();
-              const serviceCategory = (service.Category || service.category || '').toLowerCase();
-              const authorName = (service.Author?.Name || service.Author?.name || service.author?.name || '').toLowerCase();
-              const searchQuery = query.toLowerCase();
-              const categoryFilter = category.toLowerCase();
+            return matchesQuery && matchesCategory;
+          });
 
-              // Split search query into words for better matching
-              const searchWords = searchQuery.split(' ').filter(word => word.length > 0);
-              
-              // Check if any search word matches title, description, category, or author
-              const matchesQuery = searchWords.some(word => 
-                title.includes(word) || 
-                description.includes(word) || 
-                serviceCategory.includes(word) ||
-                authorName.includes(word)
-              ) || title.includes(searchQuery) || description.includes(searchQuery);
-              
-              const matchesCategory = !category || serviceCategory.includes(categoryFilter);
-
-              return matchesQuery && matchesCategory;
-            });
-
-            console.log('Public filtered services:', filteredServices);
-            setResults(filteredServices);
-          } catch (publicErr) {
-            console.error('Error fetching public services:', publicErr);
-            setError('Failed to load search results. Please try again.');
-          }
+          console.log('Mock filtered services for public users:', filteredServices);
+          setResults(filteredServices);
         }
       } catch (err) {
         console.error('Error fetching search results:', err);
