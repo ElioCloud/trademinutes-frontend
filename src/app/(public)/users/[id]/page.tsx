@@ -282,30 +282,28 @@ export default function UserProfilePage() {
     <div className="min-h-screen bg-gray-50">
       {/* Cover Image */}
       <div className="relative w-full h-48 md:h-64 bg-gradient-to-r from-blue-500 to-purple-600">
-        {profile.CoverImageURL && (
-          <Image 
-            src={profile.CoverImageURL} 
-            alt="Cover" 
-            fill
-            className="object-cover" 
-          />
-        )}
+        <Image 
+          src={profile.CoverImageURL || "https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80"} 
+          alt="Cover" 
+          fill
+          className="object-cover" 
+        />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-10">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Column - Profile Card */}
           <div className="lg:w-1/3">
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
               {/* Profile Picture */}
-              <div className="relative p-6">
+              <div className="relative p-6 pt-16">
                 <div className="flex justify-center">
                   <Image 
                     src={profile.ProfilePictureURL || "/categories-banner.png"} 
                     alt={profile.Name} 
                     width={120} 
                     height={120} 
-                    className="rounded-full border-4 border-white shadow-lg object-cover w-30 h-30" 
+                    className="rounded-full border-4 border-white shadow-xl object-cover w-30 h-30" 
                   />
                 </div>
                 <div className="text-center mt-4">
