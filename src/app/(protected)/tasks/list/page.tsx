@@ -67,13 +67,30 @@ export default function TaskListPage() {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
       const json = await res.json();
+      console.log("=== FRONTEND DEBUG: Raw API Response ===");
+      console.log("API Response:", json);
+      
+      let processedTasks;
       if (json && Array.isArray(json.data)) {
-        setTasks(json.data.map((task: any) => ({ ...task, id: task.id || task._id })));
+        processedTasks = json.data.map((task: any) => ({ ...task, id: task.id || task._id }));
       } else if (Array.isArray(json)) {
-        setTasks(json.map((task: any) => ({ ...task, id: task.id || task._id })));
+        processedTasks = json.map((task: any) => ({ ...task, id: task.id || task._id }));
       } else {
-        setTasks([]);
+        processedTasks = [];
       }
+      
+      console.log("=== FRONTEND DEBUG: Processed Tasks ===");
+      processedTasks.forEach((task: any, index: number) => {
+        console.log(`Task ${index + 1}:`, {
+          id: task.id,
+          title: task.Title,
+          images: task.Images,
+          imagesLength: task.Images ? task.Images.length : 0,
+          hasImages: task.Images && task.Images.length > 0
+        });
+      });
+      
+      setTasks(processedTasks);
     } catch (err) {
       console.error("Failed to fetch tasks:", err);
     } finally {
@@ -210,6 +227,12 @@ export default function TaskListPage() {
                 { bg: 'bg-yellow-100', text: 'text-yellow-600' },
                 { bg: 'bg-orange-100', text: 'text-orange-600' }
               ];
+              
+              // Debug image rendering
+              console.log(`=== RENDERING TASK ${idx + 1}: ${task.Title} ===`);
+              console.log('Task images:', task.Images);
+              console.log('Has images:', task.Images && task.Images.length > 0);
+              console.log('First image:', task.Images && task.Images.length > 0 ? task.Images[0] : 'None');
               
               return (
                 <div key={task.id ?? idx} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1" onClick={() => {
