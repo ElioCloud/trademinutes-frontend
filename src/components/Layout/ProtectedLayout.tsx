@@ -62,16 +62,40 @@ export default function ProtectedLayout({ children, headerName }: LayoutProps) {
         }
 
         const json = await res.json();
+        
+        // Handle different response structures and null values
+        if (!json) {
+          throw new Error("Empty response from API");
+        }
+        
         const tasks = json.data || json;
         
-        // Transform tasks to activity format
-        const activities: RealTimeActivity[] = tasks.slice(0, 10).map((task: any) => ({
-          user: task.Author?.Name || 'Anonymous',
-          title: task.Title || 'Untitled Task',
-          category: task.Category || 'General',
-          avatar: task.Author?.Avatar || 'https://images.pexels.com/photos/277576/pexels-photo-277576.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2',
-          id: task.ID || task.id || task._id // Ensure correct ID is used
-        }));
+        // Ensure tasks is an array before processing
+        if (!Array.isArray(tasks)) {
+          throw new Error("Invalid response format: tasks is not an array");
+        }
+        
+        // Transform tasks to activity format with error handling
+        const activities: RealTimeActivity[] = tasks.slice(0, 10).map((task: any) => {
+          // Ensure task is a valid object
+          if (!task || typeof task !== 'object') {
+            return {
+              user: 'Anonymous',
+              title: 'Untitled Task',
+              category: 'General',
+              avatar: 'https://images.pexels.com/photos/277576/pexels-photo-277576.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2',
+              id: 'unknown'
+            };
+          }
+          
+          return {
+            user: task.Author?.Name || task.author?.name || 'Anonymous',
+            title: task.Title || task.title || 'Untitled Task',
+            category: task.Category || task.category || 'General',
+            avatar: task.Author?.Avatar || task.author?.avatar || 'https://images.pexels.com/photos/277576/pexels-photo-277576.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2',
+            id: task.ID || task.id || task._id || 'unknown' // Ensure correct ID is used
+          };
+        }).filter(Boolean); // Remove any undefined entries
         setRealTimeActivities(activities);
       } catch (err) {
         console.error("Failed to fetch real-time activities:", err);
