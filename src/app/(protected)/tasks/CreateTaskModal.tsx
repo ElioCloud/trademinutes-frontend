@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { FaUpload, FaTimes, FaImage } from "react-icons/fa";
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -29,6 +30,11 @@ export default function CreateTaskModal({
   const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [coverImage, setCoverImage] = useState<File | null>(null);
+  const [coverImagePreview, setCoverImagePreview] = useState<string>("");
+  const [contentImages, setContentImages] = useState<File[]>([]);
+  const [contentImagePreviews, setContentImagePreviews] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
   const API_BASE_URL =
     process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084";
 
@@ -135,23 +141,79 @@ export default function CreateTaskModal({
     });
   };
 
+  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        showToast("❌ Cover image must be less than 5MB", "error");
+        return;
+      }
+      setCoverImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setCoverImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleContentImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (contentImages.length + files.length > 5) {
+      showToast("❌ Maximum 5 content images allowed", "error");
+      return;
+    }
+    
+    const validFiles = files.filter(file => {
+      if (file.size > 5 * 1024 * 1024) {
+        showToast("❌ Each image must be less than 5MB", "error");
+        return false;
+      }
+      return true;
+    });
+
+    setContentImages(prev => [...prev, ...validFiles]);
+    
+    validFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setContentImagePreviews(prev => [...prev, e.target?.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeCoverImage = () => {
+    setCoverImage(null);
+    setCoverImagePreview("");
+  };
+
+  const removeContentImage = (index: number) => {
+    setContentImages(prev => prev.filter((_, i) => i !== index));
+    setContentImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    setUploading(true);
 
     const { date, timeFrom, timeTo } = formData.availability[0];
 
     if (!date) {
       showToast("❌ Please select a date.", "error");
+      setUploading(false);
       return;
     }
 
     if (!timeFrom || !timeTo) {
       showToast("❌ Please select both start and end times.", "error");
+      setUploading(false);
       return;
     }
 
     if (timeFrom >= timeTo) {
       showToast("⏰ 'Time From' must be earlier than 'Time To'", "error");
+      setUploading(false);
       return;
     }
 
@@ -165,26 +227,43 @@ export default function CreateTaskModal({
       longitude === 0
     ) {
       showToast("❌ Please select a valid location from the suggestions.", "error");
+      setUploading(false);
       return;
     }
 
-    const payload = {
-      ...formData,
-      latitude,
-      longitude,
-      category: selectedCategory,
-      credits: Number(formData.credits),
-    };
     const token = localStorage.getItem("token");
 
     try {
+      // Create FormData for multipart upload
+      const formDataToSend = new FormData();
+      
+      // Add basic task data
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('location', formData.location);
+      formDataToSend.append('latitude', latitude.toString());
+      formDataToSend.append('longitude', longitude.toString());
+      formDataToSend.append('locationType', formData.locationType);
+      formDataToSend.append('credits', formData.credits);
+      formDataToSend.append('category', selectedCategory);
+      formDataToSend.append('availability', JSON.stringify(formData.availability));
+
+      // Add cover image
+      if (coverImage) {
+        formDataToSend.append('coverImage', coverImage);
+      }
+
+      // Add content images
+      contentImages.forEach((image, index) => {
+        formDataToSend.append('contentImages', image);
+      });
+
       const res = await fetch(`${API_BASE_URL}/api/tasks/create`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload),
+        body: formDataToSend,
       });
 
       if (!res.ok) {
@@ -199,6 +278,8 @@ export default function CreateTaskModal({
     } catch (err) {
       console.error("Network error:", err);
       showToast("❌ Network error occurred.", "error");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -215,6 +296,76 @@ export default function CreateTaskModal({
           📝 Create Task
         </h2>
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Cover Image Upload */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">Cover Image</label>
+            {coverImagePreview ? (
+              <div className="relative">
+                <img
+                  src={coverImagePreview}
+                  alt="Cover preview"
+                  className="w-full h-32 object-cover rounded-lg border"
+                />
+                <button
+                  type="button"
+                  onClick={removeCoverImage}
+                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                >
+                  <FaTimes className="w-3 h-3" />
+                </button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition">
+                <FaUpload className="w-8 h-8 text-gray-400 mb-2" />
+                <span className="text-sm text-gray-500">Upload cover image</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCoverImageChange}
+                  className="hidden"
+                />
+              </label>
+            )}
+          </div>
+
+          {/* Content Images Upload */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Content Images (Optional - Max 5)
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {contentImagePreviews.map((preview, index) => (
+                <div key={index} className="relative">
+                  <img
+                    src={preview}
+                    alt={`Content ${index + 1}`}
+                    className="w-full h-20 object-cover rounded-lg border"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeContentImage(index)}
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                  >
+                    <FaTimes className="w-2 h-2" />
+                  </button>
+                </div>
+              ))}
+              {contentImagePreviews.length < 5 && (
+                <label className="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition">
+                  <FaImage className="w-4 h-4 text-gray-400 mb-1" />
+                  <span className="text-xs text-gray-500">Add image</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleContentImagesChange}
+                    className="hidden"
+                  />
+                </label>
+              )}
+            </div>
+          </div>
+
           <select
             name="category"
             value={selectedCategory}
@@ -334,9 +485,14 @@ export default function CreateTaskModal({
 
           <button
             type="submit"
-            className="w-full bg-emerald-600 text-white py-2 rounded-md font-semibold hover:bg-emerald-700 transition"
+            disabled={uploading}
+            className={`w-full py-2 rounded-md font-semibold transition ${
+              uploading 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-emerald-600 hover:bg-emerald-700'
+            } text-white`}
           >
-            Create Task
+            {uploading ? 'Creating Task...' : 'Create Task'}
           </button>
         </form>
       </div>
