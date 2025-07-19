@@ -962,12 +962,23 @@ export default function ProfileDashboardPage() {
             
             <div className="text-center mb-6">
               <div className="relative inline-block">
-                <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-white font-bold text-lg">
-                    {profile?.Name?.charAt(0) || "J"}
-                  </span>
-                </div>
-                <div className="absolute inset-0 w-20 h-20 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+                {profile?.ProfilePictureURL ? (
+                  <div className="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden border-4 border-blue-200">
+                    <Image
+                      src={profile.ProfilePictureURL}
+                      alt={`${profile.Name}'s profile picture`}
+                      width={80}
+                      height={80}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3 border-4 border-blue-200">
+                    <span className="text-white font-bold text-lg">
+                      {profile?.Name?.charAt(0) || "J"}
+                    </span>
+                  </div>
+                )}
               </div>
               <p className="text-sm text-gray-600 mb-1">{profile?.completedServices || 0} services completed</p>
               <h4 className="text-lg font-semibold text-gray-900 mb-2">Good Morning {profile?.Name?.split(' ')[0] || 'Jason'} 🔥</h4>
