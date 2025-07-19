@@ -152,6 +152,16 @@ function SearchResultsPage() {
             
             const services = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
             console.log('Public services array:', services);
+            console.log('Total services from API:', services.length);
+            console.log('Search query:', query);
+            console.log('Category filter:', category);
+
+            // If no search query, show all services
+            if (!query.trim() && !category) {
+              console.log('No search query or category - showing all services');
+              setResults(services);
+              return;
+            }
 
             // Filter services based on query and category with improved search logic
             const filteredServices = services.filter((service: Service) => {
