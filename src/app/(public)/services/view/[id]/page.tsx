@@ -308,37 +308,7 @@ export default function ServiceViewPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Service Title and Provider Info */}
-            <div className="bg-white rounded-xl p-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                {title || 'Service Title'}
-              </h1>
-              
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="relative">
-                  <Image
-                    src={avatar || '/api/placeholder/60/60'}
-                    alt={user}
-                    width={60}
-                    height={60}
-                    className="rounded-full"
-                  />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">{user}</h3>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <FaStar key={i} className={`w-4 h-4 ${i < Math.floor(rating) ? 'text-yellow-400' : 'text-gray-300'}`} />
-                      ))}
-                    </div>
-                    <span className="text-sm text-gray-600">{rating} ({reviewCount} reviews)</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Image Gallery */}
+            {/* Cover Image */}
             <div className="bg-white rounded-xl overflow-hidden">
               <div className="relative h-96">
                 {images.length > 0 ? (
@@ -395,6 +365,36 @@ export default function ServiceViewPage() {
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Service Title and Provider Info */}
+            <div className="bg-white rounded-xl p-6">
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">
+                {title || 'Service Title'}
+              </h1>
+              
+              <div className="flex items-center space-x-4 mb-6">
+                <div className="relative">
+                  <Image
+                    src={avatar || '/api/placeholder/60/60'}
+                    alt={user}
+                    width={60}
+                    height={60}
+                    className="rounded-full"
+                  />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900">{user}</h3>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <div className="flex items-center">
+                      {[...Array(5)].map((_, i) => (
+                        <FaStar key={i} className={`w-4 h-4 ${i < Math.floor(rating) ? 'text-yellow-400' : 'text-gray-300'}`} />
+                      ))}
+                    </div>
+                    <span className="text-sm text-gray-600">{rating} ({reviewCount} reviews)</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Reviews Section */}
