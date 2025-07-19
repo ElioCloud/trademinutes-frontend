@@ -467,7 +467,7 @@ export default function UserProfileSummaryPage() {
                   <div className="text-center">
                     <h2 className="text-xl font-bold text-gray-900">{profile.Name || 'TradeMinutes User'}</h2>
                     <p className="text-sm text-gray-500">Marketplace Member</p>
-                    <p className="text-xs text-gray-400 mt-1">Click the edit icons to update your profile</p>
+                    <p className="text-xs text-gray-400 mt-1">(Click the edit icons to update your profile)</p>
                   </div>
                 </>
               )}
@@ -475,32 +475,32 @@ export default function UserProfileSummaryPage() {
 
             {/* Profile Stats */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg text-white">
                 <div className="flex items-center gap-3">
-                  <FiDollarSign className="w-5 h-5 text-gray-600" />
+                  <FiDollarSign className="w-5 h-5" />
                   <div>
-                    <p className="text-sm text-gray-600">Credits</p>
-                    <p className="text-xl font-bold text-gray-900">{profile.Credits || 0}</p>
+                    <p className="text-sm opacity-90">Credits</p>
+                    <p className="text-xl font-bold">{profile.Credits || 0}</p>
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-lg text-white">
                 <div className="flex items-center gap-3">
-                  <FiCheck className="w-5 h-5 text-gray-600" />
+                  <FiCheck className="w-5 h-5" />
                   <div>
-                    <p className="text-sm text-gray-600">Tasks Completed</p>
-                    <p className="text-xl font-bold text-gray-900">12</p>
+                    <p className="text-sm opacity-90">Tasks Completed</p>
+                    <p className="text-xl font-bold">12</p>
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg text-white">
                 <div className="flex items-center gap-3">
-                  <FiStar className="w-5 h-5 text-gray-600" />
+                  <FiStar className="w-5 h-5" />
                   <div>
-                    <p className="text-sm text-gray-600">Rating</p>
-                    <p className="text-xl font-bold text-gray-900">4.9/5</p>
+                    <p className="text-sm opacity-90">Rating</p>
+                    <p className="text-xl font-bold">4.9/5</p>
                   </div>
                 </div>
               </div>
