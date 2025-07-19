@@ -338,7 +338,7 @@ export default function ServiceGrid({ items = services }: { items?: (Service | t
   const goTo = (p: number) => setPage(Math.min(Math.max(p, 1), totalPages));
 
   const handleCardClick = (serviceId: string | number) => {
-    router.push(`/tasks/view/${String(serviceId)}`);
+    router.push(`/services/view/${String(serviceId)}`);
   };
 
   if (loading) {

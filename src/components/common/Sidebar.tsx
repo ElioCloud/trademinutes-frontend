@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { MdDashboard, MdTask, MdExplore, MdMessage } from "react-icons/md";
-import { FiLogOut, FiSettings, FiHome, FiSearch, FiList, FiCalendar, FiMessageCircle, FiBell, FiUser, FiDollarSign, FiTrendingUp, FiUsers, FiHelpCircle, FiFileText, FiAward, FiBookOpen, FiPlus, FiShield } from "react-icons/fi";
+import { FiLogOut, FiSettings, FiHome, FiSearch, FiList, FiCalendar, FiMessageCircle, FiBell, FiUser, FiDollarSign, FiTrendingUp, FiUsers, FiHelpCircle, FiFileText, FiAward, FiBookOpen, FiPlus, FiShield, FiHeart } from "react-icons/fi";
 import { FaRegCalendarAlt, FaUserAlt } from "react-icons/fa";
 import Link from "next/link";
 import { BellIcon } from "@heroicons/react/24/outline";
@@ -203,6 +203,7 @@ export default function Sidebar() {
                 pathname={pathname}
                 icon={<FiPlus size={22} />}
               />
+
             </div>
           </div>
 

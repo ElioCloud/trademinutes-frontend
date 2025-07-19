@@ -2,10 +2,10 @@
 
 import { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import {
   FiChevronLeft,
   FiChevronRight,
-  FiHeart,
   FiStar,
 } from 'react-icons/fi';
 import { FaMapMarkerAlt, FaClock, FaCoins } from 'react-icons/fa';
@@ -53,6 +53,7 @@ type Service = {
 
 
 export default function TrendingServices() {
+  const router = useRouter();
   const rowRef = useRef<HTMLDivElement | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -100,6 +101,13 @@ export default function TrendingServices() {
     if (!container) return;
     const shift = dir === 'left' ? -320 : 320; // pixel step
     container.scrollBy({ left: shift, behavior: 'smooth' });
+  };
+
+  const handleServiceClick = (service: Service) => {
+    const serviceId = service.ID || service.id;
+    if (serviceId) {
+      router.push(`/services/view/${serviceId}`);
+    }
   };
 
   return (
@@ -168,6 +176,7 @@ export default function TrendingServices() {
                   return (
                     <div
                       key={service.ID || service.id}
+                      onClick={() => handleServiceClick(service)}
                       className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1 min-w-[300px] max-w-[300px] snap-start flex-shrink-0"
                     >
                       {/* image */}
@@ -184,9 +193,6 @@ export default function TrendingServices() {
                           <div className={`w-full h-full bg-gradient-to-br ${gradients[index % gradients.length]}`}></div>
                         )}
                         <div className="absolute inset-0 bg-black/20"></div>
-                        <button className="absolute top-2 right-2 bg-white rounded-full p-2 shadow hover:bg-gray-50">
-                          <FiHeart className="w-4 h-4" />
-                        </button>
                       </div>
 
                       {/* content */}
