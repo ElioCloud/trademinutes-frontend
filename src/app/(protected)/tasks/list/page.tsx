@@ -250,15 +250,20 @@ export default function TaskListPage() {
               console.log('Has images:', task.Images && task.Images.length > 0);
               console.log('First image:', task.Images && task.Images.length > 0 ? task.Images[0] : 'None');
               
+              // Convert primitive.A to string array if needed
+              const imageUrls = task.Images && Array.isArray(task.Images) ? task.Images : [];
+              console.log('Image URLs:', imageUrls);
+              console.log('Has image URLs:', imageUrls.length > 0);
+              
               return (
                 <div key={task.id ?? idx} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1" onClick={() => {
                   console.log('Clicking task:', task.id, task.Title);
                   router.push(`/tasks/view/${String(task.id)}`);
                 }}>
                   <div className="h-32 relative">
-                    {task.Images && task.Images.length > 0 ? (
+                    {imageUrls.length > 0 ? (
                       <img
-                        src={task.Images[0]}
+                        src={imageUrls[0]}
                         alt={task.Title}
                         className="w-full h-full object-cover"
                       />
