@@ -410,7 +410,7 @@ export default function UserProfileSummaryPage() {
       <div className="min-h-screen bg-white text-black flex flex-col gap-6 p-6">
         <div className="flex flex-col md:flex-row gap-6 w-full max-w-[1400px] mx-auto">
           {/* Left: Profile Card */}
-          <div className="w-full md:w-1/4 bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col gap-6">
+          <div className="w-full md:w-1/4 bg-white rounded-xl shadow-sm overflow-hidden p-6 flex flex-col gap-6">
             <div className="flex flex-col items-center gap-4">
               {editingProfilePicture ? (
                 <div className="w-full">
@@ -641,10 +641,10 @@ export default function UserProfileSummaryPage() {
             </div>
           </div>
 
-          {/* Center: Stats + About + Experience */}
-          <div className="w-full md:w-2/4 flex flex-col gap-6">
-            {/* About/Description */}
-            <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+                      {/* Center: Stats + About + Experience */}
+            <div className="w-full md:w-2/4 flex flex-col gap-6">
+              {/* About/Description */}
+              <div className="bg-white rounded-xl shadow-sm overflow-hidden p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                   <FaUser className="w-5 h-5 text-blue-500" />
@@ -802,7 +802,7 @@ export default function UserProfileSummaryPage() {
             </div>
 
             {/* Today's Schedule */}
-            <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden p-6">
               <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">
                 <FaCalendar className="w-5 h-5 text-green-500" />
                 Today's Tasks
@@ -844,7 +844,7 @@ export default function UserProfileSummaryPage() {
 
           {/* Right: Reviews/Feedback */}
           <div className="w-full md:w-1/4 flex flex-col gap-6">
-            <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden p-6">
               <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">
                 <FaStar className="w-5 h-5 text-yellow-500" />
                 User Reviews
@@ -958,7 +958,7 @@ export default function UserProfileSummaryPage() {
             </div>
 
             {/* Quick Stats */}
-            <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden p-6">
               <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">
                 <FaChartLine className="w-5 h-5 text-purple-500" />
                 Quick Stats
