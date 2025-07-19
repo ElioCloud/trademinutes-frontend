@@ -26,10 +26,12 @@ type Service = {
     name?: string;
     Avatar?: string;
     avatar?: string;
+    ProfilePictureURL?: string;
   };
   author?: {
     name?: string;
     avatar?: string;
+    profilePictureURL?: string;
   };
   Images?: string[];
   rating?: number;
@@ -134,62 +136,93 @@ export default function TrendingServices() {
                   </div>
                 ))
               ) : (
-                services.map((service) => (
-                  <div
-                    key={service.ID || service.id}
-                    className="bg-white rounded-lg shadow-sm min-w-[300px] max-w-[300px] snap-start flex-shrink-0"
-                  >
-                    {/* image */}
-                    <div className="relative">
-                      {service.Images && service.Images.length > 0 ? (
-                        <Image
-                          src={service.Images[0]}
-                          alt={service.Title || service.title || 'Service'}
-                          width={300}
-                          height={200}
-                          className="rounded-t-lg object-cover h-[200px] w-full"
-                        />
-                      ) : (
-                        <div className="h-[200px] bg-gradient-to-br from-blue-400 to-blue-600 rounded-t-lg flex items-center justify-center">
-                          <span className="text-white text-3xl font-bold">
-                            {(service.Title || service.title || 'S').charAt(0).toUpperCase()}
+                services.map((service, index) => {
+                  const gradients = [
+                    'from-blue-400 to-blue-600',
+                    'from-purple-400 to-purple-600', 
+                    'from-green-400 to-green-600',
+                    'from-pink-400 to-pink-600',
+                    'from-indigo-400 to-indigo-600'
+                  ];
+                  const colors = [
+                    { bg: 'bg-blue-100', text: 'text-blue-600' },
+                    { bg: 'bg-purple-100', text: 'text-purple-600' },
+                    { bg: 'bg-green-100', text: 'text-green-600' },
+                    { bg: 'bg-pink-100', text: 'text-pink-600' },
+                    { bg: 'bg-indigo-100', text: 'text-indigo-600' }
+                  ];
+                  
+                  return (
+                    <div
+                      key={service.ID || service.id}
+                      className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1 min-w-[300px] max-w-[300px] snap-start flex-shrink-0"
+                    >
+                      {/* image */}
+                      <div className="h-32 relative">
+                        {service.Images && service.Images.length > 0 ? (
+                          <Image
+                            src={service.Images[0]}
+                            alt={service.Title || service.title || 'Service'}
+                            width={300}
+                            height={128}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className={`w-full h-full bg-gradient-to-br ${gradients[index % gradients.length]}`}></div>
+                        )}
+                        <div className="absolute inset-0 bg-black/20"></div>
+                        <button className="absolute top-2 right-2 bg-white rounded-full p-2 shadow hover:bg-gray-50">
+                          <FiHeart className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* content */}
+                      <div className="p-4">
+                        <span className={`inline-block px-2 py-1 ${colors[index % colors.length].bg} ${colors[index % colors.length].text} text-xs font-semibold rounded mb-2`}>
+                          {service.Category || service.category || 'General'}
+                        </span>
+                        <h3 className="font-semibold text-gray-900 mb-2 truncate">
+                          {service.Title || service.title || 'Service Title'}
+                        </h3>
+                        
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            {(service.Author?.Avatar || service.Author?.ProfilePictureURL || service.author?.avatar || service.author?.profilePictureURL) ? (
+                              <Image 
+                                src={service.Author?.Avatar || service.Author?.ProfilePictureURL || service.author?.avatar || service.author?.profilePictureURL || ''} 
+                                alt={service.Author?.Name || service.author?.name || 'Provider'} 
+                                width={24}
+                                height={24}
+                                className="w-6 h-6 rounded-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                }}
+                              />
+                            ) : null}
+                            <div className={`w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-semibold ${(service.Author?.Avatar || service.Author?.ProfilePictureURL || service.author?.avatar || service.author?.profilePictureURL) ? 'hidden' : ''}`}>
+                              {(service.Author?.Name || service.Author?.name || service.author?.name || 'P').charAt(0).toUpperCase()}
+                            </div>
+                            <span className="text-sm text-gray-600">
+                              {service.Author?.Name || service.Author?.name || service.author?.name || 'Provider'}
+                            </span>
+                          </div>
+                          <span className="text-lg font-bold text-green-600">
+                            {service.Credits || service.credits || 0} Credits
                           </span>
                         </div>
-                      )}
-                      <button className="absolute top-2 right-2 bg-white rounded-full p-2 shadow">
-                        <FiHeart />
-                      </button>
-                    </div>
-
-                    {/* content */}
-                    <div className="p-4">
-                      <p className="text-sm text-gray-500">{service.Category || service.category || 'General'}</p>
-                      <h3 className="text-[17px] font-semibold mt-1 text-gray-900 truncate">
-                        {service.Title || service.title || 'Service Title'}
-                      </h3>
-
-                      {/* rating */}
-                      <div className="flex items-center text-sm text-gray-600 mt-2">
-                        <FiStar className="text-yellow-400 mr-1" />
-                        {service.rating || 4.5}
-                        <span className="ml-1">({service.reviewCount || Math.floor(Math.random() * 50) + 10} reviews)</span>
-                      </div>
-
-                      {/* footer */}
-                      <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-                            {(service.Author?.Name || service.Author?.name || service.author?.name || 'P').charAt(0).toUpperCase()}
-                          </div>
-                          <span className="text-sm">{service.Author?.Name || service.Author?.name || service.author?.name || 'Provider'}</span>
+                        
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <FiStar className="w-4 h-4 text-yellow-400" />
+                          <span>
+                            {service.rating || 4.5} 
+                            ({service.reviewCount || Math.floor(Math.random() * 50) + 10} reviews)
+                          </span>
                         </div>
-                        <span className="text-sm text-gray-500">
-                          <strong className="text-green-600">{service.Credits || service.credits || 0} credits</strong>
-                        </span>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>

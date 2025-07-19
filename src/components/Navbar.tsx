@@ -75,13 +75,7 @@ export default function Navbar() {
           {/* Nav dropdowns */}
           <nav className="flex gap-6 text-sm font-medium items-center">
            
-            <Dropdown
-              label="Browse Services"
-              items={[
-                { name: "By Category", href: "/services/category" },
-                { name: "All Services", href: "/services/all" },
-              ]}
-            />
+            <Link href="/services/all" className="hover:text-green-600">Browse Services</Link>
             <Dropdown
               label="Users"
               items={[
@@ -113,7 +107,7 @@ export default function Navbar() {
       {open && (
         <div className="md:hidden bg-white px-4 py-4 space-y-3 shadow-md text-sm">
         
-          <Link href="/jobs">Browse Services</Link>
+          <Link href="/services/all">Browse Services</Link>
           <Link href="/users">Users</Link>
           <Link href="/about">Pages</Link>
           <Link href="/contact">Contact</Link>
