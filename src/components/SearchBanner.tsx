@@ -27,15 +27,6 @@ export default function SearchBanner({ query, category, resultCount }: SearchBan
                         Found {resultCount} service{resultCount !== 1 ? 's' : ''}
                     </p>
                 )}
-
-                <button className="flex items-center gap-2 text-sm font-medium text-gray-800">
-                    <span className="bg-white rounded-full p-2 shadow">
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M6 4l8 6-8 6V4z" />
-                        </svg>
-                    </span>
-                    How TradeMinutes Works
-                </button>
             </div>
 
             {/* Right Illustration */}
