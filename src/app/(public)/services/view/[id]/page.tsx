@@ -539,52 +539,13 @@ export default function ServiceViewPage() {
 
                 {/* Selected Package Details */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {packages[selectedPackage].title}
-                  </h3>
-                  
                   <div className="flex items-center justify-between">
                     <span className="text-2xl font-bold text-gray-900">
-                      CA${packages[selectedPackage].price}
+                      {price} Credits
                     </span>
                     <div className="flex items-center text-sm text-gray-500">
-                      <span>+ fees</span>
-                      <FaInfoCircle className="w-4 h-4 ml-1" />
+                      <span>No tax</span>
                     </div>
-                  </div>
-                  
-                  <p className="text-gray-600">
-                    {packages[selectedPackage].description}
-                  </p>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <FaClock className="w-4 h-4" />
-                      <span>{packages[selectedPackage].deliveryTime}</span>
-                    </div>
-                    
-                    {packages[selectedPackage].features.map((feature, index) => (
-                      <div key={index} className="flex items-center space-x-2 text-sm text-gray-600">
-                        <FaCheck className="w-4 h-4 text-green-500" />
-                        <span>{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {/* Delivery Options */}
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-gray-900">Delivery Options</h4>
-                    {packages[selectedPackage].deliveryOptions.map((option, index) => (
-                      <label key={index} className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          name="delivery"
-                          defaultChecked={index === 0}
-                          className="text-green-500"
-                        />
-                        <span className="text-sm text-gray-600">{option}</span>
-                      </label>
-                    ))}
                   </div>
                 </div>
 
@@ -594,7 +555,7 @@ export default function ServiceViewPage() {
                     onClick={handleOrder}
                     className="w-full bg-black text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 transition-colors"
                   >
-                    Request to order
+                    Book this service
                   </button>
                   <button
                     onClick={handleContact}
