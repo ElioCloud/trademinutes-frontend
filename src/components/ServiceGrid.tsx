@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { FiStar } from 'react-icons/fi';
+import { FaStar, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 
@@ -232,7 +233,37 @@ const services = [
 
 const PER_PAGE = 8;
 
-export default function ServiceGrid({ items = services }: { items?: (typeof services[0] & { _id?: string | number, ID?: string | number })[] }) {
+interface Service {
+  ID?: string;
+  id?: string;
+  Title?: string;
+  title?: string;
+  Description?: string;
+  description?: string;
+  Credits?: number;
+  credits?: number;
+  Category?: string;
+  category?: string;
+  Location?: string;
+  location?: string;
+  Author?: {
+    Name?: string;
+    name?: string;
+    Avatar?: string;
+    avatar?: string;
+  };
+  author?: {
+    name?: string;
+    avatar?: string;
+  };
+  Images?: string[];
+  rating?: number;
+  reviewCount?: number;
+  CreatedAt?: number;
+  createdAt?: number;
+}
+
+export default function ServiceGrid({ items = services }: { items?: (Service | typeof services[0])[] }) {
   const [realServices, setRealServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -287,8 +318,8 @@ export default function ServiceGrid({ items = services }: { items?: (typeof serv
     fetchServices();
   }, []);
 
-  // Use real services if available, otherwise fall back to mock data
-  const displayItems = realServices.length > 0 ? realServices : items;
+  // Use passed items if provided, otherwise use fetched real services, fall back to mock data
+  const displayItems = items && items.length > 0 ? items : (realServices.length > 0 ? realServices : services);
   console.log("ServiceGrid displayItems:", displayItems);
   
   const totalPages = Math.ceil(displayItems.length / PER_PAGE);
@@ -324,26 +355,51 @@ export default function ServiceGrid({ items = services }: { items?: (typeof serv
 
   return (
     <>
-      {/* Services count */}
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">
-          Total Services: {displayItems.length}
-        </h2>
+      {/* Navigation controls */}
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-semibold text-gray-900">All Services ({displayItems.length})</h3>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => goTo(page - 1)}
+            disabled={page === 1}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-40"
+          >
+            <FaArrowLeft className="w-4 h-4" />
+          </button>
+          
+          <span className="text-sm text-gray-600 font-medium">
+            Page {page} of {totalPages}
+          </span>
+          
+          <button 
+            onClick={() => goTo(page + 1)}
+            disabled={page === totalPages}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-40"
+          >
+            <FaArrowRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-15">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {paginated.map((s, idx) => {
-          // Colorful border palette matching the listing page
-          const borderColors = [
-            'border-green-400',
-            'border-blue-400',
-            'border-pink-400',
-            'border-yellow-400',
-            'border-purple-400',
-            'border-orange-400',
+          const gradients = [
+            'from-blue-400 to-blue-600',
+            'from-purple-400 to-purple-600', 
+            'from-green-400 to-green-600',
+            'from-pink-400 to-pink-600',
+            'from-yellow-400 to-yellow-600',
+            'from-indigo-400 to-indigo-600'
           ];
-          const borderClass = borderColors[idx % borderColors.length];
+          const colors = [
+            { bg: 'bg-blue-100', text: 'text-blue-600' },
+            { bg: 'bg-purple-100', text: 'text-purple-600' },
+            { bg: 'bg-green-100', text: 'text-green-600' },
+            { bg: 'bg-pink-100', text: 'text-pink-600' },
+            { bg: 'bg-yellow-100', text: 'text-yellow-600' },
+            { bg: 'bg-indigo-100', text: 'text-indigo-600' }
+          ];
           
           // Handle both mock and real data structures
           const serviceId = s._id || s.ID || s.id;
@@ -352,20 +408,11 @@ export default function ServiceGrid({ items = services }: { items?: (typeof serv
           const rating = s.rating || 4.5;
           const reviews = s.reviewCount || s.reviews || Math.floor(Math.random() * 50) + 10;
           const user = s.Author?.Name || s.Author?.name || s.author?.name || s.user || 'Provider';
-          const avatar = s.Author?.Avatar || s.Author?.avatar || s.avatar || 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg';
+          const avatar = s.Author?.Avatar || s.Author?.ProfilePictureURL || s.author?.avatar || s.author?.profilePictureURL;
           const price = s.Credits || s.credits || s.price || 0;
           
           // Enhanced image handling for different formats
           let image = s.Images?.[0] || s.image;
-          
-          // Debug: Log image data for this service
-          console.log(`Service ${idx + 1} image data:`, {
-            title,
-            images: s.Images,
-            image,
-            hasImages: !!s.Images,
-            imagesLength: s.Images?.length
-          });
           
           // If no image found, try alternative image fields
           if (!image && s.Images && s.Images.length > 0) {
@@ -379,92 +426,67 @@ export default function ServiceGrid({ items = services }: { items?: (typeof serv
           }
           
           return (
-            <div
-              key={`${serviceId}-${idx}`}
-              className={`bg-white rounded-lg p-5 shadow-md hover:shadow-xl relative border-2 ${borderClass} cursor-pointer transition-all duration-200 hover:scale-105`}
+            <div 
+              key={`${serviceId}-${idx}`} 
+              className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1"
               onClick={() => handleCardClick(serviceId)}
             >
-              {/* Service image if available */}
-              {image && (
-                <div className="mb-3">
-                  <Image
+              <div className="h-32 relative">
+                {image ? (
+                  <img
                     src={image}
                     alt={title}
-                    width={300}
-                    height={200}
-                    className="w-full h-32 object-cover rounded-lg"
+                    className="w-full h-full object-cover"
                   />
-                </div>
-              )}
-
-              <h3 className="text-lg font-semibold mb-1">{title}</h3>
-              <p className="text-xs text-gray-500 mb-1">
-                📂 <strong>{category}</strong>
-              </p>
-              
-              {/* rating */}
-              <div className="flex items-center text-xs text-gray-500 mb-1">
-                <FiStar className="text-yellow-400 mr-1" />
-                {rating} ({reviews} reviews)
+                ) : (
+                  <div className={`w-full h-full bg-gradient-to-br ${gradients[idx % gradients.length]}`}></div>
+                )}
+                <div className="absolute inset-0 bg-black/20"></div>
               </div>
-
-              {/* user info */}
-              <div className="flex items-center gap-2 mb-2">
-                <Image
-                  src={avatar}
-                  alt={user}
-                  width={20}
-                  height={20}
-                  className="rounded-full object-cover"
-                />
-                <span className="text-xs text-gray-500">
-                  👤 <strong>{user}</strong>
+              <div className="p-4">
+                <span className={`inline-block px-2 py-1 ${colors[idx % colors.length].bg} ${colors[idx % colors.length].text} text-xs font-semibold rounded mb-2`}>
+                  {category || 'GENERAL'}
                 </span>
+                <h4 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+                  {title || 'Service Title'}
+                </h4>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    {avatar ? (
+                      <img 
+                        src={avatar} 
+                        alt={user} 
+                        className="w-6 h-6 rounded-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                    ) : null}
+                    <div className={`w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-semibold ${avatar ? 'hidden' : ''}`}>
+                      {user.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-sm text-gray-600">
+                      {user}
+                    </span>
+                  </div>
+                  <span className="text-lg font-bold text-green-600">
+                    {price} credits
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <FaStar className="w-4 h-4 text-yellow-400" />
+                  <span>
+                    {rating} ({reviews} reviews)
+                  </span>
+                </div>
               </div>
-
-              {/* price */}
-              <p className="text-sm font-medium text-gray-700">
-                🪙 {price} credits
-              </p>
             </div>
           );
         })}
       </div>
 
-      {/* pagination controls */}
-      {totalPages > 1 && (
-  <div className="flex items-center justify-center gap-2 mt-18 mb-18">
-    <button
-      onClick={() => goTo(page - 1)}
-      disabled={page === 1}
-      className="px-3 py-1 rounded border border-black text-black disabled:opacity-40"
-    >
-      Prev
-    </button>
 
-    {Array.from({ length: totalPages }).map((_, i) => (
-      <button
-        key={`page-btn-${i + 1}`}
-        onClick={() => goTo(i + 1)}
-        className={`px-3 py-1 rounded border border-black ${
-          page === i + 1
-            ? 'bg-emerald-600 text-white'
-            : 'bg-white text-black'
-        }`}
-      >
-        {i + 1}
-      </button>
-    ))}
-
-    <button
-      onClick={() => goTo(page + 1)}
-      disabled={page === totalPages}
-      className="px-3 py-1 rounded border border-black text-black disabled:opacity-40"
-    >
-      Next
-    </button>
-  </div>
-)}
 
     </>
   );
