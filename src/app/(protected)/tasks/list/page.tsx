@@ -123,8 +123,11 @@ export default function TaskListPage() {
 
   console.log("task", tasks);
 
-  // Force mapping of _id to id before rendering
-  const mappedTasks = tasks.map((task: any) => ({ ...task, id: task.id }));
+  // Ensure all tasks have proper id mapping
+  const mappedTasks = tasks.map((task: any) => ({ 
+    ...task, 
+    id: task.id || task._id || task.ID 
+  }));
 
   return (
     <ProtectedLayout>
@@ -153,7 +156,7 @@ export default function TaskListPage() {
           <p>No tasks found.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tasks.map((task: Task, idx: number) => {
+            {mappedTasks.map((task: Task, idx: number) => {
               const gradients = [
                 'from-blue-400 to-blue-600',
                 'from-purple-400 to-purple-600', 
@@ -172,7 +175,10 @@ export default function TaskListPage() {
               ];
               
               return (
-                <div key={task.id ?? idx} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push(`/tasks/view/${String(task.id)}`)}>
+                <div key={task.id ?? idx} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => {
+                  console.log('Clicking task:', task.id, task.Title);
+                  router.push(`/tasks/view/${String(task.id)}`);
+                }}>
                   <div className={`h-32 bg-gradient-to-br ${gradients[idx % gradients.length]} relative`}>
                     <button
                       onClick={e => {
