@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Image from 'next/image';
 import { FaStar, FaMapMarkerAlt, FaClock, FaCoins, FaHeart, FaShare, FaEllipsisH, FaCheck, FaInfoCircle } from 'react-icons/fa';
 import Navbar from '@/components/Navbar';
@@ -320,13 +321,26 @@ export default function ServiceViewPage() {
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <span className="cursor-pointer hover:text-green-600">🏠</span>
+            <Link href="/" className="cursor-pointer hover:text-green-600">🏠</Link>
             <span>/</span>
-            <span className="cursor-pointer hover:text-green-600">Graphics & Design</span>
-            <span>/</span>
-            <span className="cursor-pointer hover:text-green-600">Architecture & Interior Design</span>
-            <span>/</span>
-            <span className="cursor-pointer hover:text-green-600">2D Drawings & Floor Plans</span>
+            <Link href="/services" className="cursor-pointer hover:text-green-600">Services</Link>
+            {category && (
+              <>
+                <span>/</span>
+                <Link 
+                  href={`/services/category/${category.toLowerCase().replace(/\s+/g, '-')}`} 
+                  className="cursor-pointer hover:text-green-600"
+                >
+                  {category}
+                </Link>
+              </>
+            )}
+            {title && (
+              <>
+                <span>/</span>
+                <span className="text-gray-900 font-medium truncate max-w-xs">{title}</span>
+              </>
+            )}
           </div>
         </div>
       </div>
