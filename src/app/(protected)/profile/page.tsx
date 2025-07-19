@@ -117,25 +117,24 @@ export default function UserProfileSummaryPage() {
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [editData, setEditData] = useState({
     description: "Welcome to TradeMinutes! TradeMinutes is a modern service marketplace where you can offer, discover, and book a wide range of services—from tutoring and tech help to pet care and more. Earn credits by completing tasks, grow your reputation, and connect with a vibrant community of users.",
-    howItWorks: [
-      "Browse or list services in dozens of categories",
-      "Book appointments and manage your schedule", 
-      "Earn and spend credits for every transaction"
+    education: [
+      "Bachelor's in Computer Science - University of Technology",
+      "Web Development Bootcamp - CodeAcademy",
+      "Data Science Certification - Coursera"
     ],
-    achievements: [
-      "Completed 12 tasks in 3 different categories",
-      "Maintained a 4.9/5 average rating from 8 reviews",
-      "Earned 100+ credits through service excellence"
+    workExperience: [
+      "Senior Software Engineer at TechCorp (2020-2023)",
+      "Full Stack Developer at StartupXYZ (2018-2020)",
+      "Freelance Web Developer (2016-2018)"
     ],
-    badges: ["Top Tasker", "Trusted Seller", "Community Helper"],
     skills: [] as string[],
     program: "",
     yearOfStudy: ""
   });
   const [newSkill, setNewSkill] = useState("");
-  const [newAchievement, setNewAchievement] = useState("");
-  const [newBadge, setNewBadge] = useState("");
-  const [newHowItWorks, setNewHowItWorks] = useState("");
+
+  const [newEducation, setNewEducation] = useState("");
+  const [newWorkExperience, setNewWorkExperience] = useState("");
   const [saving, setSaving] = useState(false);
   const [editingProfilePicture, setEditingProfilePicture] = useState(false);
 
@@ -358,57 +357,41 @@ export default function UserProfileSummaryPage() {
     }));
   };
 
-  const addAchievement = () => {
-    const trimmed = newAchievement.trim();
-    if (trimmed && !editData.achievements.includes(trimmed)) {
+
+
+  const addEducation = () => {
+    const trimmed = newEducation.trim();
+    if (trimmed && !editData.education.includes(trimmed)) {
       setEditData(prev => ({
         ...prev,
-        achievements: [...prev.achievements, trimmed]
+        education: [...prev.education, trimmed]
       }));
-      setNewAchievement("");
+      setNewEducation("");
     }
   };
 
-  const removeAchievement = (achievement: string) => {
+  const removeEducation = (item: string) => {
     setEditData(prev => ({
       ...prev,
-      achievements: prev.achievements.filter(a => a !== achievement)
+      education: prev.education.filter(e => e !== item)
     }));
   };
 
-  const addBadge = () => {
-    const trimmed = newBadge.trim();
-    if (trimmed && !editData.badges.includes(trimmed)) {
+  const addWorkExperience = () => {
+    const trimmed = newWorkExperience.trim();
+    if (trimmed && !editData.workExperience.includes(trimmed)) {
       setEditData(prev => ({
         ...prev,
-        badges: [...prev.badges, trimmed]
+        workExperience: [...prev.workExperience, trimmed]
       }));
-      setNewBadge("");
+      setNewWorkExperience("");
     }
   };
 
-  const removeBadge = (badge: string) => {
+  const removeWorkExperience = (item: string) => {
     setEditData(prev => ({
       ...prev,
-      badges: prev.badges.filter(b => b !== badge)
-    }));
-  };
-
-  const addHowItWorks = () => {
-    const trimmed = newHowItWorks.trim();
-    if (trimmed && !editData.howItWorks.includes(trimmed)) {
-      setEditData(prev => ({
-        ...prev,
-        howItWorks: [...prev.howItWorks, trimmed]
-      }));
-      setNewHowItWorks("");
-    }
-  };
-
-  const removeHowItWorks = (item: string) => {
-    setEditData(prev => ({
-      ...prev,
-      howItWorks: prev.howItWorks.filter(h => h !== item)
+      workExperience: prev.workExperience.filter(w => w !== item)
     }));
   };
 
@@ -725,70 +708,27 @@ export default function UserProfileSummaryPage() {
                   )}
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">How It Works</h4>
+                  <h4 className="font-semibold text-gray-900 mb-2">Education</h4>
                   {editingSection === 'about' ? (
                     <div className="space-y-2">
                       <div className="flex gap-2">
                         <input
                           type="text"
-                          value={newHowItWorks}
-                          onChange={(e) => setNewHowItWorks(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addHowItWorks())}
-                          placeholder="Add how it works step"
+                          value={newEducation}
+                          onChange={(e) => setNewEducation(e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addEducation())}
+                          placeholder="Add education"
                           className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
-                        <button onClick={addHowItWorks} className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                          <FaPlus className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <div className="space-y-2">
-                        {editData.howItWorks.map((item, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                            <span className="text-sm text-gray-700 flex-1">{item}</span>
-                            <button onClick={() => removeHowItWorks(item)} className="text-red-600 hover:text-red-800">
-                              <FaTrash className="w-3 h-3" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {editData.howItWorks.map((item, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          <span className="text-sm text-gray-700">{item}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                    <FaTrophy className="w-4 h-4 text-yellow-500" />
-                    Your Achievements
-                  </h4>
-                  {editingSection === 'about' ? (
-                    <div className="space-y-2">
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={newAchievement}
-                          onChange={(e) => setNewAchievement(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addAchievement())}
-                          placeholder="Add achievement"
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                        <button onClick={addAchievement} className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                        <button onClick={addEducation} className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
                           <FiPlus className="w-4 h-4" />
                         </button>
                       </div>
                       <ul className="list-disc ml-6 text-sm text-gray-700 space-y-1">
-                        {editData.achievements.map((achievement, index) => (
+                        {editData.education.map((item, index) => (
                           <li key={index} className="flex items-center gap-2">
-                            <span className="flex-1">{achievement}</span>
-                            <button onClick={() => removeAchievement(achievement)} className="text-gray-600 hover:text-gray-800">
+                            <span className="flex-1">{item}</span>
+                            <button onClick={() => removeEducation(item)} className="text-gray-600 hover:text-gray-800">
                               <FiTrash2 className="w-3 h-3" />
                             </button>
                           </li>
@@ -797,47 +737,111 @@ export default function UserProfileSummaryPage() {
                     </div>
                   ) : (
                     <ul className="list-disc ml-6 text-sm text-gray-700 space-y-1">
-                      {editData.achievements.map((achievement, index) => (
-                        <li key={index}>{achievement}</li>
+                      {editData.education.map((item, index) => (
+                        <li key={index}>{item}</li>
                       ))}
                     </ul>
                   )}
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Badges</h4>
+                  <h4 className="font-semibold text-gray-900 mb-2">Work Experience</h4>
                   {editingSection === 'about' ? (
                     <div className="space-y-2">
                       <div className="flex gap-2">
                         <input
                           type="text"
-                          value={newBadge}
-                          onChange={(e) => setNewBadge(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addBadge())}
-                          placeholder="Add badge"
+                          value={newWorkExperience}
+                          onChange={(e) => setNewWorkExperience(e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addWorkExperience())}
+                          placeholder="Add work experience"
                           className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
-                        <button onClick={addBadge} className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                        <button onClick={addWorkExperience} className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
                           <FiPlus className="w-4 h-4" />
                         </button>
                       </div>
-                      <div className="flex gap-2">
-                        {editData.badges.map((badge, index) => (
-                          <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-                            {badge}
-                            <button onClick={() => removeBadge(badge)} className="text-gray-600 hover:text-gray-800">
-                              <FiX className="w-2 h-2" />
+                      <ul className="list-disc ml-6 text-sm text-gray-700 space-y-1">
+                        {editData.workExperience.map((item, index) => (
+                          <li key={index} className="flex items-center gap-2">
+                            <span className="flex-1">{item}</span>
+                            <button onClick={() => removeWorkExperience(item)} className="text-gray-600 hover:text-gray-800">
+                              <FiTrash2 className="w-3 h-3" />
                             </button>
-                          </span>
+                          </li>
                         ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <ul className="list-disc ml-6 text-sm text-gray-700 space-y-1">
+                      {editData.workExperience.map((item, index) => (
+                        <li key={index}>{item}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Skills</h4>
+                  {editingSection === 'about' ? (
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newSkill}
+                          onChange={(e) => setNewSkill(e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSkill())}
+                          placeholder="Add skill"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <button onClick={addSkill} className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                          <FiPlus className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {editData.skills.map((skill, idx) => {
+                          const colors = [
+                            'bg-blue-100 text-blue-800',
+                            'bg-green-100 text-green-800',
+                            'bg-purple-100 text-purple-800',
+                            'bg-orange-100 text-orange-800',
+                            'bg-pink-100 text-pink-800',
+                            'bg-indigo-100 text-indigo-800',
+                            'bg-teal-100 text-teal-800',
+                            'bg-red-100 text-red-800'
+                          ];
+                          const colorClass = colors[idx % colors.length];
+                          
+                          return (
+                            <span key={idx} className={`${colorClass} px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1`}>
+                              {skill}
+                              <button onClick={() => removeSkill(skill)} className="text-gray-600 hover:text-gray-800">
+                                <FiX className="w-2 h-2" />
+                              </button>
+                            </span>
+                          );
+                        })}
                       </div>
                     </div>
                   ) : (
-                    <div className="flex gap-2">
-                      {editData.badges.map((badge, index) => (
-                        <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold">
-                          {badge}
-                        </span>
-                      ))}
+                    <div className="flex flex-wrap gap-2">
+                      {editData.skills.map((skill, idx) => {
+                        const colors = [
+                          'bg-blue-100 text-blue-800',
+                          'bg-green-100 text-green-800',
+                          'bg-purple-100 text-purple-800',
+                          'bg-orange-100 text-orange-800',
+                          'bg-pink-100 text-pink-800',
+                          'bg-indigo-100 text-indigo-800',
+                          'bg-teal-100 text-teal-800',
+                          'bg-red-100 text-red-800'
+                        ];
+                        const colorClass = colors[idx % colors.length];
+                        
+                        return (
+                          <span key={idx} className={`${colorClass} px-3 py-1 rounded-full text-xs font-semibold`}>
+                            {skill}
+                          </span>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
