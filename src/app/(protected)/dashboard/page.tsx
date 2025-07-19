@@ -736,6 +736,136 @@ export default function ProfileDashboardPage() {
               <p className="text-sm text-gray-600">Keep growing your business!</p>
             </div>
           </div>
+
+          {/* Quick Actions Section */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
+              <FaBolt className="w-4 h-4 text-gray-400" />
+            </div>
+            
+            <div className="space-y-3">
+              <button className="w-full flex items-center gap-3 p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
+                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <FaPlus className="w-4 h-4 text-white" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium text-gray-900">Create Service</p>
+                  <p className="text-xs text-gray-600">List your skills</p>
+                </div>
+              </button>
+              
+              <button className="w-full flex items-center gap-3 p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
+                <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                  <FaCalendar className="w-4 h-4 text-white" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium text-gray-900">Book Service</p>
+                  <p className="text-xs text-gray-600">Find providers</p>
+                </div>
+              </button>
+              
+              <button className="w-full flex items-center gap-3 p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
+                <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                  <FaEnvelope className="w-4 h-4 text-white" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium text-gray-900">Messages</p>
+                  <p className="text-xs text-gray-600">View conversations</p>
+                </div>
+              </button>
+              
+              <button className="w-full flex items-center gap-3 p-3 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors">
+                <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                  <FaStar className="w-4 h-4 text-white" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium text-gray-900">Reviews</p>
+                  <p className="text-xs text-gray-600">Rate services</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Recent Activity Section */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+              <FaClock className="w-4 h-4 text-gray-400" />
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Service completed</p>
+                  <p className="text-xs text-gray-600">Web Development for John Smith</p>
+                  <p className="text-xs text-gray-500">2 hours ago</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">New booking</p>
+                  <p className="text-xs text-gray-600">Logo Design from Lisa Brown</p>
+                  <p className="text-xs text-gray-500">5 hours ago</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Review received</p>
+                  <p className="text-xs text-gray-600">5-star rating for Content Writing</p>
+                  <p className="text-xs text-gray-500">1 day ago</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <div className="w-2 h-2 bg-orange-500 rounded-full mt-2"></div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Payment received</p>
+                  <p className="text-xs text-gray-600">$150 for Web Development</p>
+                  <p className="text-xs text-gray-500">2 days ago</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Notifications Section */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+              <FaBell className="w-4 h-4 text-gray-400" />
+            </div>
+            
+            <div className="space-y-3">
+              <div className="p-3 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                <p className="text-sm font-medium text-gray-900">Booking reminder</p>
+                <p className="text-xs text-gray-600">Logo Design session in 2 hours</p>
+                <p className="text-xs text-gray-500">10 minutes ago</p>
+              </div>
+              
+              <div className="p-3 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+                <p className="text-sm font-medium text-gray-900">New message</p>
+                <p className="text-xs text-gray-600">From Sarah Johnson</p>
+                <p className="text-xs text-gray-500">1 hour ago</p>
+              </div>
+              
+              <div className="p-3 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                <p className="text-sm font-medium text-gray-900">Service request</p>
+                <p className="text-xs text-gray-600">New inquiry for Web Development</p>
+                <p className="text-xs text-gray-500">3 hours ago</p>
+              </div>
+              
+              <div className="p-3 bg-yellow-50 border-l-4 border-yellow-500 rounded-r-lg">
+                <p className="text-sm font-medium text-gray-900">Payment pending</p>
+                <p className="text-xs text-gray-600">$75 for Logo Design</p>
+                <p className="text-xs text-gray-500">1 day ago</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
