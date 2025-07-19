@@ -356,7 +356,7 @@ export default function UserProfileSummaryPage() {
 
   return (
     <ProtectedLayout>
-      <div className="min-h-screen bg-gray-50 text-black flex flex-col gap-6 p-6">
+      <div className="min-h-screen bg-white text-black flex flex-col gap-6 p-6">
         <div className="flex flex-col md:flex-row gap-6 w-full max-w-[1400px] mx-auto">
           {/* Left: Profile Card */}
           <div className="w-full md:w-1/4 bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col gap-6">
