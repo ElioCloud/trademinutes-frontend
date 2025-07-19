@@ -121,6 +121,20 @@ type Service = {
   price?: number;
   Category?: string;
   category?: string;
+  rating?: number;
+  Rating?: number;
+  reviewCount?: number;
+  ReviewCount?: number;
+  reviews?: number;
+  Reviews?: number;
+  Author?: {
+    Name?: string;
+    ProfilePictureURL?: string;
+  };
+  author?: {
+    name?: string;
+    profilePictureURL?: string;
+  };
 };
 
 // Define Task type for taskStats
@@ -410,7 +424,13 @@ export default function ProfileDashboardPage() {
             recent: services.slice(0, 3).map((service: any) => ({
               Title: service.Title || service.title,
               Price: service.Credits || service.credits || service.Price || service.price,
-              Category: service.Category || service.category || 'General'
+              Category: service.Category || service.category || 'General',
+              rating: service.rating || service.Rating || 4.5,
+              reviewCount: service.reviewCount || service.ReviewCount || service.reviews || service.Reviews || Math.floor(Math.random() * 20) + 5,
+              Author: service.Author || service.author || {
+                Name: profile?.Name || 'Provider',
+                ProfilePictureURL: profile?.ProfilePictureURL
+              }
             }))
           });
         } else {
@@ -551,9 +571,39 @@ export default function ProfileDashboardPage() {
       total: 12,
       earnings: 2840,
       recent: [
-        { Title: "Web Development", Price: 150, Category: "Technology" },
-        { Title: "Logo Design", Price: 75, Category: "Design" },
-        { Title: "Content Writing", Price: 50, Category: "Writing" }
+        { 
+          Title: "Web Development", 
+          Price: 150, 
+          Category: "Technology",
+          rating: 4.8,
+          reviewCount: 24,
+          Author: {
+            Name: "Sarah Johnson",
+            ProfilePictureURL: undefined
+          }
+        },
+        { 
+          Title: "Logo Design", 
+          Price: 75, 
+          Category: "Design",
+          rating: 4.9,
+          reviewCount: 18,
+          Author: {
+            Name: "Mike Chen",
+            ProfilePictureURL: undefined
+          }
+        },
+        { 
+          Title: "Content Writing", 
+          Price: 50, 
+          Category: "Writing",
+          rating: 4.7,
+          reviewCount: 31,
+          Author: {
+            Name: "Emma Davis",
+            ProfilePictureURL: undefined
+          }
+        }
       ]
     });
 
@@ -802,8 +852,23 @@ export default function ProfileDashboardPage() {
                           </h4>
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
-                              <span className="text-sm text-gray-600">{profile?.Name || 'Provider'}</span>
+                              {service.Author?.ProfilePictureURL || service.author?.profilePictureURL ? (
+                                <img 
+                                  src={service.Author?.ProfilePictureURL || service.author?.profilePictureURL} 
+                                  alt={service.Author?.Name || service.author?.name || 'Provider'} 
+                                  className="w-6 h-6 rounded-full object-cover"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                  }}
+                                />
+                              ) : null}
+                              <div className={`w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-semibold ${(service.Author?.ProfilePictureURL || service.author?.profilePictureURL) ? 'hidden' : ''}`}>
+                                {(service.Author?.Name || service.author?.name || profile?.Name || 'P').charAt(0).toUpperCase()}
+                              </div>
+                              <span className="text-sm text-gray-600">
+                                {service.Author?.Name || service.author?.name || profile?.Name || 'Provider'}
+                              </span>
                             </div>
                             <span className="text-lg font-bold text-green-600">
                               ${service.Price || service.price || 0}
@@ -811,7 +876,10 @@ export default function ProfileDashboardPage() {
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-500">
                             <FaStar className="w-4 h-4 text-yellow-400" />
-                            <span>{profile?.rating || 4.5} ({Math.floor(Math.random() * 50) + 10} reviews)</span>
+                            <span>
+                              {service.rating || service.Rating || profile?.rating || 4.5} 
+                              ({service.reviewCount || service.ReviewCount || service.reviews || service.Reviews || Math.floor(Math.random() * 20) + 5} reviews)
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -831,7 +899,9 @@ export default function ProfileDashboardPage() {
                         <h4 className="font-semibold text-gray-900 mb-2">Professional Web Development Services</h4>
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                            <div className="w-6 h-6 bg-gradient-to-r from-pink-500 to-red-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
+                              S
+                            </div>
                             <span className="text-sm text-gray-600">Sarah Johnson</span>
                           </div>
                           <span className="text-lg font-bold text-green-600">$150</span>
@@ -853,7 +923,9 @@ export default function ProfileDashboardPage() {
                         <h4 className="font-semibold text-gray-900 mb-2">Creative Logo & Brand Identity Design</h4>
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                            <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-semibold">
+                              M
+                            </div>
                             <span className="text-sm text-gray-600">Mike Chen</span>
                           </div>
                           <span className="text-lg font-bold text-green-600">$75</span>
@@ -875,7 +947,9 @@ export default function ProfileDashboardPage() {
                         <h4 className="font-semibold text-gray-900 mb-2">Professional Content Writing & SEO</h4>
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                            <div className="w-6 h-6 bg-gradient-to-r from-green-500 to-teal-600 rounded-full flex items-center justify-center text-white text-xs font-semibold">
+                              E
+                            </div>
                             <span className="text-sm text-gray-600">Emma Davis</span>
                           </div>
                           <span className="text-lg font-bold text-green-600">$50</span>
