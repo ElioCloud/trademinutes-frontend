@@ -457,9 +457,6 @@ export default function UserProfileSummaryPage() {
                       height={96} 
                       className="rounded-full border-4 border-white shadow-lg object-cover w-24 h-24" 
                     />
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
-                      <FaCheck className="w-3 h-3 text-white" />
-                    </div>
                     <button
                       onClick={() => setEditingProfilePicture(true)}
                       className="absolute -top-1 -right-1 w-6 h-6 bg-gray-500 text-white rounded-full border-2 border-white flex items-center justify-center hover:bg-gray-600 transition-colors"
