@@ -47,6 +47,22 @@ export default function TaskListPage() {
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
   const router = useRouter();
 
+  // Helper function to check if a date is in the past
+  const isPastDate = (dateString: string) => {
+    const taskDate = new Date(dateString);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day
+    return taskDate < today;
+  };
+
+  // Separate current and past tasks
+  const currentTasks = tasks.filter(task => 
+    !task.Availability?.length || !isPastDate(task.Availability[0].Date)
+  );
+  const pastTasks = tasks.filter(task => 
+    task.Availability?.length && isPastDate(task.Availability[0].Date)
+  );
+
   const fetchTasks = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -147,11 +163,16 @@ export default function TaskListPage() {
 
         {loading ? (
           <p>Loading...</p>
-        ) : mappedTasks.length === 0 ? (
+        ) : tasks.length === 0 ? (
           <p>No tasks found.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mappedTasks.map((task: Task, idx: number) => {
+          <>
+            {/* Current Listings */}
+            {currentTasks.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Current Listings</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {currentTasks.map((task: Task, idx: number) => {
               const gradients = [
                 'from-blue-400 to-blue-600',
                 'from-purple-400 to-purple-600', 
@@ -245,7 +266,105 @@ export default function TaskListPage() {
                 </div>
               );
             })}
-          </div>
+                </div>
+              </div>
+            )}
+
+            {/* Past Listings */}
+            {pastTasks.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Past Listings</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {pastTasks.map((task: Task, idx: number) => {
+                    const gradients = [
+                      'from-gray-400 to-gray-600',
+                      'from-gray-500 to-gray-700', 
+                      'from-gray-600 to-gray-800'
+                    ];
+                    const colors = [
+                      { bg: 'bg-gray-100', text: 'text-gray-600' },
+                      { bg: 'bg-gray-200', text: 'text-gray-700' },
+                      { bg: 'bg-gray-300', text: 'text-gray-800' }
+                    ];
+                    
+                    return (
+                      <div key={task.id ?? idx} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow cursor-pointer opacity-75" onClick={() => router.push(`/tasks/view/${String(task.id)}`)}>
+                        <div className={`h-32 bg-gradient-to-br ${gradients[idx % gradients.length]} relative`}>
+                          <button
+                            onClick={e => {
+                              e.stopPropagation();
+                              setTaskToDelete(task.id);
+                              setShowConfirmModal(true);
+                            }}
+                            className="absolute top-3 right-3 text-white hover:text-red-400 transition-colors"
+                            title="Delete"
+                          >
+                            <FaTrash className="w-5 h-5" />
+                          </button>
+                        </div>
+                        <div className="p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className={`inline-block px-2 py-1 ${colors[idx % colors.length].bg} ${colors[idx % colors.length].text} text-xs font-semibold rounded`}>
+                              {task.Type || task.Category || 'SERVICE'}
+                            </span>
+                            <div className="flex items-center gap-1 text-sm font-bold text-green-600">
+                              <FaCoins className="w-4 h-4" />
+                              <span>{task.Credits}</span>
+                            </div>
+                          </div>
+                          <h4 className="font-semibold text-gray-900 mb-3">
+                            {task.Title}
+                          </h4>
+                          
+                          {/* Location and Time Details */}
+                          <div className="space-y-2 mb-3">
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                              <FaMapMarkerAlt className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                              <span className="truncate max-w-[200px]">{task.Location}</span>
+                              <span className="text-xs bg-gray-100 px-2 py-1 rounded flex-shrink-0">
+                                {task.LocationType}
+                              </span>
+                            </div>
+                            
+                            {task.Availability?.length > 0 && (
+                              <div className="flex items-center justify-between text-sm text-gray-500">
+                                <div className="flex items-center gap-2">
+                                  <FaCalendar className="w-4 h-4 text-gray-400" />
+                                  <span>{task.Availability[0].Date}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <FaClock className="w-4 h-4 text-gray-400" />
+                                  <span>{task.Availability[0].TimeFrom} - {task.Availability[0].TimeTo}</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Status and Rating */}
+                          <div className="flex items-center justify-between text-sm text-gray-500">
+                            <div className="flex items-center gap-2">
+                              <FaStar className="w-4 h-4 text-yellow-400" />
+                              <span>4.5 (12 reviews)</span>
+                            </div>
+                            {task.Status && (
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                task.Status === 'open' ? 'bg-green-100 text-green-600' :
+                                task.Status === 'in progress' ? 'bg-blue-100 text-blue-600' :
+                                task.Status === 'completed' ? 'bg-gray-100 text-gray-600' :
+                                'bg-yellow-100 text-yellow-600'
+                              }`}>
+                                {task.Status}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {showConfirmModal && (
