@@ -4,52 +4,52 @@ import Link from 'next/link';
 
 const categories = [
   {
-    name: 'Household Help',
-    icon: <FiHome className="w-8 h-8" />,
-    skills: '1,247 skills',
-    examples: 'Cleaning, Cooking, Repairs & More'
-  },
-  {
-    name: 'Tutoring & Study',
+    name: 'Academic Help',
     icon: <FiBookOpen className="w-8 h-8" />,
-    skills: '892 skills',
-    examples: 'Math, Science, Language & More'
+    skills: '1,247 skills',
+    examples: 'Tutoring, Study Groups, Test Prep & More'
   },
   {
-    name: 'Tech Help',
+    name: 'Tech & Digital Skills',
     icon: <FiMonitor className="w-8 h-8" />,
-    skills: '1,156 skills',
-    examples: 'Computer Setup, Software & More'
+    skills: '892 skills',
+    examples: 'Computer Setup, Software, Coding & More'
   },
   {
-    name: 'Fitness & Wellness',
+    name: 'Creative & Arts',
+    icon: <FiImage className="w-8 h-8" />,
+    skills: '1,156 skills',
+    examples: 'Design, Art, Photography, Music & More'
+  },
+  {
+    name: 'Personal Development',
     icon: <FiHeart className="w-8 h-8" />,
     skills: '634 skills',
-    examples: 'Yoga, Personal Training & More'
+    examples: 'Coaching, Life Skills, Motivation & More'
   },
   {
-    name: 'Pet Care',
+    name: 'Language & Culture',
     icon: <FiUsers className="w-8 h-8" />,
     skills: '745 skills',
-    examples: 'Dog Walking, Pet Sitting & More'
+    examples: 'Language Learning, Cultural Exchange & More'
   },
   {
-    name: 'Elderly Assistance',
-    icon: <FiHelpCircle className="w-8 h-8" />,
+    name: 'Health & Wellness',
+    icon: <FiHeart className="w-8 h-8" />,
     skills: '567 skills',
-    examples: 'Companionship, Care & More'
+    examples: 'Fitness, Yoga, Nutrition, Mental Health & More'
   },
   {
-    name: 'Creative Services',
-    icon: <FiImage className="w-8 h-8" />,
+    name: 'Handy Skills & Repair',
+    icon: <FiHome className="w-8 h-8" />,
     skills: '1,023 skills',
-    examples: 'Design, Art, Photography & More'
+    examples: 'Home Repairs, DIY Projects, Maintenance & More'
   },
   {
-    name: 'Volunteering',
-    icon: <FiGift className="w-8 h-8" />,
+    name: 'Everyday Help',
+    icon: <FiHelpCircle className="w-8 h-8" />,
     skills: '456 skills',
-    examples: 'Community Service & More'
+    examples: 'Errands, Shopping, Organization & More'
   }
 ];
 
