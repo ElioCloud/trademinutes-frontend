@@ -384,21 +384,21 @@ export default function ServiceViewPage() {
                 
                 {/* Service Details Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-100">
-                  {/* Location */}
-                  <div className="flex items-center space-x-2">
-                    <FaMapMarkerAlt className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{location}</p>
-                      <p className="text-xs text-gray-500">{locationType}</p>
-                    </div>
-                  </div>
-                  
                   {/* Credits/Price */}
                   <div className="flex items-center space-x-2">
                     <FaCoins className="w-4 h-4 text-green-500 flex-shrink-0" />
                     <div>
                       <p className="text-sm font-medium text-gray-900">{price} credits</p>
                       <p className="text-xs text-gray-500">Service cost</p>
+                    </div>
+                  </div>
+                  
+                  {/* Location */}
+                  <div className="flex items-center space-x-2">
+                    <FaMapMarkerAlt className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{location}</p>
+                      <p className="text-xs text-gray-500">{locationType}</p>
                     </div>
                   </div>
                   
