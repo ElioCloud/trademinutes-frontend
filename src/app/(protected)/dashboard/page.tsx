@@ -35,7 +35,16 @@ import {
   FaArrowLeft,
   FaEllipsisV,
   FaMailBulk,
-  FaChartBar
+  FaChartBar,
+  FaDollarSign,
+  FaHandshake,
+  FaTools,
+  FaShoppingCart,
+  FaUserTie,
+  FaClock,
+  FaMapMarkerAlt,
+  FaPhone,
+  FaGlobe
 } from "react-icons/fa";
 
 const Map = dynamic(() => import("@/components/OpenStreetMap"), { ssr: false });
@@ -65,7 +74,7 @@ function SkillTagInput({
   return (
     <div>
       <label className="text-sm font-medium block mb-1">
-        Skills &amp; Interests
+        Skills & Services
       </label>
       <div className="flex flex-wrap gap-2 mb-2">
         {tags.map((tag) => (
@@ -88,7 +97,7 @@ function SkillTagInput({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
-          placeholder="e.g. #Python"
+          placeholder="e.g. #WebDevelopment"
           className="flex-1 px-3 py-2 border rounded bg-white text-black"
         />
         <button
@@ -103,6 +112,16 @@ function SkillTagInput({
 }
 
 // ───────────────────────────────────────────────────────────────────────────────
+
+// Define Service type for marketplace stats
+type Service = {
+  Title?: string;
+  title?: string;
+  Price?: number;
+  price?: number;
+  Category?: string;
+  category?: string;
+};
 
 // Define Task type for taskStats
 type Task = {
@@ -120,7 +139,11 @@ export default function ProfileDashboardPage() {
     program?: string;
     yearOfStudy?: string;
     skills?: string[];
-    Credits?: number; // Added Credits to profile type
+    Credits?: number;
+    isProvider?: boolean;
+    rating?: number;
+    completedServices?: number;
+    totalEarnings?: number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -178,6 +201,16 @@ export default function ProfileDashboardPage() {
   // --- Analytics state ---
   const [taskStats, setTaskStats] = useState<{ total: number; credits: number; recent: Task[] }>({ total: 0, credits: 0, recent: [] });
   const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
+  
+  // --- Marketplace Analytics state ---
+  const [serviceStats, setServiceStats] = useState<{ total: number; earnings: number; recent: Service[] }>({ total: 0, earnings: 0, recent: [] });
+  const [upcomingBookings, setUpcomingBookings] = useState<any[]>([]);
+  const [marketplaceStats, setMarketplaceStats] = useState({
+    totalServices: 0,
+    activeProviders: 0,
+    totalBookings: 0,
+    averageRating: 4.5
+  });
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
@@ -276,10 +309,27 @@ export default function ProfileDashboardPage() {
           setShowProfileDialog(false);
         }
       } catch (error) {
-        console.error("❌ Profile fetch error:", error);
-        router.push("/login");
+        console.error("Error fetching profile:", error);
       } finally {
         setLoading(false);
+      }
+    };
+
+    const fetchBookings = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_PROFILE_API_URL}/api/bookings/upcoming`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          setUpcomingBookings(data.slice(0, 5)); // Get next 5 bookings
+        }
+      } catch (error) {
+        console.error("Error fetching bookings:", error);
       }
     };
 
@@ -366,6 +416,25 @@ export default function ProfileDashboardPage() {
     fetchAppointments();
     interval = setInterval(fetchAppointments, 30000);
     return () => clearInterval(interval);
+
+    // Mock marketplace stats for demo
+    setMarketplaceStats({
+      totalServices: 1247,
+      activeProviders: 89,
+      totalBookings: 3421,
+      averageRating: 4.5
+    });
+
+    // Mock service stats for demo
+    setServiceStats({
+      total: 12,
+      earnings: 2840,
+      recent: [
+        { Title: "Web Development", Price: 150, Category: "Technology" },
+        { Title: "Logo Design", Price: 75, Category: "Design" },
+        { Title: "Content Writing", Price: 50, Category: "Writing" }
+      ]
+    });
   }, [router]);
 
   useEffect(() => {
@@ -387,15 +456,14 @@ export default function ProfileDashboardPage() {
     }
   }, [showProfileDialog, profile]);
 
-  // Helper to add a skill
   const handleAddSkill = () => {
-    if (skillInput.trim()) {
-      setFormData(prev => ({ ...prev, skills: [...prev.skills, skillInput.trim()] }));
-      setSkillInput("");
+    const trimmed = skillInput.trim();
+    if (trimmed && !formData.skills.includes(trimmed)) {
+      setFormData({ ...formData, skills: [...formData.skills, trimmed] });
     }
+    setSkillInput("");
   };
 
-  // After profile is saved, fetch profile and show bonus dialog
   const handleProfileSaved = async () => {
     setProfileSaved(true);
     setTimeout(async () => {
@@ -422,68 +490,75 @@ export default function ProfileDashboardPage() {
 
   return (
     <ProtectedLayout>
-                  <div className="flex h-screen bg-gray-50">
-
-
+      <div className="flex h-screen bg-gray-50">
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col">
-
-
           {/* Main Content */}
           <div className="flex-1 p-6 overflow-y-auto">
-            {/* Featured Online Course */}
-            <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl p-8 mb-8 text-white relative overflow-hidden">
+            {/* Welcome Banner */}
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-8 mb-8 text-white relative overflow-hidden">
               <div className="relative z-10">
-                <h3 className="text-sm font-medium mb-2 opacity-90">ONLINE COURSE</h3>
-                <h2 className="text-2xl font-bold mb-4">Sharpen Your Skills with Professional Online Courses</h2>
-                <button className="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold flex items-center gap-2 hover:bg-gray-100 transition-colors">
-                  Join Now
+                <h3 className="text-sm font-medium mb-2 opacity-90">TRADEMINUTES MARKETPLACE</h3>
+                <h2 className="text-2xl font-bold mb-4">Welcome to Your Service Hub</h2>
+                <p className="text-blue-100 mb-4">Connect, collaborate, and grow your business with our trusted marketplace</p>
+                <button className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold flex items-center gap-2 hover:bg-gray-100 transition-colors">
+                  Explore Services
                   <FaArrowRight className="w-4 h-4" />
                 </button>
               </div>
               <div className="absolute right-4 top-4 text-white/20">
-                <FaStar className="w-8 h-8" />
+                <FaHandshake className="w-8 h-8" />
               </div>
             </div>
 
-            {/* Course Progress Indicators */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <div className="bg-white rounded-xl p-4 shadow-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <span className="text-purple-600 font-bold">%</span>
-                  </div>
-                  <FaEllipsisV className="w-4 h-4 text-gray-400" />
-                </div>
-                <h4 className="font-semibold text-gray-900 mb-1">UI/UX Design</h4>
-                <p className="text-sm text-gray-600">2/8 watched</p>
-              </div>
-              <div className="bg-white rounded-xl p-4 shadow-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
-                    <span className="text-pink-600 font-bold">#</span>
-                  </div>
-                  <FaEllipsisV className="w-4 h-4 text-gray-400" />
-                </div>
-                <h4 className="font-semibold text-gray-900 mb-1">Branding</h4>
-                <p className="text-sm text-gray-600">3/8 watched</p>
-              </div>
+            {/* Marketplace Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
               <div className="bg-white rounded-xl p-4 shadow-sm">
                 <div className="flex items-center justify-between mb-3">
                   <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <span className="text-blue-600 font-bold">🏢</span>
+                    <FaTools className="w-5 h-5 text-blue-600" />
                   </div>
                   <FaEllipsisV className="w-4 h-4 text-gray-400" />
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-1">Front End</h4>
-                <p className="text-sm text-gray-600">6/12 watched</p>
+                <h4 className="font-semibold text-gray-900 mb-1">{marketplaceStats.totalServices}</h4>
+                <p className="text-sm text-gray-600">Active Services</p>
+              </div>
+              <div className="bg-white rounded-xl p-4 shadow-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <FaUsers className="w-5 h-5 text-green-600" />
+                  </div>
+                  <FaEllipsisV className="w-4 h-4 text-gray-400" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-1">{marketplaceStats.activeProviders}</h4>
+                <p className="text-sm text-gray-600">Service Providers</p>
+              </div>
+              <div className="bg-white rounded-xl p-4 shadow-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <FaShoppingCart className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <FaEllipsisV className="w-4 h-4 text-gray-400" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-1">{marketplaceStats.totalBookings}</h4>
+                <p className="text-sm text-gray-600">Total Bookings</p>
+              </div>
+              <div className="bg-white rounded-xl p-4 shadow-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <FaStar className="w-5 h-5 text-yellow-600" />
+                  </div>
+                  <FaEllipsisV className="w-4 h-4 text-gray-400" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-1">{marketplaceStats.averageRating}</h4>
+                <p className="text-sm text-gray-600">Avg Rating</p>
               </div>
             </div>
 
-            {/* Continue Watching */}
+            {/* Recent Services */}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Continue Watching</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Recent Services</h3>
                 <div className="flex gap-2">
                   <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
                     <FaArrowLeft className="w-4 h-4" />
@@ -501,11 +576,18 @@ export default function ProfileDashboardPage() {
                     </button>
                   </div>
                   <div className="p-4">
-                    <span className="inline-block px-2 py-1 bg-blue-100 text-blue-600 text-xs font-semibold rounded mb-2">FRONT END</span>
-                    <h4 className="font-semibold text-gray-900 mb-2">Beginner's Guide to Becoming a Professional Front-End Developer</h4>
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
-                      <span className="text-sm text-gray-600">Leonardo samsul</span>
+                    <span className="inline-block px-2 py-1 bg-blue-100 text-blue-600 text-xs font-semibold rounded mb-2">TECHNOLOGY</span>
+                    <h4 className="font-semibold text-gray-900 mb-2">Professional Web Development Services</h4>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                        <span className="text-sm text-gray-600">Sarah Johnson</span>
+                      </div>
+                      <span className="text-lg font-bold text-green-600">$150</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <FaStar className="w-4 h-4 text-yellow-400" />
+                      <span>4.8 (24 reviews)</span>
                     </div>
                   </div>
                 </div>
@@ -516,42 +598,57 @@ export default function ProfileDashboardPage() {
                     </button>
                   </div>
                   <div className="p-4">
-                    <span className="inline-block px-2 py-1 bg-purple-100 text-purple-600 text-xs font-semibold rounded mb-2">UI/UX DESIGN</span>
-                    <h4 className="font-semibold text-gray-900 mb-2">Optimizing User Experience with the Best UI/UX Design</h4>
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
-                      <span className="text-sm text-gray-600">Bayu Salto</span>
+                    <span className="inline-block px-2 py-1 bg-purple-100 text-purple-600 text-xs font-semibold rounded mb-2">DESIGN</span>
+                    <h4 className="font-semibold text-gray-900 mb-2">Creative Logo & Brand Identity Design</h4>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                        <span className="text-sm text-gray-600">Mike Chen</span>
+                      </div>
+                      <span className="text-lg font-bold text-green-600">$75</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <FaStar className="w-4 h-4 text-yellow-400" />
+                      <span>4.9 (18 reviews)</span>
                     </div>
                   </div>
                 </div>
                 <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                  <div className="h-32 bg-gradient-to-br from-pink-400 to-pink-600 relative">
+                  <div className="h-32 bg-gradient-to-br from-green-400 to-green-600 relative">
                     <button className="absolute top-3 right-3 text-white hover:text-red-400">
                       <FaHeart className="w-5 h-5" />
                     </button>
                   </div>
                   <div className="p-4">
-                    <span className="inline-block px-2 py-1 bg-pink-100 text-pink-600 text-xs font-semibold rounded mb-2">BRANDING</span>
-                    <h4 className="font-semibold text-gray-900 mb-2">Reviving and Refresh Company Image</h4>
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
-                      <span className="text-sm text-gray-600">Padhang Satrio</span>
+                    <span className="inline-block px-2 py-1 bg-green-100 text-green-600 text-xs font-semibold rounded mb-2">WRITING</span>
+                    <h4 className="font-semibold text-gray-900 mb-2">Professional Content Writing & SEO</h4>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                        <span className="text-sm text-gray-600">Emma Davis</span>
+                      </div>
+                      <span className="text-lg font-bold text-green-600">$50</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <FaStar className="w-4 h-4 text-yellow-400" />
+                      <span>4.7 (31 reviews)</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Your Lesson */}
+            {/* Upcoming Bookings */}
             <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Lesson</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Bookings</h3>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">MENTOR</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">TYPE</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">DESC</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-600">SERVICE</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-600">CLIENT</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-600">DATE</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-600">STATUS</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-600">ACTION</th>
                     </tr>
                   </thead>
@@ -559,19 +656,63 @@ export default function ProfileDashboardPage() {
                     <tr className="border-b border-gray-100">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                            <span className="text-white text-xs font-bold">P</span>
+                          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                            <FaTools className="w-4 h-4 text-white" />
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">Padhang Satrio</p>
-                            <p className="text-xs text-gray-500">2/16/2004</p>
+                            <p className="font-medium text-gray-900">Web Development</p>
+                            <p className="text-xs text-gray-500">$150</p>
                           </div>
                         </div>
                       </td>
                       <td className="py-3 px-4">
-                        <span className="inline-block px-2 py-1 bg-purple-100 text-purple-600 text-xs font-semibold rounded">UI/UX DESIGN</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                          <span className="text-sm text-gray-700">John Smith</span>
+                        </div>
                       </td>
-                      <td className="py-3 px-4 text-gray-700">Understand Of UI/UX Design</td>
+                      <td className="py-3 px-4 text-gray-700">
+                        <div className="flex items-center gap-1">
+                          <FaCalendar className="w-3 h-3 text-gray-400" />
+                          <span className="text-sm">Dec 15, 2024</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="inline-block px-2 py-1 bg-green-100 text-green-600 text-xs font-semibold rounded">Confirmed</span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <button className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center hover:bg-blue-600">
+                          <FaArrowRight className="w-3 h-3" />
+                        </button>
+                      </td>
+                    </tr>
+                    <tr className="border-b border-gray-100">
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                            <FaTools className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">Logo Design</p>
+                            <p className="text-xs text-gray-500">$75</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                          <span className="text-sm text-gray-700">Lisa Brown</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-gray-700">
+                        <div className="flex items-center gap-1">
+                          <FaCalendar className="w-3 h-3 text-gray-400" />
+                          <span className="text-sm">Dec 18, 2024</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="inline-block px-2 py-1 bg-yellow-100 text-yellow-600 text-xs font-semibold rounded">Pending</span>
+                      </td>
                       <td className="py-3 px-4">
                         <button className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center hover:bg-purple-600">
                           <FaArrowRight className="w-3 h-3" />
@@ -581,99 +722,111 @@ export default function ProfileDashboardPage() {
                   </tbody>
                 </table>
               </div>
-              <button className="mt-4 text-purple-600 hover:text-purple-700 font-medium">See All</button>
+              <button className="mt-4 text-blue-600 hover:text-blue-700 font-medium">View All Bookings</button>
             </div>
           </div>
         </div>
 
         {/* Right Sidebar */}
         <div className="w-80 bg-white shadow-sm p-6 overflow-y-auto">
-          {/* Statistics Section */}
+          {/* Profile & Stats Section */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Statistic</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Your Stats</h3>
               <FaEllipsisV className="w-4 h-4 text-gray-400" />
             </div>
             
             <div className="text-center mb-6">
               <div className="relative inline-block">
-                <div className="w-20 h-20 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
                   <span className="text-white font-bold text-lg">
                     {profile?.Name?.charAt(0) || "J"}
                   </span>
                 </div>
-                <div className="absolute inset-0 w-20 h-20 border-4 border-purple-200 border-t-purple-500 rounded-full animate-spin"></div>
+                <div className="absolute inset-0 w-20 h-20 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
               </div>
-              <p className="text-sm text-gray-600 mb-1">32% completed</p>
+              <p className="text-sm text-gray-600 mb-1">{profile?.completedServices || 0} services completed</p>
               <h4 className="text-lg font-semibold text-gray-900 mb-2">Good Morning {profile?.Name?.split(' ')[0] || 'Jason'} 🔥</h4>
-              <p className="text-sm text-gray-600">Continue your learning to achieve your target!</p>
+              <p className="text-sm text-gray-600">Keep growing your business!</p>
             </div>
 
-            {/* Chart */}
+            {/* Earnings Chart */}
             <div className="bg-gray-50 rounded-lg p-4">
-              <h5 className="font-semibold text-gray-900 mb-3">Statistic</h5>
+              <h5 className="font-semibold text-gray-900 mb-3">Monthly Earnings</h5>
               <div className="flex items-end gap-2 h-24">
-                <div className="flex-1 bg-purple-300 rounded-t" style={{height: '60%'}}></div>
-                <div className="flex-1 bg-purple-400 rounded-t" style={{height: '80%'}}></div>
-                <div className="flex-1 bg-purple-500 rounded-t" style={{height: '100%'}}></div>
+                <div className="flex-1 bg-blue-300 rounded-t" style={{height: '60%'}}></div>
+                <div className="flex-1 bg-blue-400 rounded-t" style={{height: '80%'}}></div>
+                <div className="flex-1 bg-blue-500 rounded-t" style={{height: '100%'}}></div>
               </div>
               <div className="flex justify-between text-xs text-gray-500 mt-2">
-                <span>1-10 Aug</span>
-                <span>11-20 Aug</span>
-                <span>21-30 Aug</span>
+                <span>Oct</span>
+                <span>Nov</span>
+                <span>Dec</span>
               </div>
             </div>
           </div>
 
-          {/* Your Mentor Section */}
+          {/* Top Service Providers Section */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Your mentor</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Top Providers</h3>
               <FaPlus className="w-4 h-4 text-gray-400" />
             </div>
             
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">P</span>
+                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">S</span>
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900">Padhang Satrio</p>
-                  <p className="text-xs text-gray-500">Mentor</p>
+                  <p className="font-medium text-gray-900">Sarah Johnson</p>
+                  <p className="text-xs text-gray-500">Web Developer</p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <FaStar className="w-3 h-3 text-yellow-400" />
+                    <span className="text-xs text-gray-600">4.8 (24)</span>
+                  </div>
                 </div>
-                <button className="px-3 py-1 bg-purple-100 text-purple-600 text-xs font-semibold rounded-full hover:bg-purple-200">
-                  Follow
+                <button className="px-3 py-1 bg-blue-100 text-blue-600 text-xs font-semibold rounded-full hover:bg-blue-200">
+                  Hire
                 </button>
               </div>
               
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">Z</span>
+                <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">M</span>
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900">Zakir Horizontal</p>
-                  <p className="text-xs text-gray-500">Mentor</p>
+                  <p className="font-medium text-gray-900">Mike Chen</p>
+                  <p className="text-xs text-gray-500">Designer</p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <FaStar className="w-3 h-3 text-yellow-400" />
+                    <span className="text-xs text-gray-600">4.9 (18)</span>
+                  </div>
                 </div>
                 <button className="px-3 py-1 bg-purple-100 text-purple-600 text-xs font-semibold rounded-full hover:bg-purple-200">
-                  Follow
+                  Hire
                 </button>
               </div>
               
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">L</span>
+                  <span className="text-white font-bold text-sm">E</span>
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900">Leonardo Samsul</p>
-                  <p className="text-xs text-gray-500">Mentor</p>
+                  <p className="font-medium text-gray-900">Emma Davis</p>
+                  <p className="text-xs text-gray-500">Content Writer</p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <FaStar className="w-3 h-3 text-yellow-400" />
+                    <span className="text-xs text-gray-600">4.7 (31)</span>
+                  </div>
                 </div>
-                <button className="px-3 py-1 bg-purple-100 text-purple-600 text-xs font-semibold rounded-full hover:bg-purple-200">
-                  Follow
+                <button className="px-3 py-1 bg-green-100 text-green-600 text-xs font-semibold rounded-full hover:bg-green-200">
+                  Hire
                 </button>
               </div>
             </div>
             
-            <button className="w-full mt-4 text-purple-600 hover:text-purple-700 font-medium">See All</button>
+            <button className="w-full mt-4 text-blue-600 hover:text-blue-700 font-medium">View All Providers</button>
           </div>
         </div>
       </div>
@@ -753,7 +906,7 @@ export default function ProfileDashboardPage() {
                   <div className="text-red-600 text-sm mb-2 font-medium">{formError}</div>
                 )}
                 <div>
-                  <label className="text-sm font-medium block mb-1 text-[#15803d]">Skills & Interests</label>
+                  <label className="text-sm font-medium block mb-1 text-[#15803d]">Skills & Services</label>
                   <div className="flex flex-wrap gap-2 mb-2">
                     {formData.skills.map((tag) => (
                       <span
@@ -780,7 +933,7 @@ export default function ProfileDashboardPage() {
                           handleAddSkill();
                         }
                       }}
-                      placeholder="e.g. #Python"
+                      placeholder="e.g. #WebDevelopment"
                       className="flex-1 px-5 py-3 border border-gray-200 rounded-full bg-white text-[#1a1446] placeholder-gray-400 text-base focus:border-[#22c55e] outline-none"
                     />
                     <button
@@ -843,3 +996,4 @@ export default function ProfileDashboardPage() {
     </ProtectedLayout>
   );
 }
+
