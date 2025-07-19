@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FaUpload, FaTimes, FaImage, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
-import Sidebar from "@/components/common/Sidebar";
+import ProtectedLayout from "@/components/Layout/ProtectedLayout";
 
 interface Tier {
   name: string;
@@ -637,16 +637,14 @@ export default function CreateServicePage() {
   );
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-gray-100 via-white to-gray-200">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col">
-        {/* Top Bar */}
-        <div className="bg-white/70 backdrop-blur-lg border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
+    <ProtectedLayout>
+      <div className="max-w-4xl mx-auto">
+        {/* Page Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Create New Service</h1>
-              <p className="text-gray-600 mt-1">
+              <h1 className="text-3xl font-bold text-gray-900">Create New Service</h1>
+              <p className="text-gray-600 mt-2">
                 Step {currentStep} of 2: {currentStep === 1 ? 'Basic Information' : 'Pricing Tiers'}
               </p>
             </div>
@@ -660,7 +658,7 @@ export default function CreateServicePage() {
           </div>
           
           {/* Step Indicator */}
-          <div className="flex items-center mt-4 space-x-4">
+          <div className="flex items-center space-x-4">
             <div className={`w-4 h-4 rounded-full ${currentStep >= 1 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
             <div className={`flex-1 h-2 rounded ${currentStep >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
             <div className={`w-4 h-4 rounded-full ${currentStep >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
@@ -668,63 +666,59 @@ export default function CreateServicePage() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-6">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              {currentStep === 1 ? renderStep1() : renderStep2()}
-            </div>
+        <div className="bg-white rounded-2xl shadow-lg p-8">
+          {currentStep === 1 ? renderStep1() : renderStep2()}
+        </div>
 
-            {/* Navigation */}
-            <div className="mt-8 flex items-center justify-between">
-              {currentStep > 1 ? (
-                <button
-                  type="button"
-                  onClick={prevStep}
-                  className="flex items-center space-x-2 px-6 py-3 border border-gray-300 bg-white text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm"
-                >
-                  <FaArrowLeft className="w-4 h-4" />
-                  <span>Previous</span>
-                </button>
+        {/* Navigation */}
+        <div className="mt-8 flex items-center justify-between">
+          {currentStep > 1 ? (
+            <button
+              type="button"
+              onClick={prevStep}
+              className="flex items-center space-x-2 px-6 py-3 border border-gray-300 bg-white text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm"
+            >
+              <FaArrowLeft className="w-4 h-4" />
+              <span>Previous</span>
+            </button>
+          ) : (
+            <div></div>
+          )}
+          
+          {currentStep < 2 ? (
+            <button
+              type="button"
+              onClick={nextStep}
+              className="flex items-center space-x-2 px-8 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors shadow-lg font-medium"
+            >
+              <span>Next</span>
+              <FaArrowRight className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={uploading}
+              onClick={handleSubmit}
+              className={`px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg ${
+                uploading 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 hover:shadow-xl'
+              } text-white flex items-center space-x-2`}
+            >
+              {uploading ? (
+                <>
+                  <LoadingSpinner size="sm" text="" />
+                  <span>Creating Service...</span>
+                </>
               ) : (
-                <div></div>
+                <>
+                  <span>Create Service</span>
+                </>
               )}
-              
-              {currentStep < 2 ? (
-                <button
-                  type="button"
-                  onClick={nextStep}
-                  className="flex items-center space-x-2 px-8 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors shadow-lg font-medium"
-                >
-                  <span>Next</span>
-                  <FaArrowRight className="w-4 h-4" />
-                </button>
-              ) : (
-                <button
-                  type="submit"
-                  disabled={uploading}
-                  onClick={handleSubmit}
-                  className={`px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg ${
-                    uploading 
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 hover:shadow-xl'
-                  } text-white flex items-center space-x-2`}
-                >
-                  {uploading ? (
-                    <>
-                      <LoadingSpinner size="sm" text="" />
-                      <span>Creating Service...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Create Service</span>
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
-          </div>
+            </button>
+          )}
         </div>
       </div>
-    </div>
+    </ProtectedLayout>
   );
 } 
