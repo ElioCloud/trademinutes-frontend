@@ -189,6 +189,14 @@ export default function ProfileDashboardPage() {
       }),
     });
 
+    // Check for authentication errors
+    if (res.status === 401 || res.status === 403) {
+      console.warn("❌ Token invalid for profile update — redirecting to login");
+      localStorage.removeItem("token");
+      router.push("/login");
+      throw new Error("Authentication failed");
+    }
+
     if (!res.ok) {
       const msg = await res.text();
       throw new Error(msg || "Update failed");
@@ -230,23 +238,67 @@ export default function ProfileDashboardPage() {
 
     console.log("✅ JWT token loaded from localStorage:", token);
 
+    // Validate token format (basic check)
+    const validateToken = (token: string) => {
+      try {
+        // Basic JWT format validation (header.payload.signature)
+        const parts = token.split('.');
+        if (parts.length !== 3) {
+          return false;
+        }
+        // Check if parts are base64 encoded
+        return parts.every(part => /^[A-Za-z0-9+/=]+$/.test(part));
+      } catch {
+        return false;
+      }
+    };
+
+    if (!validateToken(token)) {
+      console.error("❌ Invalid token format — redirecting to login");
+      localStorage.removeItem("token");
+      router.push("/login");
+      return;
+    }
+
+    // Helper function to handle API calls with authentication
+    const apiCall = async (url: string, options: RequestInit = {}) => {
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          ...options.headers,
+        },
+      });
+
+      // Check for authentication errors
+      if (res.status === 401 || res.status === 403) {
+        console.warn("❌ Token invalid or expired — redirecting to login");
+        localStorage.removeItem("token");
+        router.push("/login");
+        throw new Error("Authentication failed");
+      }
+
+      return res;
+    };
+
     const fetchProfile = async () => {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_PROFILE_API_URL}/api/profile/get`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+        const res = await apiCall(
+          `${process.env.NEXT_PUBLIC_PROFILE_API_URL}/api/profile/get`
         );
 
         const contentType = res.headers.get("content-type") || "";
         if (!contentType.includes("application/json")) {
           const rawText = await res.text();
-          throw new Error(rawText || "Invalid response format");
+          console.error("❌ Non-JSON response:", rawText);
+          throw new Error("Invalid response format from server");
         }
 
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Unauthorized");
+        if (!res.ok) {
+          console.error("❌ API error:", data);
+          throw new Error(data.error || data.message || "Failed to fetch profile");
+        }
 
         // Detailed debug logging
         console.log("=== Profile Data Debug ===");
@@ -322,18 +374,20 @@ export default function ProfileDashboardPage() {
 
     const fetchBookings = async () => {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_PROFILE_API_URL}/api/bookings/upcoming`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+        const res = await apiCall(
+          `${process.env.NEXT_PUBLIC_PROFILE_API_URL}/api/bookings/upcoming`
         );
 
         if (res.ok) {
           const data = await res.json();
           setUpcomingBookings(data.slice(0, 5)); // Get next 5 bookings
+        } else {
+          console.warn("⚠️ Failed to fetch bookings:", res.status);
         }
       } catch (error) {
+        if (error instanceof Error && error.message === "Authentication failed") {
+          return; // Already handled by apiCall
+        }
         console.error("Error fetching bookings:", error);
       }
     };
@@ -341,11 +395,8 @@ export default function ProfileDashboardPage() {
     const fetchServices = async () => {
       try {
         // Fetch user's services
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084"}/api/tasks/get/user`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+        const res = await apiCall(
+          `${process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084"}/api/tasks/get/user`
         );
 
         if (res.ok) {
@@ -362,8 +413,13 @@ export default function ProfileDashboardPage() {
               Category: service.Category || service.category || 'General'
             }))
           });
+        } else {
+          console.warn("⚠️ Failed to fetch services:", res.status);
         }
       } catch (error) {
+        if (error instanceof Error && error.message === "Authentication failed") {
+          return; // Already handled by apiCall
+        }
         console.error("Error fetching services:", error);
       }
     };
@@ -372,23 +428,37 @@ export default function ProfileDashboardPage() {
     fetchServices();
 
     // Fetch tasks
-    fetch(`${process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084"}/api/tasks/get/user`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(res => res.json())
-      .then(json => {
-        let tasks: Task[] = [];
-        if (json && Array.isArray(json.data)) {
-          tasks = json.data;
-        } else if (Array.isArray(json)) {
-          tasks = json;
+    const fetchTasks = async () => {
+      try {
+        const res = await apiCall(
+          `${process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084"}/api/tasks/get/user`
+        );
+
+        if (res.ok) {
+          const json = await res.json();
+          let tasks: Task[] = [];
+          if (json && Array.isArray(json.data)) {
+            tasks = json.data;
+          } else if (Array.isArray(json)) {
+            tasks = json;
+          }
+          setTaskStats({
+            total: tasks.length,
+            credits: tasks.reduce((sum: number, t: Task) => sum + (t.Credits || 0), 0),
+            recent: tasks.slice(0, 5),
+          });
+        } else {
+          console.warn("⚠️ Failed to fetch tasks:", res.status);
         }
-        setTaskStats({
-          total: tasks.length,
-          credits: tasks.reduce((sum: number, t: Task) => sum + (t.Credits || 0), 0),
-          recent: tasks.slice(0, 5),
-        });
-      });
+      } catch (error) {
+        if (error instanceof Error && error.message === "Authentication failed") {
+          return; // Already handled by apiCall
+        }
+        console.error("Error fetching tasks:", error);
+      }
+    };
+
+    fetchTasks();
 
     // Fetch upcoming appointments (realtime)
     let interval: NodeJS.Timeout;
@@ -396,23 +466,28 @@ export default function ProfileDashboardPage() {
       try {
         // Get user ID from profile
         let userId;
-        const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8081'}/api/auth/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!profileRes.ok) return;
+        const profileRes = await apiCall(
+          `${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8081'}/api/auth/profile`
+        );
+        
+        if (!profileRes.ok) {
+          console.warn("⚠️ Failed to fetch user profile for appointments:", profileRes.status);
+          return;
+        }
+        
         const profileData = await profileRes.json();
         userId = profileData.ID || profileData.id;
         if (!userId) return;
+        
         // Use the same API as the appointments page
-        const res = await fetch(`${process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084"}/api/bookings?role=owner&id=${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await apiCall(
+          `${process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084"}/api/bookings?role=owner&id=${userId}`
+        );
+        
         if (!res.ok) return;
         const json = await res.json();
         const bookings = (json.data || json || []);
         // For each booking, fetch task details if needed
-        const API_BASE_URL = process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084";
-        const tokenHeader = { Authorization: `Bearer ${token}` };
         const appointmentsWithTasks = await Promise.all(bookings.slice(0, 5).map(async (item: any, idx: number) => {
           let title = "(No title)";
           let dateStr = item.Timeslot?.date || null;
@@ -420,7 +495,9 @@ export default function ProfileDashboardPage() {
           let to = item.Timeslot?.timeTo || null;
           if (item.TaskID) {
             try {
-              const taskRes = await fetch(`${API_BASE_URL}/api/tasks/get/${item.TaskID}`, { headers: tokenHeader });
+              const taskRes = await apiCall(
+                `${process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084"}/api/tasks/get/${item.TaskID}`
+              );
               if (taskRes.ok) {
                 const taskData = await taskRes.json();
                 title = taskData.Title || taskData.title || title;
@@ -431,7 +508,11 @@ export default function ProfileDashboardPage() {
                   to = taskData.Availability?.[0]?.TimeTo || null;
                 }
               }
-            } catch {}
+            } catch (error) {
+              if (error instanceof Error && error.message === "Authentication failed") {
+                return; // Already handled by apiCall
+              }
+            }
           }
           // If still missing, set to N/A
           dateStr = dateStr || "N/A";
@@ -446,6 +527,10 @@ export default function ProfileDashboardPage() {
         }));
         setUpcomingAppointments(appointmentsWithTasks);
       } catch (err) {
+        if (err instanceof Error && err.message === "Authentication failed") {
+          return; // Already handled by apiCall
+        }
+        console.error("Error fetching appointments:", err);
         setUpcomingAppointments([]);
       }
     };
@@ -522,21 +607,45 @@ export default function ProfileDashboardPage() {
       // Fetch updated profile
       const token = localStorage.getItem("token");
       if (token) {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_PROFILE_API_URL}/api/profile/get`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setCreditsAfter(data.Credits);
-          setProfile(data);
-          setShowBonusDialog(true);
-          setTimeout(() => setShowBonusDialog(false), 3000);
+        try {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_PROFILE_API_URL}/api/profile/get`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          
+          // Check for authentication errors
+          if (res.status === 401 || res.status === 403) {
+            console.warn("❌ Token invalid for profile refresh — redirecting to login");
+            localStorage.removeItem("token");
+            router.push("/login");
+            return;
+          }
+          
+          if (res.ok) {
+            const data = await res.json();
+            setCreditsAfter(data.Credits);
+            setProfile(data);
+            setShowBonusDialog(true);
+            setTimeout(() => setShowBonusDialog(false), 3000);
+          }
+        } catch (error) {
+          console.error("Error refreshing profile:", error);
         }
       }
     }, 2000);
   };
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <ProtectedLayout>
+        <div className="flex h-screen bg-white items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-[#22c55e] border-solid"></div>
+            <span className="text-lg font-semibold text-[#1a1446]">Loading dashboard...</span>
+          </div>
+        </div>
+      </ProtectedLayout>
+    );
+  }
 
   return (
     <ProtectedLayout>
