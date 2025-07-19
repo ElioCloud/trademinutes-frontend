@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { FaUpload, FaTimes, FaImage, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ProtectedLayout from "@/components/Layout/ProtectedLayout";
@@ -808,13 +807,7 @@ export default function CreateServicePage() {
                 }
               </p>
             </div>
-            <Link
-              href="/tasks/list"
-              className="flex items-center space-x-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <FaArrowLeft className="w-4 h-4" />
-              <span>Back to Listings</span>
-            </Link>
+
           </div>
           
           {/* Step Indicator */}
