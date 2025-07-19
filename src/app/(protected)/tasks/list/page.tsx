@@ -194,12 +194,9 @@ export default function TaskListPage() {
                         <span>{task.Credits}</span>
                       </div>
                     </div>
-                    <h4 className="font-semibold text-gray-900 mb-2">
+                    <h4 className="font-semibold text-gray-900 mb-3">
                       {task.Title}
                     </h4>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                      {task.Description}
-                    </p>
                     
                     {/* Location and Time Details */}
                     <div className="space-y-2 mb-3">
