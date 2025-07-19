@@ -634,23 +634,51 @@ export default function UserProfileSummaryPage() {
                     </button>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {editData.skills.map((skill, idx) => (
-                      <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-                        {skill}
-                        <button onClick={() => removeSkill(skill)} className="text-gray-600 hover:text-gray-800">
-                          <FiX className="w-2 h-2" />
-                        </button>
-                      </span>
-                    ))}
+                    {editData.skills.map((skill, idx) => {
+                      const colors = [
+                        'bg-blue-100 text-blue-800',
+                        'bg-green-100 text-green-800',
+                        'bg-purple-100 text-purple-800',
+                        'bg-orange-100 text-orange-800',
+                        'bg-pink-100 text-pink-800',
+                        'bg-indigo-100 text-indigo-800',
+                        'bg-teal-100 text-teal-800',
+                        'bg-red-100 text-red-800'
+                      ];
+                      const colorClass = colors[idx % colors.length];
+                      
+                      return (
+                        <span key={idx} className={`${colorClass} px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1`}>
+                          {skill}
+                          <button onClick={() => removeSkill(skill)} className="text-gray-600 hover:text-gray-800">
+                            <FiX className="w-2 h-2" />
+                          </button>
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
               ) : (
                 <div className="flex flex-wrap gap-2">
-                  {editData.skills.map((skill, idx) => (
-                    <span key={idx} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold">
-                      {skill}
-                    </span>
-                  ))}
+                  {editData.skills.map((skill, idx) => {
+                    const colors = [
+                      'bg-blue-100 text-blue-800',
+                      'bg-green-100 text-green-800',
+                      'bg-purple-100 text-purple-800',
+                      'bg-orange-100 text-orange-800',
+                      'bg-pink-100 text-pink-800',
+                      'bg-indigo-100 text-indigo-800',
+                      'bg-teal-100 text-teal-800',
+                      'bg-red-100 text-red-800'
+                    ];
+                    const colorClass = colors[idx % colors.length];
+                    
+                    return (
+                      <span key={idx} className={`${colorClass} px-3 py-1 rounded-full text-xs font-semibold`}>
+                        {skill}
+                      </span>
+                    );
+                  })}
                 </div>
               )}
             </div>
