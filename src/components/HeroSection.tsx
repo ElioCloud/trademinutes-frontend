@@ -26,7 +26,11 @@ const categories = [
   "Other"
 ];
 
-export default function HeroSection() {
+interface HeroSectionProps {
+  onVideoClick?: () => void;
+}
+
+export default function HeroSection({ onVideoClick }: HeroSectionProps) {
   const router = useRouter();
   const [current, setCurrent] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -195,6 +199,21 @@ export default function HeroSection() {
   <p className="text-sm mt-4 text-gray-200">
     Popular: Gardening, Dog Walking, Coding Help, Resume Review, Piano Lessons
   </p>
+
+  {/* Video Button Section */}
+  <div className="mt-8 flex items-center justify-center gap-4">
+    <button 
+      onClick={onVideoClick}
+      className="flex items-center gap-3 bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-full hover:bg-white/30 transition-all duration-300 border border-white/30"
+    >
+      <span className="bg-white rounded-full p-2 shadow-lg">
+        <svg className="w-4 h-4 text-gray-800" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M6 4l8 6-8 6V4z" />
+        </svg>
+      </span>
+      <span className="font-medium">How TradeMinutes Works</span>
+    </button>
+  </div>
 </div>
 
     </section>
