@@ -311,7 +311,7 @@ export default function ServiceViewPage() {
             {/* Service Title and Provider Info */}
             <div className="bg-white rounded-xl p-6">
               <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                I will draw your floor plan, elevations or architectural plans
+                {title || 'Service Title'}
               </h1>
               
               <div className="flex items-center space-x-4 mb-6">
@@ -323,13 +323,9 @@ export default function ServiceViewPage() {
                     height={60}
                     className="rounded-full"
                   />
-                  <div className="absolute -bottom-1 -right-1 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                    Level 2
-                  </div>
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-900">{user}</h3>
-                  <p className="text-sm text-gray-600">2 orders in queue</p>
                   <div className="flex items-center space-x-2 mt-1">
                     <div className="flex items-center">
                       {[...Array(5)].map((_, i) => (
