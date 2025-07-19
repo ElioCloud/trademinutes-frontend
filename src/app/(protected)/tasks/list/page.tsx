@@ -201,9 +201,9 @@ export default function TaskListPage() {
                     {/* Location and Time Details */}
                     <div className="space-y-2 mb-3">
                       <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <FaMapMarkerAlt className="w-4 h-4 text-gray-400" />
-                        <span className="truncate">{task.Location}</span>
-                        <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                        <FaMapMarkerAlt className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <span className="truncate max-w-[200px]">{task.Location}</span>
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded flex-shrink-0">
                           {task.LocationType}
                         </span>
                       </div>
