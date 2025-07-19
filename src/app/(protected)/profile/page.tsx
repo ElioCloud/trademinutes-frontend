@@ -584,6 +584,35 @@ export default function UserProfileSummaryPage() {
                   fill
                   className="object-cover" 
                 />
+                {/* Content overlay when image is present */}
+                {profile.CoverImageURL && (
+                  <div className="absolute inset-0 bg-black/20 flex items-center">
+                    <div className="w-full max-w-[1400px] mx-auto px-6">
+                      <div className="flex flex-col md:flex-row items-center justify-between h-full">
+                        {/* Left side content */}
+                        <div className="flex-1 text-white">
+                          <h1 className="text-2xl md:text-3xl font-bold mb-2">
+                            Welcome to TradeMinutes
+                          </h1>
+                          <p className="text-lg md:text-xl opacity-90 mb-4">
+                            Connect with your local community and discover amazing services
+                          </p>
+                          <div className="flex items-center gap-2 text-sm opacity-80">
+                            <div className="w-3 h-3 bg-white rounded-full flex items-center justify-center">
+                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                            </div>
+                            <span>How TradeMinutes Works</span>
+                          </div>
+                        </div>
+                        {/* Right side decorative elements */}
+                        <div className="hidden md:flex items-center justify-end flex-1 relative">
+                          <div className="w-32 h-32 bg-yellow-200/20 rounded-full absolute -top-8 -left-8"></div>
+                          <div className="w-24 h-24 bg-orange-200/20 rounded-full absolute -bottom-6 -right-6"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <button
                   onClick={() => setEditingCoverImage(true)}
                   className="absolute top-4 right-4 w-8 h-8 bg-white/80 text-gray-700 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg"
