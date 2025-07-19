@@ -54,18 +54,29 @@ export default function TaskListPage() {
   const fetchTasks = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
+      console.log("No token found, setting loading to false");
       setLoading(false);
       return;
     }
     try {
       const API_BASE_URL =
         process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084";
+      console.log("Fetching tasks from:", `${API_BASE_URL}/api/tasks/get/user`);
+      console.log("Using token:", token.substring(0, 20) + "...");
+      
       const res = await fetch(`${API_BASE_URL}/api/tasks/get/user`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      
+      console.log("API Response status:", res.status);
+      console.log("API Response headers:", Object.fromEntries(res.headers.entries()));
+      
       if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+        const errorText = await res.text();
+        console.error("API Error Response:", errorText);
+        throw new Error(`HTTP error! status: ${res.status}, body: ${errorText}`);
       }
+      
       const json = await res.json();
       console.log("=== FRONTEND DEBUG: Raw API Response ===");
       console.log("API Response:", json);
@@ -93,7 +104,12 @@ export default function TaskListPage() {
       setTasks(processedTasks);
     } catch (err) {
       console.error("Failed to fetch tasks:", err);
+      console.error("Error details:", {
+        message: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : undefined
+      });
     } finally {
+      console.log("Setting loading to false");
       setLoading(false);
     }
   };
