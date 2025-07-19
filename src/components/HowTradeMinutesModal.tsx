@@ -28,7 +28,7 @@ const slides: Slide[] = [
     id: 2,
     title: "Step 2: Connect & Swap",
     description: "Once you find the right helper, connect with them and arrange your skill swap. No money involved - just fair exchanges of time and expertise.",
-    image: "/services-banner.png",
+    image: "https://media.istockphoto.com/id/1397336758/vector/business-concept-illustration-on-the-subject-of-teamwork.jpg?s=612x612&w=0&k=20&c=QmCPzcFzBHt_itlKlCI8I4fWA4_kLw-835DvW3crLTc=",
     alt: "Connect and swap illustration"
   },
   {
