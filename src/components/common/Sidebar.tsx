@@ -198,7 +198,7 @@ export default function Sidebar() {
                 icon={<FiList size={22} />}
               />
               <SidebarButton
-                href="/book-appointment"
+                href="/create-service"
                 label="Create Service"
                 pathname={pathname}
                 icon={<FiPlus size={22} />}

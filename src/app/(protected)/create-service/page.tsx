@@ -1,15 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { FaUpload, FaTimes, FaImage, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
-
-interface CreateTaskModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  showToast: (msg: string, type: "success" | "error") => void;
-  onCreated?: () => void;
-}
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 interface Tier {
   name: string;
@@ -23,12 +20,8 @@ interface Tier {
   maxDays: number;
 }
 
-export default function CreateTaskModal({
-  isOpen,
-  onClose,
-  showToast,
-  onCreated,
-}: CreateTaskModalProps) {
+export default function CreateServicePage() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     title: "",
@@ -93,8 +86,10 @@ export default function CreateTaskModal({
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
+      router.push('/login');
       return;
     }
+    
     const fetchCategories = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/api/tasks/categories`, {
@@ -108,14 +103,12 @@ export default function CreateTaskModal({
         setCategories(data);
       } catch (err) {
         console.error("Failed to fetch categories", err);
-        showToast("❌ Failed to load categories.", "error");
+        alert("❌ Failed to load categories.");
       }
     };
 
-    if (isOpen) {
-      fetchCategories();
-    }
-  }, [isOpen, showToast]);
+    fetchCategories();
+  }, [router]);
 
   const generateTimeOptions = () => {
     const options = [];
@@ -137,8 +130,6 @@ export default function CreateTaskModal({
     }
     return options;
   };
-
-  if (!isOpen) return null;
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
@@ -168,7 +159,7 @@ export default function CreateTaskModal({
         setLocationSuggestions(data.features);
       } catch (err) {
         console.error("Mapbox error:", err);
-        showToast("❌ Failed to fetch locations.", "error");
+        alert("❌ Failed to fetch locations.");
       }
     } else {
       setLocationSuggestions([]);
@@ -200,7 +191,7 @@ export default function CreateTaskModal({
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        showToast("❌ Cover image must be less than 5MB", "error");
+        alert("❌ Cover image must be less than 5MB");
         return;
       }
       setCoverImage(file);
@@ -215,13 +206,13 @@ export default function CreateTaskModal({
   const handleContentImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (contentImages.length + files.length > 5) {
-      showToast("❌ Maximum 5 content images allowed", "error");
+      alert("❌ Maximum 5 content images allowed");
       return;
     }
     
     const validFiles = files.filter(file => {
       if (file.size > 5 * 1024 * 1024) {
-        showToast("❌ Each image must be less than 5MB", "error");
+        alert("❌ Each image must be less than 5MB");
         return false;
       }
       return true;
@@ -252,11 +243,11 @@ export default function CreateTaskModal({
     if (currentStep === 1) {
       // Validate step 1
       if (!formData.title || !formData.description || !selectedCategory || !formData.location) {
-        showToast("❌ Please fill in all required fields.", "error");
+        alert("❌ Please fill in all required fields.");
         return;
       }
       if (!coverImage) {
-        showToast("❌ Please upload a cover image.", "error");
+        alert("❌ Please upload a cover image.");
         return;
       }
     }
@@ -274,13 +265,13 @@ export default function CreateTaskModal({
     const { timeFrom, timeTo } = formData.availability[0];
 
     if (!timeFrom || !timeTo) {
-      showToast("❌ Please select both start and end times.", "error");
+      alert("❌ Please select both start and end times.");
       setUploading(false);
       return;
     }
 
     if (timeFrom >= timeTo) {
-      showToast("⏰ 'Time From' must be earlier than 'Time To'", "error");
+      alert("⏰ 'Time From' must be earlier than 'Time To'");
       setUploading(false);
       return;
     }
@@ -288,7 +279,7 @@ export default function CreateTaskModal({
     // Validate tiers
     const hasValidTiers = tiers.some(tier => tier.credits > 0 && tier.title && tier.description);
     if (!hasValidTiers) {
-      showToast("❌ Please configure at least one tier with credits, title, and description.", "error");
+      alert("❌ Please configure at least one tier with credits, title, and description.");
       setUploading(false);
       return;
     }
@@ -302,7 +293,7 @@ export default function CreateTaskModal({
       latitude === 0 ||
       longitude === 0
     ) {
-      showToast("❌ Please select a valid location from the suggestions.", "error");
+      alert("❌ Please select a valid location from the suggestions.");
       setUploading(false);
       return;
     }
@@ -334,18 +325,6 @@ export default function CreateTaskModal({
         formDataToSend.append('contentImages', image);
       });
 
-      // Debug: Log what's being sent
-      console.log('FormData contents:');
-      for (let [key, value] of formDataToSend.entries()) {
-        console.log(key, value);
-      }
-
-      console.log('Sending request to:', `${API_BASE_URL}/api/tasks/create`);
-      console.log('Request headers:', {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data' // Browser will set this automatically
-      });
-
       const res = await fetch(`${API_BASE_URL}/api/tasks/create`, {
         method: "POST",
         headers: {
@@ -357,22 +336,21 @@ export default function CreateTaskModal({
       if (!res.ok) {
         const errorText = await res.text();
         console.error("Server error:", errorText);
-        showToast("❌ Failed to create task.", "error");
+        alert("❌ Failed to create service.");
       } else {
-        showToast("✅ Task created successfully!", "success");
-        if (onCreated) onCreated();
-        onClose();
+        alert("✅ Service created successfully!");
+        router.push('/my-listings');
       }
     } catch (err) {
       console.error("Network error:", err);
-      showToast("❌ Network error occurred.", "error");
+      alert("❌ Network error occurred.");
     } finally {
       setUploading(false);
     }
   };
 
   const renderStep1 = () => (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Cover Image Upload */}
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">Cover Image *</label>
@@ -381,7 +359,7 @@ export default function CreateTaskModal({
             <img
               src={coverImagePreview}
               alt="Cover preview"
-              className="w-full h-32 object-cover rounded-lg border"
+              className="w-full h-48 object-cover rounded-lg border"
             />
             <button
               type="button"
@@ -392,17 +370,18 @@ export default function CreateTaskModal({
             </button>
           </div>
         ) : (
-          <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition">
-            <FaUpload className="w-8 h-8 text-gray-400 mb-2" />
-            <span className="text-sm text-gray-500">Upload cover image</span>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleCoverImageChange}
-              className="hidden"
-            />
+          <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition">
+            <FaUpload className="w-12 h-12 text-gray-400 mb-4" />
+            <span className="text-lg text-gray-500">Upload cover image</span>
           </label>
         )}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleCoverImageChange}
+          className="hidden"
+          id="cover-image"
+        />
       </div>
 
       {/* Content Images Upload */}
@@ -410,13 +389,13 @@ export default function CreateTaskModal({
         <label className="block text-sm font-medium text-gray-700">
           Content Images (Max 5)
         </label>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {contentImagePreviews.map((preview, index) => (
             <div key={index} className="relative">
               <img
                 src={preview}
                 alt={`Content ${index + 1}`}
-                className="w-full h-20 object-cover rounded-lg border"
+                className="w-full h-32 object-cover rounded-lg border"
               />
               <button
                 type="button"
@@ -428,9 +407,9 @@ export default function CreateTaskModal({
             </div>
           ))}
           {contentImagePreviews.length < 5 && (
-            <label className="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition">
-              <FaImage className="w-4 h-4 text-gray-400 mb-1" />
-              <span className="text-xs text-gray-500">Add image</span>
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition">
+              <FaImage className="w-6 h-6 text-gray-400 mb-2" />
+              <span className="text-sm text-gray-500">Add image</span>
               <input
                 type="file"
                 accept="image/*"
@@ -443,35 +422,37 @@ export default function CreateTaskModal({
         </div>
       </div>
 
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Category *</label>
-        <select
-          name="category"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-          required
-        >
-          <option value="">Select a category</option>
-          {categories.map((cat, idx) => (
-            <option key={idx} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
-      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Category *</label>
+          <select
+            name="category"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+            required
+          >
+            <option value="">Select a category</option>
+            {categories.map((cat, idx) => (
+              <option key={idx} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Title *</label>
-        <input
-          type="text"
-          name="title"
-          placeholder="Enter your service title"
-          className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-          value={formData.title}
-          onChange={handleChange}
-          required
-        />
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Title *</label>
+          <input
+            type="text"
+            name="title"
+            placeholder="Enter your service title"
+            className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+            value={formData.title}
+            onChange={handleChange}
+            required
+          />
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -479,7 +460,7 @@ export default function CreateTaskModal({
         <textarea
           name="description"
           placeholder="Describe your service in detail"
-          rows={3}
+          rows={4}
           className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors resize-none"
           value={formData.description}
           onChange={handleChange}
@@ -487,9 +468,9 @@ export default function CreateTaskModal({
         />
       </div>
 
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Location *</label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Location *</label>
           <div className="relative">
             <input
               type="text"
@@ -514,6 +495,10 @@ export default function CreateTaskModal({
               </ul>
             )}
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Service Type</label>
           <select
             name="locationType"
             value={formData.locationType}
@@ -529,10 +514,10 @@ export default function CreateTaskModal({
 
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">Availability Time *</label>
-        <div className="flex gap-2">
+        <div className="flex gap-4">
           <select
             name="timeFrom"
-            className="border border-gray-300 px-3 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+            className="border border-gray-300 px-4 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
             value={formData.availability[0].timeFrom}
             onChange={(e) => handleAvailabilityChange("timeFrom", e.target.value)}
             required
@@ -542,7 +527,7 @@ export default function CreateTaskModal({
           </select>
           <select
             name="timeTo"
-            className="border border-gray-300 px-3 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+            className="border border-gray-300 px-4 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
             value={formData.availability[0].timeTo}
             onChange={(e) => handleAvailabilityChange("timeTo", e.target.value)}
             required
@@ -556,93 +541,93 @@ export default function CreateTaskModal({
   );
 
   const renderStep2 = () => (
-    <div className="space-y-6">
-      <div className="text-center mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Configure Service Tiers</h3>
-        <p className="text-sm text-gray-600">Set up your pricing tiers and time commitments</p>
+    <div className="space-y-8">
+      <div className="text-center mb-8">
+        <h3 className="text-2xl font-semibold text-gray-900">Configure Service Tiers</h3>
+        <p className="text-gray-600 mt-2">Set up your pricing tiers and time commitments</p>
       </div>
 
       {tiers.map((tier, index) => (
-        <div key={index} className="border border-gray-200 rounded-xl p-4 space-y-4">
+        <div key={index} className="border border-gray-200 rounded-xl p-6 space-y-6">
           <div className="flex items-center justify-between">
-            <h4 className="text-lg font-semibold text-gray-900">{tier.name} Tier</h4>
-            <div className="flex items-center space-x-2">
+            <h4 className="text-xl font-semibold text-gray-900">{tier.name} Tier</h4>
+            <div className="flex items-center space-x-3">
               <span className="text-sm text-gray-500">Credits:</span>
               <input
                 type="number"
                 value={tier.credits}
                 onChange={(e) => handleTierChange(index, 'credits', parseInt(e.target.value) || 0)}
-                className="w-20 border border-gray-300 px-2 py-1 rounded text-sm"
+                className="w-24 border border-gray-300 px-3 py-2 rounded-lg text-sm"
                 min="0"
                 placeholder="0"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
               <input
                 type="text"
                 value={tier.title}
                 onChange={(e) => handleTierChange(index, 'title', e.target.value)}
-                className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                 placeholder={`${tier.name} package title`}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Time</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Delivery Time</label>
               <input
                 type="text"
                 value={tier.deliveryTime}
                 onChange={(e) => handleTierChange(index, 'deliveryTime', e.target.value)}
-                className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                 placeholder="e.g., 2 days"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
             <textarea
               value={tier.description}
               onChange={(e) => handleTierChange(index, 'description', e.target.value)}
-              className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
-              rows={2}
+              className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+              rows={3}
               placeholder={`Describe what's included in the ${tier.name} package`}
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Weekly Hours</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Weekly Hours</label>
               <input
                 type="number"
                 value={tier.weeklyHours}
                 onChange={(e) => handleTierChange(index, 'weeklyHours', parseInt(e.target.value) || 0)}
-                className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                 min="0"
                 max="168"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Daily Hours</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Daily Hours</label>
               <input
                 type="number"
                 value={tier.dailyHours}
                 onChange={(e) => handleTierChange(index, 'dailyHours', parseInt(e.target.value) || 0)}
-                className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                 min="0"
                 max="24"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Max Days</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Max Days</label>
               <input
                 type="number"
                 value={tier.maxDays}
                 onChange={(e) => handleTierChange(index, 'maxDays', parseInt(e.target.value) || 0)}
-                className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                 min="1"
               />
             </div>
@@ -653,90 +638,94 @@ export default function CreateTaskModal({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-      <div className="bg-white max-w-4xl w-full rounded-2xl shadow-2xl overflow-hidden max-h-[95vh] relative">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200 p-6">
+    <main className="min-h-screen bg-gray-50">
+      <Navbar />
+      
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Create New Listing</h2>
+              <h1 className="text-3xl font-bold text-gray-900">Create New Service</h1>
               <p className="text-gray-600 mt-1">
                 Step {currentStep} of 2: {currentStep === 1 ? 'Basic Information' : 'Pricing Tiers'}
               </p>
             </div>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+            <Link
+              href="/my-listings"
+              className="flex items-center space-x-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              <FaTimes className="w-6 h-6" />
-            </button>
+              <FaArrowLeft className="w-4 h-4" />
+              <span>Back to Listings</span>
+            </Link>
           </div>
           
           {/* Step Indicator */}
-          <div className="flex items-center mt-4 space-x-2">
-            <div className={`w-3 h-3 rounded-full ${currentStep >= 1 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
-            <div className={`flex-1 h-1 rounded ${currentStep >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
-            <div className={`w-3 h-3 rounded-full ${currentStep >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
-          </div>
-        </div>
-        
-        {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(95vh-220px)]">
-          {currentStep === 1 ? renderStep1() : renderStep2()}
-        </div>
-
-        {/* Footer with Navigation */}
-        <div className="border-t border-gray-200 pb-12 pt-4 pr-10 bg-gray-50">
-          <div className="flex items-center justify-between">
-            {currentStep > 1 ? (
-              <button
-                type="button"
-                onClick={prevStep}
-                className="flex items-center space-x-2 px-6 py-3 border border-gray-300 bg-white text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm"
-              >
-                <FaArrowLeft className="w-4 h-4" />
-                <span>Previous</span>
-              </button>
-            ) : (
-              <div></div>
-            )}
-            
-            {currentStep < 2 ? (
-              <button
-                type="button"
-                onClick={nextStep}
-                className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors shadow-lg font-medium"
-              >
-                <span>Next</span>
-                <FaArrowRight className="w-4 h-4" />
-              </button>
-            ) : (
-              <button
-                type="submit"
-                disabled={uploading}
-                onClick={handleSubmit}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg ${
-                  uploading 
-                    ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 hover:shadow-xl'
-                } text-white flex items-center space-x-2`}
-              >
-                {uploading ? (
-                  <>
-                    <LoadingSpinner size="sm" text="" />
-                    <span>Creating Listing...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Create Listing</span>
-                  </>
-                )}
-              </button>
-            )}
+          <div className="flex items-center mt-6 space-x-4">
+            <div className={`w-4 h-4 rounded-full ${currentStep >= 1 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
+            <div className={`flex-1 h-2 rounded ${currentStep >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
+            <div className={`w-4 h-4 rounded-full ${currentStep >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
           </div>
         </div>
       </div>
 
-    </div>
+      {/* Content */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-2xl shadow-lg p-8">
+          {currentStep === 1 ? renderStep1() : renderStep2()}
+        </div>
+
+        {/* Navigation */}
+        <div className="mt-8 flex items-center justify-between">
+          {currentStep > 1 ? (
+            <button
+              type="button"
+              onClick={prevStep}
+              className="flex items-center space-x-2 px-6 py-3 border border-gray-300 bg-white text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm"
+            >
+              <FaArrowLeft className="w-4 h-4" />
+              <span>Previous</span>
+            </button>
+          ) : (
+            <div></div>
+          )}
+          
+          {currentStep < 2 ? (
+            <button
+              type="button"
+              onClick={nextStep}
+              className="flex items-center space-x-2 px-8 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors shadow-lg font-medium"
+            >
+              <span>Next</span>
+              <FaArrowRight className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={uploading}
+              onClick={handleSubmit}
+              className={`px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg ${
+                uploading 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 hover:shadow-xl'
+              } text-white flex items-center space-x-2`}
+            >
+              {uploading ? (
+                <>
+                  <LoadingSpinner size="sm" text="" />
+                  <span>Creating Service...</span>
+                </>
+              ) : (
+                <>
+                  <span>Create Service</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
+      </div>
+
+      <Footer />
+    </main>
   );
-}
+} 
