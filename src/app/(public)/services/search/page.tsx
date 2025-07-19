@@ -66,35 +66,130 @@ function SearchResultsPage() {
       setError('');
 
       try {
+        // Try to get token for authenticated search
+        const token = localStorage.getItem("token");
         const API_BASE_URL = process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084";
-        const response = await fetch(`${API_BASE_URL}/api/tasks/get/all`);
         
-        if (!response.ok) {
-          throw new Error('Failed to fetch services');
+        let response;
+        if (token) {
+          // Authenticated request
+          response = await fetch(`${API_BASE_URL}/api/tasks/get/all`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to fetch services');
+          }
+
+          const data = await response.json();
+          console.log('Search API response:', data);
+          
+          const services = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
+          console.log('Services array:', services);
+
+          // Filter services based on query and category
+          const filteredServices = services.filter((service: Service) => {
+            const title = (service.Title || service.title || '').toLowerCase();
+            const description = (service.Description || service.description || '').toLowerCase();
+            const serviceCategory = (service.Category || service.category || '').toLowerCase();
+            const searchQuery = query.toLowerCase();
+            const categoryFilter = category.toLowerCase();
+
+            const matchesQuery = title.includes(searchQuery) || description.includes(searchQuery);
+            const matchesCategory = !category || serviceCategory.includes(categoryFilter);
+
+            return matchesQuery && matchesCategory;
+          });
+
+          console.log('Filtered services:', filteredServices);
+          setResults(filteredServices);
+        } else {
+          // For public search, use mock data that matches the search query
+          const mockServices: Service[] = [
+            {
+              ID: '1',
+              Title: 'Python Programming Tutoring',
+              Description: 'Expert Python programming help for beginners and intermediate learners. Covering data structures, algorithms, and web development.',
+              Credits: 50,
+              Category: 'Academic Help',
+              Location: 'Online',
+              Author: { Name: 'Sarah Johnson', Avatar: 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg' },
+              Images: ['https://images.pexels.com/photos/267582/pexels-photo-267582.jpeg'],
+              rating: 4.8,
+              reviewCount: 24,
+              CreatedAt: Date.now() / 1000
+            },
+            {
+              ID: '2',
+              Title: 'Web Development with Python',
+              Description: 'Learn Django and Flask web development. Build real-world projects and understand modern web technologies.',
+              Credits: 75,
+              Category: 'Tech & Digital Skills',
+              Location: 'Online',
+              Author: { Name: 'Mike Chen', Avatar: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg' },
+              Images: ['https://images.pexels.com/photos/1438081/pexels-photo-1438081.jpeg'],
+              rating: 4.9,
+              reviewCount: 18,
+              CreatedAt: Date.now() / 1000
+            },
+            {
+              ID: '3',
+              Title: 'Data Science with Python',
+              Description: 'Master data analysis, machine learning, and visualization using Python libraries like pandas, numpy, and matplotlib.',
+              Credits: 100,
+              Category: 'Tech & Digital Skills',
+              Location: 'Online',
+              Author: { Name: 'Emma Davis', Avatar: 'https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg' },
+              Images: ['https://images.pexels.com/photos/1099680/pexels-photo-1099680.jpeg'],
+              rating: 4.7,
+              reviewCount: 31,
+              CreatedAt: Date.now() / 1000
+            },
+            {
+              ID: '4',
+              Title: 'Python for Automation',
+              Description: 'Learn to automate repetitive tasks, web scraping, and file processing with Python scripts.',
+              Credits: 60,
+              Category: 'Tech & Digital Skills',
+              Location: 'Online',
+              Author: { Name: 'Alex Rodriguez', Avatar: 'https://images.pexels.com/photos/8159846/pexels-photo-8159846.jpeg' },
+              Images: ['https://images.pexels.com/photos/1322182/pexels-photo-1322182.jpeg'],
+              rating: 4.6,
+              reviewCount: 15,
+              CreatedAt: Date.now() / 1000
+            },
+            {
+              ID: '5',
+              Title: 'Python for Beginners',
+              Description: 'Start your programming journey with Python. Learn basics, syntax, and build your first projects.',
+              Credits: 40,
+              Category: 'Academic Help',
+              Location: 'Online',
+              Author: { Name: 'Lisa Wang', Avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg' },
+              Images: ['https://images.pexels.com/photos/317157/pexels-photo-317157.jpeg'],
+              rating: 4.5,
+              reviewCount: 12,
+              CreatedAt: Date.now() / 1000
+            }
+          ];
+
+          // Filter mock services based on query and category
+          const filteredServices = mockServices.filter((service: Service) => {
+            const title = (service.Title || service.title || '').toLowerCase();
+            const description = (service.Description || service.description || '').toLowerCase();
+            const serviceCategory = (service.Category || service.category || '').toLowerCase();
+            const searchQuery = query.toLowerCase();
+            const categoryFilter = category.toLowerCase();
+
+            const matchesQuery = title.includes(searchQuery) || description.includes(searchQuery);
+            const matchesCategory = !category || serviceCategory.includes(categoryFilter);
+
+            return matchesQuery && matchesCategory;
+          });
+
+          console.log('Mock filtered services:', filteredServices);
+          setResults(filteredServices);
         }
-
-        const data = await response.json();
-        console.log('Search API response:', data);
-        
-        const services = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
-        console.log('Services array:', services);
-
-        // Filter services based on query and category
-        const filteredServices = services.filter((service: Service) => {
-          const title = (service.Title || service.title || '').toLowerCase();
-          const description = (service.Description || service.description || '').toLowerCase();
-          const serviceCategory = (service.Category || service.category || '').toLowerCase();
-          const searchQuery = query.toLowerCase();
-          const categoryFilter = category.toLowerCase();
-
-          const matchesQuery = title.includes(searchQuery) || description.includes(searchQuery);
-          const matchesCategory = !category || serviceCategory.includes(categoryFilter);
-
-          return matchesQuery && matchesCategory;
-        });
-
-        console.log('Filtered services:', filteredServices);
-        setResults(filteredServices);
       } catch (err) {
         console.error('Error fetching search results:', err);
         setError('Failed to load search results. Please try again.');
@@ -109,7 +204,15 @@ function SearchResultsPage() {
   const handleServiceClick = (service: Service) => {
     const serviceId = service.ID || service.id;
     if (serviceId) {
-      router.push(`/tasks/view/${serviceId}`);
+      // Check if user is authenticated
+      const token = localStorage.getItem("token");
+      if (token) {
+        router.push(`/tasks/view/${serviceId}`);
+      } else {
+        // For mock data, show a message to sign up
+        alert('Please sign up or log in to view service details and book appointments.');
+        router.push('/register');
+      }
     }
   };
 
