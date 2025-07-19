@@ -1,23 +1,103 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import ParticlesBackground from "./ParticlesBackground";
+import { FaSearch, FaTimes } from "react-icons/fa";
 
 const images = [
     "https://images.pexels.com/photos/6457565/pexels-photo-6457565.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-  
+];
 
+// Categories from the backend
+const categories = [
+  "Academic Help",
+  "Tech & Digital Skills", 
+  "Creative & Arts",
+  "Personal Development",
+  "Language & Culture",
+  "Health & Wellness",
+  "Handy Skills & Repair",
+  "Everyday Help",
+  "Administrative & Misc Help",
+  "Social & Community",
+  "Entrepreneurship & Business",
+  "Specialized Skills",
+  "Other"
 ];
 
 export default function HeroSection() {
+  const router = useRouter();
   const [current, setCurrent] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
+  // Background image rotation effect
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrent((prev) => (prev + 1) % images.length);
     }, 5000); // change every 5 seconds
 
     return () => clearInterval(interval);
+  }, []);
+
+  // Real-time search suggestions
+  useEffect(() => {
+    if (searchQuery.trim().length > 0) {
+      // Generate suggestions based on query and categories
+      const suggestions = categories.filter(category => 
+        category.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setSearchSuggestions(suggestions.slice(0, 5));
+      setShowSuggestions(true);
+    } else {
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [searchQuery]);
+
+  // Handle search submission
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      const params = new URLSearchParams();
+      params.append('q', searchQuery.trim());
+      if (selectedCategory) {
+        params.append('category', selectedCategory);
+      }
+      router.push(`/services/search?${params.toString()}`);
+    }
+  };
+
+  // Handle suggestion click
+  const handleSuggestionClick = (suggestion: string) => {
+    setSearchQuery(suggestion);
+    setSelectedCategory(suggestion);
+    setShowSuggestions(false);
+  };
+
+  // Handle Enter key press
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  // Handle click outside to close suggestions
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.search-container')) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   return (
@@ -40,18 +120,46 @@ export default function HeroSection() {
     TradeMinutes lets you help others and get help in return — no money involved, just your time.
   </p>
 
-  <div className="bg-white rounded-lg shadow-lg flex items-center overflow-hidden w-full max-w-6xl mx-auto">
+  <div className="bg-white rounded-lg shadow-lg flex items-center overflow-hidden w-full max-w-6xl mx-auto relative">
 
   {/* Search Icon + Input */}
-  <div className="flex items-center px-6 py-4 w-full md:w-[50%]">
-    <svg className="w-6 h-6 text-gray-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
-    </svg>
+  <div className="flex items-center px-6 py-4 w-full md:w-[50%] relative search-container">
+    <FaSearch className="w-6 h-6 text-gray-500 mr-3" />
     <input
       type="text"
       placeholder="Search For Help or Services"
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      onKeyPress={handleKeyPress}
+      onFocus={() => setShowSuggestions(true)}
       className="w-full text-lg text-black outline-none placeholder-gray-500"
     />
+    {searchQuery && (
+      <button
+        onClick={() => setSearchQuery("")}
+        className="absolute right-2 text-gray-400 hover:text-gray-600"
+      >
+        <FaTimes className="w-4 h-4" />
+      </button>
+    )}
+    
+    {/* Search Suggestions Dropdown */}
+    {showSuggestions && searchSuggestions.length > 0 && (
+      <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 mt-1">
+        {searchSuggestions.map((suggestion, index) => (
+          <button
+            key={index}
+            onClick={() => handleSuggestionClick(suggestion)}
+            className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+          >
+            <div className="flex items-center">
+              <FaSearch className="w-4 h-4 text-gray-400 mr-3" />
+              <span className="text-gray-700">{suggestion}</span>
+            </div>
+          </button>
+        ))}
+      </div>
+    )}
   </div>
 
   {/* Divider */}
@@ -59,18 +167,27 @@ export default function HeroSection() {
 
   {/* Dropdown */}
   <div className="px-6 py-4 w-full md:w-[30%]">
-    <select className="w-full text-lg py-3 bg-white text-black outline-none">
-      <option>Category</option>
-      <option>Cooking</option>
-      <option>Web Design</option>
-      <option>Fitness Coaching</option>
-      <option>Tutoring</option>
+    <select 
+      value={selectedCategory}
+      onChange={(e) => setSelectedCategory(e.target.value)}
+      className="w-full text-lg py-3 bg-white text-black outline-none"
+    >
+      <option value="">All Categories</option>
+      {categories.map((category, index) => (
+        <option key={index} value={category}>
+          {category}
+        </option>
+      ))}
     </select>
   </div>
 
   {/* Button */}
-  <button className="bg-green-500 text-white text-lg font-semibold px-13 py-8 hover:bg-green-600 rounded-r-lg">
-    Search
+  <button 
+    onClick={handleSearch}
+    disabled={!searchQuery.trim()}
+    className="bg-green-500 text-white text-lg font-semibold px-13 py-8 hover:bg-green-600 rounded-r-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+  >
+    {isSearching ? "Searching..." : "Search"}
   </button>
 </div>
 
