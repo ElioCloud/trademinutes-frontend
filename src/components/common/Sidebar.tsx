@@ -198,7 +198,7 @@ export default function Sidebar() {
                 icon={<FiList size={22} />}
               />
               <SidebarButton
-                href="/create-service"
+                href="/tasks/create-service"
                 label="Create Service"
                 pathname={pathname}
                 icon={<FiPlus size={22} />}
