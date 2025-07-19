@@ -105,6 +105,7 @@ export default function UserProfileSummaryPage() {
     Address?: string;
     ID?: string;
     ProfilePictureURL?: string;
+    CoverImageURL?: string;
     Bio?: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -138,6 +139,7 @@ export default function UserProfileSummaryPage() {
   const [newWorkExperience, setNewWorkExperience] = useState("");
   const [saving, setSaving] = useState(false);
   const [editingProfilePicture, setEditingProfilePicture] = useState(false);
+  const [editingCoverImage, setEditingCoverImage] = useState(false);
 
   const fetchReviewsForMyTasks = async (userId: string) => {
     try {
@@ -434,6 +436,16 @@ export default function UserProfileSummaryPage() {
     setEditingProfilePicture(false);
   };
 
+  const handleCoverImageUpload = (imageUrl: string) => {
+    setProfile(prev => prev ? { ...prev, CoverImageURL: imageUrl } : null);
+    setEditingCoverImage(false);
+  };
+
+  const handleCoverImageRemove = () => {
+    setProfile(prev => prev ? { ...prev, CoverImageURL: "" } : null);
+    setEditingCoverImage(false);
+  };
+
   const navigateToUserProfile = (userId: string) => {
     router.push(`/users/${userId}`);
   };
@@ -443,9 +455,46 @@ export default function UserProfileSummaryPage() {
   return (
     <ProtectedLayout>
       <div className="min-h-screen bg-white text-black flex flex-col gap-6 p-6">
-        <div className="flex flex-col md:flex-row gap-6 w-full max-w-[1400px] mx-auto">
-          {/* Left: Profile Card */}
-          <div className="w-full md:w-1/4 bg-white rounded-xl shadow-sm overflow-hidden p-6 flex flex-col gap-6">
+        <div className="w-full max-w-[1400px] mx-auto">
+          {/* Cover Image Section */}
+          <div className="relative w-full h-48 md:h-64 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl overflow-hidden mb-6">
+            {editingCoverImage ? (
+              <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                <ProfilePictureUpload
+                  currentImageUrl={profile.CoverImageURL}
+                  onImageUpload={handleCoverImageUpload}
+                  onImageRemove={handleCoverImageRemove}
+                />
+                <div className="absolute top-4 right-4 flex gap-2">
+                  <button
+                    onClick={() => setEditingCoverImage(false)}
+                    className="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <Image 
+                  src={profile.CoverImageURL || "/services-banner.png"} 
+                  alt="Cover" 
+                  fill
+                  className="object-cover" 
+                />
+                <button
+                  onClick={() => setEditingCoverImage(true)}
+                  className="absolute top-4 right-4 w-8 h-8 bg-white/80 text-gray-700 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg"
+                >
+                  <FiEdit className="w-4 h-4" />
+                </button>
+              </>
+            )}
+          </div>
+
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Left: Profile Card */}
+            <div className="w-full md:w-1/4 bg-white rounded-xl shadow-sm overflow-hidden p-6 flex flex-col gap-6">
             <div className="flex flex-col items-center gap-4">
               {editingProfilePicture ? (
                 <div className="w-full">
@@ -990,6 +1039,7 @@ export default function UserProfileSummaryPage() {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </ProtectedLayout>
