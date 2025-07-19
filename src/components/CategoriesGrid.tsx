@@ -58,7 +58,7 @@ export default function CategoriesGrid() {
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
-        <div className="flex items-center justify-between mb-12">
+        <div className="mb-12">
           <div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
               Browse talent by category
@@ -67,12 +67,6 @@ export default function CategoriesGrid() {
               Get some Inspirations from 1800+ skills
             </p>
           </div>
-          <a 
-            href="/services/category" 
-            className="text-green-600 hover:text-green-700 font-medium text-lg transition-colors"
-          >
-            All Categories →
-          </a>
         </div>
 
         {/* Categories Grid */}
