@@ -480,31 +480,7 @@ export default function ServiceViewPage() {
               ))}
             </div>
 
-            {/* About This Gig */}
-            <div className="bg-white rounded-xl p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">About this gig</h2>
-              <div className="prose max-w-none text-gray-700 space-y-4">
-                <p>I just need your sketch (JPG, PDF, etc.) with measures to make drawing in AutoCAD or LayOut (SketchUp).</p>
-                <p>My work includes the source file (only in the standard package and premium) and other format you need it, like: JPG, PDF</p>
-                <p className="font-semibold text-red-600">*** Contact through the inbox before buying ***</p>
-                <p>The price does not include a new architectural design, only draw based on a design.</p>
-              </div>
-              
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Project scale</h4>
-                  <p className="text-gray-600">Building</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Building type</h4>
-                  <p className="text-gray-600">Residential, Commercial, Office & workspace</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Drawing type</h4>
-                  <p className="text-gray-600">Floor plan, Elevation, Site plan</p>
-                </div>
-              </div>
-            </div>
+
           </div>
 
           {/* Sidebar */}
