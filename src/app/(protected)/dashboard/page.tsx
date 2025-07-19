@@ -935,10 +935,6 @@ export default function ProfileDashboardPage() {
         <div className="w-72 bg-white shadow-sm p-4 overflow-y-auto flex-shrink-0">
           {/* Profile & Stats Section */}
           <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Your Stats</h3>
-              <FaEllipsisV className="w-4 h-4 text-gray-400" />
-            </div>
             
             <div className="text-center mb-6">
               <div className="relative inline-block">
