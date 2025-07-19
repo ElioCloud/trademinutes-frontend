@@ -725,6 +725,193 @@ export default function ProfileDashboardPage() {
               <button className="mt-4 text-blue-600 hover:text-blue-700 font-medium">View All Bookings</button>
             </div>
           </div>
+
+          {/* Quick Actions Section */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <button className="flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors">
+                <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <FaPlus className="w-5 h-5 text-white" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium text-gray-900">Create Service</p>
+                  <p className="text-sm text-gray-600">List your skills</p>
+                </div>
+              </button>
+              
+              <button className="flex items-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-xl transition-colors">
+                <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                  <FaSearch className="w-5 h-5 text-white" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium text-gray-900">Find Services</p>
+                  <p className="text-sm text-gray-600">Browse marketplace</p>
+                </div>
+              </button>
+              
+              <button className="flex items-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-xl transition-colors">
+                <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                  <FaCalendar className="w-5 h-5 text-white" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium text-gray-900">Book Appointment</p>
+                  <p className="text-sm text-gray-600">Schedule services</p>
+                </div>
+              </button>
+              
+              <button className="flex items-center gap-3 p-4 bg-orange-50 hover:bg-orange-100 rounded-xl transition-colors">
+                <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+                  <FaEnvelope className="w-5 h-5 text-white" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium text-gray-900">Messages</p>
+                  <p className="text-sm text-gray-600">View conversations</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Performance Metrics Section */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Overview</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm opacity-90">Monthly Earnings</span>
+                  <FaDollarSign className="w-5 h-5" />
+                </div>
+                <div className="text-3xl font-bold">$2,840</div>
+                <div className="text-sm opacity-90">+12% from last month</div>
+              </div>
+              
+              <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm opacity-90">Services Completed</span>
+                  <FaCheck className="w-5 h-5" />
+                </div>
+                <div className="text-3xl font-bold">12</div>
+                <div className="text-sm opacity-90">This month</div>
+              </div>
+              
+              <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm opacity-90">Average Rating</span>
+                  <FaStar className="w-5 h-5" />
+                </div>
+                <div className="text-3xl font-bold">4.8</div>
+                <div className="text-sm opacity-90">24 reviews</div>
+              </div>
+              
+              <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm opacity-90">Active Bookings</span>
+                  <FaCalendar className="w-5 h-5" />
+                </div>
+                <div className="text-3xl font-bold">5</div>
+                <div className="text-sm opacity-90">Upcoming</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Activity & Notifications Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            {/* Recent Activity */}
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                <FaClock className="w-4 h-4 text-gray-400" />
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-start gap-4 p-3 bg-green-50 rounded-lg">
+                  <div className="w-3 h-3 bg-green-500 rounded-full mt-2"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">Booking confirmed</p>
+                    <p className="text-xs text-gray-600">Web Development session scheduled for tomorrow at 2 PM</p>
+                    <p className="text-xs text-gray-500 mt-1">2 hours ago</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4 p-3 bg-blue-50 rounded-lg">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full mt-2"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">New message received</p>
+                    <p className="text-xs text-gray-600">Sarah Johnson sent you a message about the logo design project</p>
+                    <p className="text-xs text-gray-500 mt-1">4 hours ago</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4 p-3 bg-purple-50 rounded-lg">
+                  <div className="w-3 h-3 bg-purple-500 rounded-full mt-2"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">Service completed</p>
+                    <p className="text-xs text-gray-600">Logo Design project for TechStart Inc. has been completed</p>
+                    <p className="text-xs text-gray-500 mt-1">1 day ago</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4 p-3 bg-yellow-50 rounded-lg">
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full mt-2"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">Payment received</p>
+                    <p className="text-xs text-gray-600">$150 payment received for Web Development services</p>
+                    <p className="text-xs text-gray-500 mt-1">2 days ago</p>
+                  </div>
+                </div>
+              </div>
+              
+              <button className="w-full mt-4 text-blue-600 hover:text-blue-700 font-medium">View All Activity</button>
+            </div>
+
+            {/* Notifications */}
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+                <FaBell className="w-4 h-4 text-gray-400" />
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-start gap-4 p-3 bg-red-50 border border-red-100 rounded-lg">
+                  <div className="w-3 h-3 bg-red-500 rounded-full mt-2"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">Urgent: Booking tomorrow</p>
+                    <p className="text-xs text-gray-600">Web Development session at 2 PM - Please confirm availability</p>
+                    <p className="text-xs text-red-600 mt-1">High priority</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full mt-2"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">New review received</p>
+                    <p className="text-xs text-gray-600">5-star rating from John Smith for your Web Development services</p>
+                    <p className="text-xs text-blue-600 mt-1">Great feedback!</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4 p-3 bg-green-50 border border-green-100 rounded-lg">
+                  <div className="w-3 h-3 bg-green-500 rounded-full mt-2"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">Payment processed</p>
+                    <p className="text-xs text-gray-600">$75 payment received for Logo Design project</p>
+                    <p className="text-xs text-green-600 mt-1">Funds available</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4 p-3 bg-purple-50 border border-purple-100 rounded-lg">
+                  <div className="w-3 h-3 bg-purple-500 rounded-full mt-2"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">New service request</p>
+                    <p className="text-xs text-gray-600">Lisa Brown is interested in your Content Writing services</p>
+                    <p className="text-xs text-purple-600 mt-1">Respond within 24h</p>
+                  </div>
+                </div>
+              </div>
+              
+              <button className="w-full mt-4 text-blue-600 hover:text-blue-700 font-medium">View All Notifications</button>
+            </div>
+          </div>
         </div>
 
         {/* Right Sidebar */}
