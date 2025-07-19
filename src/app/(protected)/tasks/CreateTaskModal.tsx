@@ -654,7 +654,7 @@ export default function CreateTaskModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-      <div className="bg-white max-w-4xl w-full rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] relative">
+      <div className="bg-white max-w-4xl w-full rounded-2xl shadow-2xl overflow-hidden max-h-[95vh] relative">
         {/* Header */}
         <div className="bg-white border-b border-gray-200 p-6">
           <div className="flex items-center justify-between">
@@ -681,7 +681,7 @@ export default function CreateTaskModal({
         </div>
         
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+        <div className="p-6 overflow-y-auto max-h-[calc(95vh-200px)]">
           {currentStep === 1 ? renderStep1() : renderStep2()}
         </div>
 
