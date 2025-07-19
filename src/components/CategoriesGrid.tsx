@@ -1,54 +1,55 @@
 import React from 'react';
-import { FaLaptopCode, FaPalette, FaBullhorn, FaFileAlt, FaMicrophone, FaPlay, FaRuler, FaChartBar } from 'react-icons/fa';
+import { FiHome, FiBookOpen, FiMonitor, FiHeart, FiUsers, FiHelpCircle, FiImage, FiGift } from 'react-icons/fi';
+import Link from 'next/link';
 
 const categories = [
   {
-    name: 'Development & IT',
-    icon: <FaLaptopCode className="w-8 h-8" />,
-    skills: '1,853 skills',
-    examples: 'Software Engineer, Web / Mobile Developer & More'
-  },
-  {
-    name: 'Design & Creative',
-    icon: <FaPalette className="w-8 h-8" />,
+    name: 'Household Help',
+    icon: <FiHome className="w-8 h-8" />,
     skills: '1,247 skills',
-    examples: 'UI/UX Designer, Graphic Designer & More'
+    examples: 'Cleaning, Cooking, Repairs & More'
   },
   {
-    name: 'Digital Marketing',
-    icon: <FaBullhorn className="w-8 h-8" />,
+    name: 'Tutoring & Study',
+    icon: <FiBookOpen className="w-8 h-8" />,
     skills: '892 skills',
-    examples: 'SEO Specialist, Social Media Manager & More'
+    examples: 'Math, Science, Language & More'
   },
   {
-    name: 'Writing & Translation',
-    icon: <FaFileAlt className="w-8 h-8" />,
+    name: 'Tech Help',
+    icon: <FiMonitor className="w-8 h-8" />,
     skills: '1,156 skills',
-    examples: 'Content Writer, Translator & More'
+    examples: 'Computer Setup, Software & More'
   },
   {
-    name: 'Music & Audio',
-    icon: <FaMicrophone className="w-8 h-8" />,
+    name: 'Fitness & Wellness',
+    icon: <FiHeart className="w-8 h-8" />,
     skills: '634 skills',
-    examples: 'Voice Over Artist, Music Producer & More'
+    examples: 'Yoga, Personal Training & More'
   },
   {
-    name: 'Video & Animation',
-    icon: <FaPlay className="w-8 h-8" />,
+    name: 'Pet Care',
+    icon: <FiUsers className="w-8 h-8" />,
     skills: '745 skills',
-    examples: 'Video Editor, Animator & More'
+    examples: 'Dog Walking, Pet Sitting & More'
   },
   {
-    name: 'Engineering & Architecture',
-    icon: <FaRuler className="w-8 h-8" />,
-    skills: '1,023 skills',
-    examples: 'Civil Engineer, Architect & More'
-  },
-  {
-    name: 'Finance & Accounting',
-    icon: <FaChartBar className="w-8 h-8" />,
+    name: 'Elderly Assistance',
+    icon: <FiHelpCircle className="w-8 h-8" />,
     skills: '567 skills',
-    examples: 'Financial Analyst, Accountant & More'
+    examples: 'Companionship, Care & More'
+  },
+  {
+    name: 'Creative Services',
+    icon: <FiImage className="w-8 h-8" />,
+    skills: '1,023 skills',
+    examples: 'Design, Art, Photography & More'
+  },
+  {
+    name: 'Volunteering',
+    icon: <FiGift className="w-8 h-8" />,
+    skills: '456 skills',
+    examples: 'Community Service & More'
   }
 ];
 
@@ -77,13 +78,14 @@ export default function CategoriesGrid() {
         {/* Categories Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {categories.map((category, index) => (
-            <div 
+            <Link 
               key={category.name}
-              className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg hover:border-green-300 transition-all duration-300 cursor-pointer group"
+              href={`/services/search?category=${encodeURIComponent(category.name)}`}
+              className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg hover:border-green-300 transition-all duration-300 cursor-pointer group block"
             >
               {/* Icon */}
-              <div className="flex items-center justify-center w-16 h-16 bg-green-50 border-2 border-green-200 rounded-full mb-4 group-hover:bg-green-100 group-hover:border-green-300 transition-colors">
-                <div className="text-green-600 group-hover:text-green-700">
+              <div className="mb-4">
+                <div className="text-gray-600 group-hover:text-green-600 transition-colors">
                   {category.icon}
                 </div>
               </div>
@@ -102,7 +104,7 @@ export default function CategoriesGrid() {
               <p className="text-sm text-gray-600">
                 {category.examples}
               </p>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

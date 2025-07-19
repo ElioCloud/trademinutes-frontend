@@ -19,21 +19,21 @@ interface HowTradeMinutesModalProps {
 const slides: Slide[] = [
   {
     id: 1,
-    title: "Step 1: Browse Helpers",
+    title: "Browse Helpers",
     description: "Explore our community of trusted members who offer their skills and time. Read reviews, check ratings, and find the perfect person to help you with your task.",
     image: "/topuser-banner.png",
     alt: "Browse helpers illustration"
   },
   {
     id: 2,
-    title: "Step 2: Connect & Swap",
+    title: "Connect & Swap",
     description: "Once you find the right helper, connect with them and arrange your skill swap. No money involved - just fair exchanges of time and expertise.",
     image: "/slide02.png",
     alt: "Connect and swap illustration"
   },
   {
     id: 3,
-    title: "Step 3: Build Community",
+    title: "Build Community",
     description: "Complete your task, leave reviews, and build lasting connections in your community. TradeMinutes helps you give and receive help while building meaningful relationships.",
     image: "/services-banner.png",
     alt: "Build community illustration"
