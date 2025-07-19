@@ -624,7 +624,7 @@ export default function ProfileDashboardPage() {
               </div>
             </div>
 
-            {/* Upcoming Bookings */}
+      
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Bookings</h3>
               <div className="overflow-x-auto">
