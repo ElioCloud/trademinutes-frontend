@@ -6,6 +6,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Image from 'next/image';
+import SearchBanner from '@/components/SearchBanner';
 
 // Real service type based on API response
 type Service = {
@@ -239,25 +240,12 @@ function SearchResultsPage() {
         </div>
       </div>
 
-      {/* Banner */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold mb-4">Search Results</h1>
-            <p className="text-xl opacity-90">
-              Showing results for: <span className="font-semibold">{query}</span>
-              {category && (
-                <> in category: <span className="font-semibold">{category}</span></>
-              )}
-            </p>
-            {results.length > 0 && (
-              <p className="text-lg opacity-80 mt-2">
-                Found {results.length} service{results.length !== 1 ? 's' : ''}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
+      {/* Search Banner */}
+      <SearchBanner 
+        query={query} 
+        category={category} 
+        resultCount={results.length} 
+      />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
