@@ -442,21 +442,7 @@ function SearchResultsPage() {
                         <span className="ml-1">({service.reviewCount || Math.floor(Math.random() * 50) + 10} reviews)</span>
                       </div>
 
-                      {/* Location and Date */}
-                      <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
-                        {service.Location || service.location ? (
-                          <div className="flex items-center">
-                            <FaMapMarkerAlt className="mr-1" />
-                            {service.Location || service.location}
-                          </div>
-                        ) : null}
-                        {service.CreatedAt || service.createdAt ? (
-                          <div className="flex items-center">
-                            <FaClock className="mr-1" />
-                            {formatDate(service.CreatedAt || service.createdAt || Date.now() / 1000)}
-                          </div>
-                        ) : null}
-                      </div>
+
 
                       {/* Footer */}
                       <div className="flex items-center justify-between pt-3 border-t">
