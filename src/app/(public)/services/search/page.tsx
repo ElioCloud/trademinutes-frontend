@@ -132,9 +132,51 @@ function SearchResultsPage() {
           console.log('Filtered services from backend:', filteredServices);
           setResults(filteredServices);
         } else {
-          // For unauthenticated users, show a message to sign up
-          setError('Please sign up or log in to search and view services from our community.');
-          setResults([]);
+          // For unauthenticated users, fetch services without authentication
+          try {
+            const response = await fetch(`${API_BASE_URL}/api/tasks/get/all`);
+            
+            if (!response.ok) {
+              throw new Error('Failed to fetch services');
+            }
+
+            const data = await response.json();
+            console.log('Public search API response:', data);
+            
+            const services = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
+            console.log('Public services array:', services);
+
+            // Filter services based on query and category with improved search logic
+            const filteredServices = services.filter((service: Service) => {
+              const title = (service.Title || service.title || '').toLowerCase();
+              const description = (service.Description || service.description || '').toLowerCase();
+              const serviceCategory = (service.Category || service.category || '').toLowerCase();
+              const authorName = (service.Author?.Name || service.Author?.name || service.author?.name || '').toLowerCase();
+              const searchQuery = query.toLowerCase();
+              const categoryFilter = category.toLowerCase();
+
+              // Split search query into words for better matching
+              const searchWords = searchQuery.split(' ').filter(word => word.length > 0);
+              
+              // Check if any search word matches title, description, category, or author
+              const matchesQuery = searchWords.some(word => 
+                title.includes(word) || 
+                description.includes(word) || 
+                serviceCategory.includes(word) ||
+                authorName.includes(word)
+              ) || title.includes(searchQuery) || description.includes(searchQuery);
+              
+              const matchesCategory = !category || serviceCategory.includes(categoryFilter);
+
+              return matchesQuery && matchesCategory;
+            });
+
+            console.log('Public filtered services:', filteredServices);
+            setResults(filteredServices);
+          } catch (publicErr) {
+            console.error('Error fetching public services:', publicErr);
+            setError('Failed to load search results. Please try again.');
+          }
         }
       } catch (err) {
         console.error('Error fetching search results:', err);
@@ -155,8 +197,8 @@ function SearchResultsPage() {
       if (token) {
         router.push(`/tasks/view/${serviceId}`);
       } else {
-        // For mock data, show a message to sign up
-        alert('Please sign up or log in to view service details and book appointments.');
+        // For unauthenticated users, show a message to sign up for booking
+        alert('Please sign up or log in to book appointments and access full service details.');
         router.push('/register');
       }
     }
