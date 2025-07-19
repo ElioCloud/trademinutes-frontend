@@ -365,14 +365,8 @@ export default function UserProfileSummaryPage() {
                 <h2 className="text-xl font-bold text-gray-900">{profile.Name || 'TradeMinutes User'}</h2>
                 <p className="text-sm text-gray-500">Marketplace Member</p>
                 <p className="text-xs text-gray-400">User ID: TM-{profile.Email?.split('@')[0]}</p>
+                <p className="text-xs text-gray-400 mt-1">Click the edit icons to update your profile</p>
               </div>
-              <button 
-                onClick={() => router.push('/profile/edit')}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold text-sm hover:bg-blue-600 transition-colors"
-              >
-                <FaEdit className="w-4 h-4" />
-                Edit Profile
-              </button>
             </div>
 
             {/* Profile Stats */}
