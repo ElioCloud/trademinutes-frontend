@@ -45,6 +45,7 @@ export default function TaskListPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const router = useRouter();
 
 
@@ -89,6 +90,12 @@ export default function TaskListPage() {
     const token = localStorage.getItem("token");
     if (!taskToDelete || !token) return;
 
+    // Check if user typed the correct confirmation
+    if (deleteConfirmation.toLowerCase() !== "delete") {
+      toast.error("❌ Please type 'delete' to confirm");
+      return;
+    }
+
     try {
       const API_BASE_URL =
         process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084";
@@ -118,6 +125,7 @@ export default function TaskListPage() {
     } finally {
       setShowConfirmModal(false);
       setTaskToDelete(null);
+      setDeleteConfirmation("");
     }
   };
 
@@ -275,20 +283,41 @@ export default function TaskListPage() {
                   <FaTrash className="w-8 h-8 text-red-600" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 mb-2">Delete Listing?</h2>
-                <p className="text-gray-600">
+                <p className="text-gray-600 mb-4">
                   This action cannot be undone. The listing will be permanently removed.
                 </p>
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-gray-700 text-left">
+                    Type "delete" to confirm
+                  </label>
+                  <input
+                    type="text"
+                    value={deleteConfirmation}
+                    onChange={(e) => setDeleteConfirmation(e.target.value)}
+                    placeholder="Type 'delete' to confirm"
+                    className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                    autoFocus
+                  />
+                </div>
               </div>
               <div className="flex gap-3">
                 <button
-                  onClick={() => setShowConfirmModal(false)}
+                  onClick={() => {
+                    setShowConfirmModal(false);
+                    setDeleteConfirmation("");
+                  }}
                   className="flex-1 px-4 py-3 rounded-xl text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => { console.log('Delete clicked', taskToDelete); handleDelete(); }}
-                  className="flex-1 px-4 py-3 rounded-xl text-sm font-medium bg-red-500 text-white hover:bg-red-600 transition-colors"
+                  disabled={deleteConfirmation.toLowerCase() !== "delete"}
+                  className={`flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                    deleteConfirmation.toLowerCase() === "delete"
+                      ? "bg-red-500 text-white hover:bg-red-600"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
                 >
                   Delete
                 </button>
