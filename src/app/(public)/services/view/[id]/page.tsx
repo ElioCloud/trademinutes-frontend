@@ -374,14 +374,7 @@ export default function ServiceViewPage() {
               </h1>
               
               {/* Service Details */}
-              <div className="mb-6 space-y-4">
-                {/* Description */}
-                {service?.Description && (
-                  <p className="text-gray-700 leading-relaxed">
-                    {service.Description}
-                  </p>
-                )}
-                
+              <div className="mb-6">
                 {/* Service Details Grid */}
                 <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                   {/* Location */}
@@ -431,6 +424,18 @@ export default function ServiceViewPage() {
                 </div>
               </div>
             </div>
+
+            {/* About the Service */}
+            {service?.Description && (
+              <div className="bg-white rounded-xl p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">About the service</h2>
+                <div className="prose max-w-none text-gray-700">
+                  <p className="leading-relaxed">
+                    {service.Description}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Reviews Section */}
             <div className="bg-white rounded-xl p-6">
