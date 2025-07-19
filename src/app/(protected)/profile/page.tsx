@@ -180,20 +180,68 @@ export default function UserProfileSummaryPage() {
         ).length;
       }
       
-      // Fetch reviews to calculate average rating
+      // Fetch reviews to calculate average rating - use the same logic as fetchReviewsForMyTasks
       try {
-        const reviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`);
-        if (reviewsRes.ok) {
-          const reviewsData = await reviewsRes.json();
-          const reviews = Array.isArray(reviewsData) ? reviewsData : (reviewsData.data || []);
+        // First, get user's tasks
+        const tasksRes = await fetch(`${TASK_API_BASE}/api/tasks/get/user`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (tasksRes.ok) {
+          const tasksData = await tasksRes.json();
+          const tasks = tasksData.data || tasksData || [];
+          const myTaskIds = tasks.map((task: any) => task.id || task._id || task.ID);
           
-          reviews.forEach((review: any) => {
+          let allReviews: any[] = [];
+          
+          // Fetch reviews for each task
+          for (const taskId of myTaskIds) {
+            if (!taskId) continue;
+            
+            try {
+              const reviewRes = await fetch(`${REVIEW_API_BASE}/api/reviews?taskId=${taskId}`);
+              if (reviewRes.ok) {
+                const reviews = await reviewRes.json();
+                if (Array.isArray(reviews)) {
+                  allReviews = allReviews.concat(reviews);
+                } else if (reviews.data && Array.isArray(reviews.data)) {
+                  allReviews = allReviews.concat(reviews.data);
+                }
+              }
+            } catch (taskErr) {
+              console.error(`Error fetching reviews for task ${taskId}:`, taskErr);
+            }
+          }
+          
+          // If no reviews found via tasks, try direct user reviews
+          if (allReviews.length === 0) {
+            try {
+              const userReviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`);
+              if (userReviewsRes.ok) {
+                const userReviews = await userReviewsRes.json();
+                if (Array.isArray(userReviews)) {
+                  allReviews = userReviews;
+                } else if (userReviews.data && Array.isArray(userReviews.data)) {
+                  allReviews = userReviews.data;
+                }
+              }
+            } catch (userErr) {
+              console.error("Error fetching user reviews:", userErr);
+            }
+          }
+          
+          // Calculate rating from all reviews
+          allReviews.forEach((review: any) => {
             const rating = review.rating || review.Rating || 0;
             if (rating > 0) {
               totalRating += rating;
               reviewCount++;
             }
           });
+          
+          console.log("Profile stats - Total reviews found:", allReviews.length);
+          console.log("Profile stats - Reviews with ratings:", reviewCount);
+          console.log("Profile stats - Total rating:", totalRating);
         }
       } catch (reviewErr) {
         console.error("Error fetching reviews for profile stats:", reviewErr);
