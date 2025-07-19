@@ -150,21 +150,19 @@ export default function TaskListPage() {
         `}</style>
         
         {/* Header Section */}
-        <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-700 text-white py-12 px-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h1 className="text-3xl font-bold mb-2">My Listings</h1>
-                <p className="text-purple-100 text-lg">Manage and create your service listings</p>
-              </div>
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="bg-white text-purple-600 px-6 py-3 rounded-xl text-sm font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center gap-2"
-              >
-                <span className="text-lg">➕</span>
-                Create New Listing
-              </button>
+        <div className="max-w-7xl mx-auto px-8 pt-8 pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="flex items-center gap-4 flex-wrap">
+              <h1 className="text-2xl font-bold text-gray-900">My Listings</h1>
+              <span className="text-gray-500 text-base font-normal">Manage and create your service listings</span>
             </div>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center gap-2"
+            >
+              <span className="text-lg">➕</span>
+              Create Listing
+            </button>
           </div>
         </div>
 
