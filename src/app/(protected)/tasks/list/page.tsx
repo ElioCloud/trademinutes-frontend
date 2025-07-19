@@ -139,7 +139,7 @@ export default function TaskListPage() {
 
   return (
     <ProtectedLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+      <div className="min-h-screen bg-white">
         <style jsx>{`
           .line-clamp-2 {
             display: -webkit-box;
@@ -150,7 +150,7 @@ export default function TaskListPage() {
         `}</style>
         
         {/* Header Section */}
-        <div className="max-w-7xl mx-auto px-8 pt-8 pb-4">
+        <div className="pt-8 pb-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div className="flex items-center gap-4 flex-wrap">
               <h1 className="text-2xl font-bold text-gray-900">My Listings</h1>
@@ -167,7 +167,7 @@ export default function TaskListPage() {
         </div>
 
         {/* Content Section */}
-        <div className="max-w-7xl mx-auto px-8 py-8">
+        <div className="py-8">
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
