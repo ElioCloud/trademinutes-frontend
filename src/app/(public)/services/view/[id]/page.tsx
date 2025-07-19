@@ -383,7 +383,7 @@ export default function ServiceViewPage() {
                 )}
                 
                 {/* Service Details Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-100">
+                <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                   {/* Location */}
                   <div className="flex items-center space-x-2">
                     <FaMapMarkerAlt className="w-4 h-4 text-gray-400 flex-shrink-0" />
