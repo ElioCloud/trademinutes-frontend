@@ -262,6 +262,19 @@ export default function ServiceGrid({ items = services }: { items?: (typeof serv
         console.log('Real services:', services);
         console.log('Total real services count:', services.length);
         
+        // Debug: Log each service to see the structure
+        services.forEach((service: any, index: number) => {
+          console.log(`Service ${index + 1}:`, {
+            id: service._id || service.ID || service.id,
+            title: service.Title || service.title,
+            category: service.Category || service.category,
+            images: service.Images,
+            imagesLength: service.Images?.length,
+            author: service.Author,
+            credits: service.Credits || service.credits
+          });
+        });
+        
         setRealServices(services);
       } catch (err) {
         console.error('Error fetching real services:', err);
@@ -341,7 +354,29 @@ export default function ServiceGrid({ items = services }: { items?: (typeof serv
           const user = s.Author?.Name || s.Author?.name || s.author?.name || s.user || 'Provider';
           const avatar = s.Author?.Avatar || s.Author?.avatar || s.avatar || 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg';
           const price = s.Credits || s.credits || s.price || 0;
-          const image = s.Images?.[0] || s.image;
+          
+          // Enhanced image handling for different formats
+          let image = s.Images?.[0] || s.image;
+          
+          // Debug: Log image data for this service
+          console.log(`Service ${idx + 1} image data:`, {
+            title,
+            images: s.Images,
+            image,
+            hasImages: !!s.Images,
+            imagesLength: s.Images?.length
+          });
+          
+          // If no image found, try alternative image fields
+          if (!image && s.Images && s.Images.length > 0) {
+            // Try to find first valid image
+            for (let i = 0; i < s.Images.length; i++) {
+              if (s.Images[i] && typeof s.Images[i] === 'string') {
+                image = s.Images[i];
+                break;
+              }
+            }
+          }
           
           return (
             <div
