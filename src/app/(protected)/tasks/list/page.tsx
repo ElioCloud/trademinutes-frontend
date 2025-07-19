@@ -158,9 +158,9 @@ export default function TaskListPage() {
             </div>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 bg-gradient-to-r from-purple-500 via-pink-400 to-purple-600 text-white px-8 py-4 rounded-full text-base font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              className="flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg text-sm font-semibold shadow-md hover:bg-purple-700 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
             >
-              <span className="text-xl">➕</span>
+              <span className="text-lg">➕</span>
               Create Listing
             </button>
           </div>
