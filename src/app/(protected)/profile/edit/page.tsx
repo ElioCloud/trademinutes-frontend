@@ -49,6 +49,37 @@ export default function EditProfilePage() {
 
   const [skillInput, setSkillInput] = useState("");
 
+  // Function to handle real-time field updates
+  const handleFieldUpdate = async (field: string, value: string | string[]) => {
+    try {
+      const token = localStorage.getItem("token");
+      const API_BASE = process.env.NEXT_PUBLIC_PROFILE_API_URL || "http://localhost:8081";
+      
+      const res = await fetch(`${API_BASE}/api/profile/update-info`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          [field]: value,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Failed to update field");
+      }
+
+      // Show success message briefly
+      setSuccess(`${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully!`);
+      setTimeout(() => setSuccess(null), 2000);
+    } catch (err: any) {
+      setError(err.message || "Failed to update field");
+      setTimeout(() => setError(null), 3000);
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -96,22 +127,28 @@ export default function EditProfilePage() {
     setProfile(prev => prev ? { ...prev, ProfilePictureURL: "" } : null);
   };
 
-  const addSkill = () => {
+  const addSkill = async () => {
     const trimmed = skillInput.trim();
     if (trimmed && !formData.skills.includes(trimmed)) {
+      const newSkills = [...formData.skills, trimmed];
       setFormData(prev => ({
         ...prev,
-        skills: [...prev.skills, trimmed]
+        skills: newSkills
       }));
       setSkillInput("");
+      // Update skills in real-time
+      await handleFieldUpdate('skills', newSkills);
     }
   };
 
-  const removeSkill = (skill: string) => {
+  const removeSkill = async (skill: string) => {
+    const newSkills = formData.skills.filter(s => s !== skill);
     setFormData(prev => ({
       ...prev,
-      skills: prev.skills.filter(s => s !== skill)
+      skills: newSkills
     }));
+    // Update skills in real-time
+    await handleFieldUpdate('skills', newSkills);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -270,6 +307,7 @@ export default function EditProfilePage() {
                         type="text"
                         value={formData.college}
                         onChange={(e) => setFormData(prev => ({ ...prev, college: e.target.value }))}
+                        onBlur={(e) => handleFieldUpdate('college', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Enter your college/university"
                       />
@@ -282,6 +320,7 @@ export default function EditProfilePage() {
                         type="text"
                         value={formData.program}
                         onChange={(e) => setFormData(prev => ({ ...prev, program: e.target.value }))}
+                        onBlur={(e) => handleFieldUpdate('program', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="e.g., Computer Science"
                       />
@@ -294,6 +333,7 @@ export default function EditProfilePage() {
                       <select
                         value={formData.yearOfStudy}
                         onChange={(e) => setFormData(prev => ({ ...prev, yearOfStudy: e.target.value }))}
+                        onBlur={(e) => handleFieldUpdate('yearOfStudy', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="">Select year</option>
@@ -323,6 +363,7 @@ export default function EditProfilePage() {
                       type="text"
                       value={formData.location}
                       onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                      onBlur={(e) => handleFieldUpdate('location', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Enter your location (city, state)"
                     />
@@ -393,6 +434,7 @@ export default function EditProfilePage() {
                     <textarea
                       value={formData.bio}
                       onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+                      onBlur={(e) => handleFieldUpdate('bio', e.target.value)}
                       rows={8}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Tell others about yourself, your skills, and what services you offer..."
