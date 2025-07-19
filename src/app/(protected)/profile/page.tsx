@@ -111,6 +111,7 @@ export default function UserProfileSummaryPage() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [reviewerNames, setReviewerNames] = useState<{ [id: string]: string }>({});
+  const [reviewerProfiles, setReviewerProfiles] = useState<{ [id: string]: any }>({});
   const router = useRouter();
 
   // Editing states
@@ -256,29 +257,57 @@ export default function UserProfileSummaryPage() {
     fetchProfile();
   }, [router]);
 
-  const fetchReviewerName = async (reviewerId: string) => {
-    if (reviewerNames[reviewerId]) return reviewerNames[reviewerId];
+  const fetchReviewerProfile = async (reviewerId: string) => {
+    if (reviewerProfiles[reviewerId]) return reviewerProfiles[reviewerId];
     try {
       const API_BASE_URL = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084';
-      const res = await fetch(`${API_BASE_URL}/api/auth/user/${reviewerId}`);
-      if (res.ok) {
-        const data = await res.json();
-        const name = data.Name || data.name || data.fullName || 'Unknown';
-        setReviewerNames(prev => ({ ...prev, [reviewerId]: name }));
-        return name;
+      const PROFILE_API_BASE = process.env.NEXT_PUBLIC_PROFILE_API_URL || 'http://localhost:8083';
+      
+      // First try to get user info from auth service
+      const authRes = await fetch(`${API_BASE_URL}/api/auth/user/${reviewerId}`);
+      let name = 'Unknown';
+      if (authRes.ok) {
+        const authData = await authRes.json();
+        name = authData.Name || authData.name || authData.fullName || 'Unknown';
       }
+      
+      // Then try to get profile picture from profile service
+      let profilePicture = null;
+      try {
+        const profileRes = await fetch(`${PROFILE_API_BASE}/api/profile/${reviewerId}`);
+        if (profileRes.ok) {
+          const profileData = await profileRes.json();
+          profilePicture = profileData.ProfilePictureURL || profileData.profilePictureURL || null;
+        }
+      } catch (profileErr) {
+        console.error('Failed to fetch profile picture:', profileErr);
+      }
+      
+      const profileData = { name, profilePicture, id: reviewerId };
+      setReviewerProfiles(prev => ({ ...prev, [reviewerId]: profileData }));
+      setReviewerNames(prev => ({ ...prev, [reviewerId]: name }));
+      return profileData;
     } catch (err) {
-      console.error('Failed to fetch reviewer name:', err);
+      console.error('Failed to fetch reviewer profile:', err);
+      const fallbackData = { name: 'Unknown', profilePicture: null, id: reviewerId };
+      setReviewerProfiles(prev => ({ ...prev, [reviewerId]: fallbackData }));
+      setReviewerNames(prev => ({ ...prev, [reviewerId]: 'Unknown' }));
+      return fallbackData;
     }
-    setReviewerNames(prev => ({ ...prev, [reviewerId]: 'Unknown' }));
-    return 'Unknown';
+  };
+
+  const fetchReviewerName = async (reviewerId: string) => {
+    // Keep this for backward compatibility
+    const profile = await fetchReviewerProfile(reviewerId);
+    return profile.name;
   };
 
   useEffect(() => {
     if (reviews.length > 0) {
       reviews.forEach((review) => {
-        if (review.reviewerId && !reviewerNames[review.reviewerId]) {
-          fetchReviewerName(review.reviewerId);
+        const reviewerId = review.reviewerId || review.reviewer_id || review.userId || review.user_id;
+        if (reviewerId && !reviewerProfiles[reviewerId]) {
+          fetchReviewerProfile(reviewerId);
         }
       });
     }
@@ -403,6 +432,10 @@ export default function UserProfileSummaryPage() {
   const handleProfilePictureRemove = () => {
     setProfile(prev => prev ? { ...prev, ProfilePictureURL: "" } : null);
     setEditingProfilePicture(false);
+  };
+
+  const navigateToUserProfile = (userId: string) => {
+    router.push(`/users/${userId}`);
   };
 
   if (loading || !profile) return null;
@@ -965,20 +998,32 @@ export default function UserProfileSummaryPage() {
                     const comment = review.comment || review.Comment || review.text || review.Text || 'No comment';
                     const createdAt = review.createdAt || review.created_at || review.CreatedAt || review.date;
                     
+                    const reviewerProfile = reviewerProfiles[reviewerId];
+                    const profilePicture = reviewerProfile?.profilePicture;
+                    const reviewerName = reviewerProfile?.name || reviewerNames[reviewerId] || 'Reviewer';
+                    
                     return (
                       <div key={review.id || review._id || index} className="flex gap-3 items-start border-b border-gray-100 pb-3 last:border-b-0">
-                        <Image 
-                          src="https://randomuser.me/api/portraits/men/32.jpg" 
-                          alt="Reviewer" 
-                          width={36} 
-                          height={36} 
-                          className="rounded-full w-9 h-9 object-cover" 
-                        />
+                        <button 
+                          onClick={() => navigateToUserProfile(reviewerId)}
+                          className="flex-shrink-0 hover:opacity-80 transition-opacity"
+                        >
+                          <Image 
+                            src={profilePicture || "/categories-banner.png"} 
+                            alt={reviewerName} 
+                            width={36} 
+                            height={36} 
+                            className="rounded-full w-9 h-9 object-cover border-2 border-gray-200 hover:border-blue-300 transition-colors" 
+                          />
+                        </button>
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm text-gray-900">
-                              {reviewerNames[reviewerId] || 'Reviewer'}
-                            </span>
+                            <button 
+                              onClick={() => navigateToUserProfile(reviewerId)}
+                              className="font-semibold text-sm text-gray-900 hover:text-blue-600 transition-colors cursor-pointer"
+                            >
+                              {reviewerName}
+                            </button>
                             <span className="text-xs text-gray-400">
                               {createdAt ? 
                                 (typeof createdAt === 'number' ? 
