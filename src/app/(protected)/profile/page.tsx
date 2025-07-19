@@ -113,6 +113,13 @@ export default function UserProfileSummaryPage() {
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [reviewerNames, setReviewerNames] = useState<{ [id: string]: string }>({});
   const [reviewerProfiles, setReviewerProfiles] = useState<{ [id: string]: any }>({});
+  const [stats, setStats] = useState({
+    totalReviews: 0,
+    responseRate: 0,
+    avgResponseTime: 0,
+    memberSince: ''
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
   const router = useRouter();
 
   // Editing states
@@ -140,6 +147,100 @@ export default function UserProfileSummaryPage() {
   const [saving, setSaving] = useState(false);
   const [editingProfilePicture, setEditingProfilePicture] = useState(false);
   const [editingCoverImage, setEditingCoverImage] = useState(false);
+
+  const fetchUserStats = async (userId: string) => {
+    try {
+      setStatsLoading(true);
+      const TASK_API_BASE = process.env.NEXT_PUBLIC_TASK_API_URL || 'http://localhost:8084';
+      const REVIEW_API_BASE = process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086';
+      const AUTH_API_BASE = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084';
+      const token = localStorage.getItem("token");
+      
+      // Fetch user's tasks to calculate response rate and response time
+      const tasksRes = await fetch(`${TASK_API_BASE}/api/tasks/get/user`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      let totalTasks = 0;
+      let respondedTasks = 0;
+      let totalResponseTime = 0;
+      
+      if (tasksRes.ok) {
+        const tasksData = await tasksRes.json();
+        const tasks = tasksData.data || tasksData || [];
+        totalTasks = tasks.length;
+        
+        // Calculate response rate and average response time
+        tasks.forEach((task: any) => {
+          if (task.status === 'completed' || task.status === 'in_progress') {
+            respondedTasks++;
+          }
+          
+          // Calculate response time if task has timestamps
+          if (task.createdAt && task.updatedAt) {
+            const created = new Date(task.createdAt).getTime();
+            const updated = new Date(task.updatedAt).getTime();
+            const responseTime = updated - created;
+            if (responseTime > 0) {
+              totalResponseTime += responseTime;
+            }
+          }
+        });
+      }
+      
+      // Fetch total reviews
+      let totalReviews = 0;
+      try {
+        const reviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`);
+        if (reviewsRes.ok) {
+          const reviewsData = await reviewsRes.json();
+          const reviews = Array.isArray(reviewsData) ? reviewsData : (reviewsData.data || []);
+          totalReviews = reviews.length;
+        }
+      } catch (reviewErr) {
+        console.error("Error fetching reviews for stats:", reviewErr);
+      }
+      
+      // Fetch user creation date
+      let memberSince = '';
+      try {
+        const userRes = await fetch(`${AUTH_API_BASE}/api/auth/user/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          if (userData.createdAt) {
+            memberSince = new Date(userData.createdAt).getFullYear().toString();
+          }
+        }
+      } catch (userErr) {
+        console.error("Error fetching user data for stats:", userErr);
+      }
+      
+      // Calculate statistics
+      const responseRate = totalTasks > 0 ? Math.round((respondedTasks / totalTasks) * 100) : 0;
+      const avgResponseTime = respondedTasks > 0 ? Math.round(totalResponseTime / respondedTasks / (1000 * 60 * 60)) : 0; // Convert to hours
+      
+      setStats({
+        totalReviews,
+        responseRate,
+        avgResponseTime,
+        memberSince: memberSince || '2024'
+      });
+      
+    } catch (error) {
+      console.error("Error fetching user stats:", error);
+      // Set fallback values
+      setStats({
+        totalReviews: 0,
+        responseRate: 0,
+        avgResponseTime: 0,
+        memberSince: '2024'
+      });
+    } finally {
+      setStatsLoading(false);
+    }
+  };
 
   const fetchReviewsForMyTasks = async (userId: string) => {
     try {
@@ -248,6 +349,7 @@ export default function UserProfileSummaryPage() {
         // Fetch reviews for this user's tasks
         if (data.ID) {
           fetchReviewsForMyTasks(data.ID);
+          fetchUserStats(data.ID);
         }
       } catch (err) {
         console.error("Failed to fetch profile:", err);
@@ -1015,28 +1117,49 @@ export default function UserProfileSummaryPage() {
 
             {/* Quick Stats */}
             <div className="bg-white rounded-xl shadow-sm overflow-hidden p-6">
-                              <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">
-                  <FiTrendingUp className="w-5 h-5 text-gray-600" />
-                  Quick Stats
-                </h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Total Reviews</span>
-                  <span className="font-semibold text-gray-900">8</span>
+              <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">
+                <FiTrendingUp className="w-5 h-5 text-gray-600" />
+                Quick Stats
+              </h3>
+              {statsLoading ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Total Reviews</span>
+                    <div className="animate-pulse bg-gray-200 h-4 w-8 rounded"></div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Response Rate</span>
+                    <div className="animate-pulse bg-gray-200 h-4 w-8 rounded"></div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Avg. Response Time</span>
+                    <div className="animate-pulse bg-gray-200 h-4 w-8 rounded"></div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Member Since</span>
+                    <div className="animate-pulse bg-gray-200 h-4 w-8 rounded"></div>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Response Rate</span>
-                  <span className="font-semibold text-gray-900">98%</span>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Total Reviews</span>
+                    <span className="font-semibold text-gray-900">{stats.totalReviews}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Response Rate</span>
+                    <span className="font-semibold text-gray-900">{stats.responseRate}%</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Avg. Response Time</span>
+                    <span className="font-semibold text-gray-900">{stats.avgResponseTime}h</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Member Since</span>
+                    <span className="font-semibold text-gray-900">{stats.memberSince}</span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Avg. Response Time</span>
-                  <span className="font-semibold text-gray-900">2h</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Member Since</span>
-                  <span className="font-semibold text-gray-900">2024</span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
