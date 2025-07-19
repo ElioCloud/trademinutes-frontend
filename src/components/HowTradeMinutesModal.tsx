@@ -21,7 +21,7 @@ const slides: Slide[] = [
     id: 1,
     title: "Step 1: Browse Helpers",
     description: "Explore our community of trusted members who offer their skills and time. Read reviews, check ratings, and find the perfect person to help you with your task.",
-    image: "/services-banner.png",
+    image: "https://99designs-blog.imgix.net/blog/wp-content/uploads/2019/02/a72251e3-7331-4cea-8386-e88c1087380b.jpg?auto=format&q=60&fit=max&w=930",
     alt: "Browse helpers illustration"
   },
   {
