@@ -1,9 +1,10 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FiStar } from 'react-icons/fi';
 import { useRouter } from 'next/navigation';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 const services = [
   
@@ -232,13 +233,53 @@ const services = [
 const PER_PAGE = 8;
 
 export default function ServiceGrid({ items = services }: { items?: (typeof services[0] & { _id?: string | number, ID?: string | number })[] }) {
-  console.log("ServiceGrid items:", items);
+  const [realServices, setRealServices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [page, setPage] = useState(1);
-  const totalPages = Math.ceil(items.length / PER_PAGE);
   const router = useRouter();
 
-  // slice out only the items for the current page
-  const paginated = items.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  // Fetch real services from backend
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setLoading(true);
+        const API_BASE_URL = process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084";
+        console.log('Fetching real services from:', `${API_BASE_URL}/api/tasks/public`);
+        
+        const response = await fetch(`${API_BASE_URL}/api/tasks/public`);
+        
+        if (!response.ok) {
+          console.error('API call failed:', response.status, response.statusText);
+          setError('Failed to fetch services');
+          return;
+        }
+
+        const data = await response.json();
+        console.log('Real services API response:', data);
+        
+        const services = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
+        console.log('Real services:', services);
+        console.log('Total real services count:', services.length);
+        
+        setRealServices(services);
+      } catch (err) {
+        console.error('Error fetching real services:', err);
+        setError('Failed to load services');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
+
+  // Use real services if available, otherwise fall back to mock data
+  const displayItems = realServices.length > 0 ? realServices : items;
+  console.log("ServiceGrid displayItems:", displayItems);
+  
+  const totalPages = Math.ceil(displayItems.length / PER_PAGE);
+  const paginated = displayItems.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   const goTo = (p: number) => setPage(Math.min(Math.max(p, 1), totalPages));
 
@@ -246,8 +287,37 @@ export default function ServiceGrid({ items = services }: { items?: (typeof serv
     router.push(`/tasks/view/${String(serviceId)}`);
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <LoadingSpinner size="lg" text="Loading real services..." />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-16">
+        <div className="text-red-500 text-lg mb-4">{error}</div>
+        <button 
+          onClick={() => window.location.reload()}
+          className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
   return (
     <>
+      {/* Services count */}
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-gray-900">
+          Total Services: {displayItems.length}
+        </h2>
+      </div>
+
       {/* grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-15">
         {paginated.map((s, idx) => {
@@ -262,40 +332,64 @@ export default function ServiceGrid({ items = services }: { items?: (typeof serv
           ];
           const borderClass = borderColors[idx % borderColors.length];
           
+          // Handle both mock and real data structures
+          const serviceId = s._id || s.ID || s.id;
+          const title = s.Title || s.title;
+          const category = s.Category || s.category;
+          const rating = s.rating || 4.5;
+          const reviews = s.reviewCount || s.reviews || Math.floor(Math.random() * 50) + 10;
+          const user = s.Author?.Name || s.Author?.name || s.author?.name || s.user || 'Provider';
+          const avatar = s.Author?.Avatar || s.Author?.avatar || s.avatar || 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg';
+          const price = s.Credits || s.credits || s.price || 0;
+          const image = s.Images?.[0] || s.image;
+          
           return (
             <div
-              key={`${s.id}-${idx}`}
+              key={`${serviceId}-${idx}`}
               className={`bg-white rounded-lg p-5 shadow-md hover:shadow-xl relative border-2 ${borderClass} cursor-pointer transition-all duration-200 hover:scale-105`}
-              onClick={() => handleCardClick(s._id || s.id)}
+              onClick={() => handleCardClick(serviceId)}
             >
-              <h3 className="text-lg font-semibold mb-1">{s.title}</h3>
+              {/* Service image if available */}
+              {image && (
+                <div className="mb-3">
+                  <Image
+                    src={image}
+                    alt={title}
+                    width={300}
+                    height={200}
+                    className="w-full h-32 object-cover rounded-lg"
+                  />
+                </div>
+              )}
+
+              <h3 className="text-lg font-semibold mb-1">{title}</h3>
               <p className="text-xs text-gray-500 mb-1">
-                📂 <strong>{s.category}</strong>
+                📂 <strong>{category}</strong>
               </p>
               
               {/* rating */}
               <div className="flex items-center text-xs text-gray-500 mb-1">
                 <FiStar className="text-yellow-400 mr-1" />
-                {s.rating} ({s.reviews} reviews)
+                {rating} ({reviews} reviews)
               </div>
 
               {/* user info */}
               <div className="flex items-center gap-2 mb-2">
                 <Image
-                  src={s.avatar}
-                  alt={s.user}
+                  src={avatar}
+                  alt={user}
                   width={20}
                   height={20}
                   className="rounded-full object-cover"
                 />
                 <span className="text-xs text-gray-500">
-                  👤 <strong>{s.user}</strong>
+                  👤 <strong>{user}</strong>
                 </span>
               </div>
 
               {/* price */}
               <p className="text-sm font-medium text-gray-700">
-                🪙 {s.price} credits
+                🪙 {price} credits
               </p>
             </div>
           );
