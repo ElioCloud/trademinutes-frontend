@@ -127,6 +127,7 @@ type Service = {
   ReviewCount?: number;
   reviews?: number;
   Reviews?: number;
+  Images?: string[]; // Add Images field for cover images
   Author?: {
     Name?: string;
     ProfilePictureURL?: string;
@@ -429,6 +430,7 @@ export default function ProfileDashboardPage() {
               Category: service.Category || service.category || 'General',
               rating: service.rating || service.Rating || 4.5,
               reviewCount: service.reviewCount || service.ReviewCount || service.reviews || service.Reviews || Math.floor(Math.random() * 20) + 5,
+              Images: service.Images || [], // Add Images field
               Author: service.Author || service.author || {
                 Name: profile?.Name || 'Provider',
                 ProfilePictureURL: service.Author?.Avatar || service.author?.avatar || profile?.ProfilePictureURL
@@ -579,6 +581,7 @@ export default function ProfileDashboardPage() {
           Category: "Technology",
           rating: 4.8,
           reviewCount: 24,
+          Images: [], // Add Images field for mock data
           Author: {
             Name: "Sarah Johnson",
             ProfilePictureURL: undefined
@@ -590,6 +593,7 @@ export default function ProfileDashboardPage() {
           Category: "Design",
           rating: 4.9,
           reviewCount: 18,
+          Images: [], // Add Images field for mock data
           Author: {
             Name: "Mike Chen",
             ProfilePictureURL: undefined
@@ -601,6 +605,7 @@ export default function ProfileDashboardPage() {
           Category: "Writing",
           rating: 4.7,
           reviewCount: 31,
+          Images: [], // Add Images field for mock data
           Author: {
             Name: "Emma Davis",
             ProfilePictureURL: undefined
@@ -852,9 +857,19 @@ export default function ProfileDashboardPage() {
                     const categories = ['TECHNOLOGY', 'DESIGN', 'WRITING'];
                     
                     return (
-                      <div key={index} className="bg-white rounded-xl shadow-sm overflow-hidden">
-                        <div className={`h-32 bg-gradient-to-br ${gradients[index % gradients.length]} relative`}>
-                          <button className="absolute top-3 right-3 text-white hover:text-red-400">
+                      <div key={index} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1">
+                        <div className="h-32 relative">
+                          {service.Images && service.Images.length > 0 ? (
+                            <img
+                              src={service.Images[0]}
+                              alt={service.Title || service.title || 'Service'}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className={`w-full h-full bg-gradient-to-br ${gradients[index % gradients.length]}`}></div>
+                          )}
+                          <div className="absolute inset-0 bg-black/20"></div>
+                          <button className="absolute top-3 right-3 text-white hover:text-red-400 transition-colors bg-black/20 rounded-full p-2 hover:bg-black/40">
                             <FaHeart className="w-5 h-5" />
                           </button>
                         </div>
@@ -903,9 +918,11 @@ export default function ProfileDashboardPage() {
                 ) : (
                   // Fallback services when no real data
                   <>
-                    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                      <div className="h-32 bg-gradient-to-br from-blue-400 to-blue-600 relative">
-                        <button className="absolute top-3 right-3 text-white hover:text-red-400">
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1">
+                      <div className="h-32 relative">
+                        <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600"></div>
+                        <div className="absolute inset-0 bg-black/20"></div>
+                        <button className="absolute top-3 right-3 text-white hover:text-red-400 transition-colors bg-black/20 rounded-full p-2 hover:bg-black/40">
                           <FaHeart className="w-5 h-5" />
                         </button>
                       </div>
@@ -927,9 +944,11 @@ export default function ProfileDashboardPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                      <div className="h-32 bg-gradient-to-br from-purple-400 to-purple-600 relative">
-                        <button className="absolute top-3 right-3 text-white hover:text-red-400">
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1">
+                      <div className="h-32 relative">
+                        <div className="w-full h-full bg-gradient-to-br from-purple-400 to-purple-600"></div>
+                        <div className="absolute inset-0 bg-black/20"></div>
+                        <button className="absolute top-3 right-3 text-white hover:text-red-400 transition-colors bg-black/20 rounded-full p-2 hover:bg-black/40">
                           <FaHeart className="w-5 h-5" />
                         </button>
                       </div>
@@ -951,9 +970,11 @@ export default function ProfileDashboardPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                      <div className="h-32 bg-gradient-to-br from-green-400 to-green-600 relative">
-                        <button className="absolute top-3 right-3 text-white hover:text-red-400">
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1">
+                      <div className="h-32 relative">
+                        <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600"></div>
+                        <div className="absolute inset-0 bg-black/20"></div>
+                        <button className="absolute top-3 right-3 text-white hover:text-red-400 transition-colors bg-black/20 rounded-full p-2 hover:bg-black/40">
                           <FaHeart className="w-5 h-5" />
                         </button>
                       </div>

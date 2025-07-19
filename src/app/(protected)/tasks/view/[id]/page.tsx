@@ -7,7 +7,7 @@ import Image from "next/image";
 import ProtectedLayout from "@/components/Layout/ProtectedLayout";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaArrowLeft, FaMapMarkerAlt, FaClock, FaCoins, FaStar, FaHeart, FaCalendar, FaUser, FaChevronDown, FaChevronUp, FaEnvelope } from "react-icons/fa";
+import { FaArrowLeft, FaMapMarkerAlt, FaClock, FaCoins, FaStar, FaHeart, FaCalendar, FaUser, FaChevronDown, FaChevronUp, FaEnvelope, FaTimes, FaChevronLeft, FaChevronRight, FaExpand } from "react-icons/fa";
 
 interface Availability {
   date: string;
@@ -36,6 +36,7 @@ interface Task {
   status?: string;
   type?: string;
   acceptedBy?: string;
+  Images?: string[]; // Add Images field for uploaded images
 }
 
 // Normalize raw API data with uppercase keys
@@ -65,6 +66,7 @@ function normalizeTask(raw: any): Task {
     status: raw.Status,
     type: raw.Type,
     acceptedBy: raw.AcceptedBy,
+    Images: raw.Images || [], // Add Images field normalization
   };
 }
 
@@ -97,6 +99,11 @@ export default function ViewTaskPage() {
   const [bookingDebug, setBookingDebug] = useState<{ open: boolean; message: string }>({ open: false, message: "" });
   const [expandedReviews, setExpandedReviews] = useState<Set<string>>(new Set());
   const [showAllReviews, setShowAllReviews] = useState(false);
+  const [imageModal, setImageModal] = useState<{ open: boolean; currentIndex: number; images: string[] }>({
+    open: false,
+    currentIndex: 0,
+    images: []
+  });
 
   useEffect(() => {
     const fetchTask = async () => {
@@ -504,6 +511,37 @@ export default function ViewTaskPage() {
     }
   };
 
+  // Image zoom functionality
+  const openImageModal = (images: string[], index: number) => {
+    setImageModal({
+      open: true,
+      currentIndex: index,
+      images: images
+    });
+  };
+
+  const closeImageModal = () => {
+    setImageModal({
+      open: false,
+      currentIndex: 0,
+      images: []
+    });
+  };
+
+  const nextImage = () => {
+    setImageModal(prev => ({
+      ...prev,
+      currentIndex: (prev.currentIndex + 1) % prev.images.length
+    }));
+  };
+
+  const prevImage = () => {
+    setImageModal(prev => ({
+      ...prev,
+      currentIndex: prev.currentIndex === 0 ? prev.images.length - 1 : prev.currentIndex - 1
+    }));
+  };
+
   return (
     <ProtectedLayout>
       <div className="min-h-screen bg-white">
@@ -521,30 +559,98 @@ export default function ViewTaskPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Main Content */}
               <div className="lg:col-span-2">
-                {/* Cover Image */}
-                <div className="bg-gradient-to-br from-blue-400 to-blue-600 h-64 rounded-2xl relative mb-6">
-                  <div className="absolute inset-0 bg-black/20 rounded-2xl"></div>
-                  <div className="absolute top-4 right-4">
-                    <button className="p-2 bg-white/20 hover:bg-white/30 rounded-full transition">
-                      <FaHeart className="w-5 h-5 text-white" />
-                    </button>
-                  </div>
-                  <div className="absolute bottom-6 left-6 text-white">
-                    <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-2">
-                      {task.type || 'SERVICE'}
-                    </span>
-                    <h1 className="text-3xl font-bold mb-2">{task.title}</h1>
-                    <div className="flex items-center gap-4 text-sm">
-                      <div className="flex items-center gap-1">
-                        <FaCoins className="w-4 h-4" />
-                        <span>{task.credits} credits</span>
+                {/* Cover Image and Image Gallery */}
+                <div className="mb-6">
+                  {task.Images && task.Images.length > 0 ? (
+                    <div className="space-y-4">
+                      {/* Main Cover Image */}
+                      <div className="relative h-80 rounded-2xl overflow-hidden group cursor-pointer" onClick={() => openImageModal(task.Images!, 0)}>
+                        <img
+                          src={task.Images[0]}
+                          alt={task.title}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+                        <div className="absolute top-4 right-4">
+                          <button className="p-2 bg-white/20 hover:bg-white/30 rounded-full transition">
+                            <FaHeart className="w-5 h-5 text-white" />
+                          </button>
+                        </div>
+                        <div className="absolute bottom-6 left-6 text-white">
+                          <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-2">
+                            {task.type || 'SERVICE'}
+                          </span>
+                          <h1 className="text-3xl font-bold mb-2">{task.title}</h1>
+                          <div className="flex items-center gap-4 text-sm">
+                            <div className="flex items-center gap-1">
+                              <FaCoins className="w-4 h-4" />
+                              <span>{task.credits} credits</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <FaStar className="w-4 h-4 text-yellow-400" />
+                              <span>4.5 (12 reviews)</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="absolute top-4 left-4">
+                          <button className="p-2 bg-white/20 hover:bg-white/30 rounded-full transition">
+                            <FaExpand className="w-5 h-5 text-white" />
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <FaStar className="w-4 h-4 text-yellow-400" />
-                        <span>4.5 (12 reviews)</span>
+
+                      {/* Thumbnail Gallery */}
+                      {task.Images.length > 1 && (
+                        <div className="grid grid-cols-4 gap-3">
+                          {task.Images.slice(1, 5).map((image, index) => (
+                            <div
+                              key={index + 1}
+                              className="relative h-24 rounded-lg overflow-hidden cursor-pointer group"
+                              onClick={() => openImageModal(task.Images!, index + 1)}
+                            >
+                              <img
+                                src={image}
+                                alt={`${task.title} - Image ${index + 2}`}
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                              />
+                              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors"></div>
+                              {index === 3 && task.Images!.length > 5 && (
+                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                  <span className="text-white text-sm font-semibold">+{task.Images!.length - 5}</span>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    /* Fallback gradient when no images */
+                    <div className="bg-gradient-to-br from-blue-400 to-blue-600 h-64 rounded-2xl relative">
+                      <div className="absolute inset-0 bg-black/20 rounded-2xl"></div>
+                      <div className="absolute top-4 right-4">
+                        <button className="p-2 bg-white/20 hover:bg-white/30 rounded-full transition">
+                          <FaHeart className="w-5 h-5 text-white" />
+                        </button>
+                      </div>
+                      <div className="absolute bottom-6 left-6 text-white">
+                        <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-2">
+                          {task.type || 'SERVICE'}
+                        </span>
+                        <h1 className="text-3xl font-bold mb-2">{task.title}</h1>
+                        <div className="flex items-center gap-4 text-sm">
+                          <div className="flex items-center gap-1">
+                            <FaCoins className="w-4 h-4" />
+                            <span>{task.credits} credits</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <FaStar className="w-4 h-4 text-yellow-400" />
+                            <span>4.5 (12 reviews)</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Task Details */}
@@ -838,6 +944,81 @@ export default function ViewTaskPage() {
           )}
         </div>
       <ToastContainer position="top-right" autoClose={3000} />
+      
+      {/* Image Zoom Modal */}
+      {imageModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
+          <div className="relative w-full h-full flex items-center justify-center">
+            {/* Close Button */}
+            <button
+              onClick={closeImageModal}
+              className="absolute top-4 right-4 z-10 p-3 bg-black/50 hover:bg-black/70 rounded-full transition-colors"
+            >
+              <FaTimes className="w-6 h-6 text-white" />
+            </button>
+
+            {/* Navigation Buttons */}
+            {imageModal.images.length > 1 && (
+              <>
+                <button
+                  onClick={prevImage}
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 p-3 bg-black/50 hover:bg-black/70 rounded-full transition-colors"
+                >
+                  <FaChevronLeft className="w-6 h-6 text-white" />
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-3 bg-black/50 hover:bg-black/70 rounded-full transition-colors"
+                >
+                  <FaChevronRight className="w-6 h-6 text-white" />
+                </button>
+              </>
+            )}
+
+            {/* Image Counter */}
+            {imageModal.images.length > 1 && (
+              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 px-4 py-2 bg-black/50 rounded-full">
+                <span className="text-white text-sm font-medium">
+                  {imageModal.currentIndex + 1} / {imageModal.images.length}
+                </span>
+              </div>
+            )}
+
+            {/* Main Image */}
+            <div className="max-w-4xl max-h-full p-4">
+              <img
+                src={imageModal.images[imageModal.currentIndex]}
+                alt={`Task image ${imageModal.currentIndex + 1}`}
+                className="w-full h-full object-contain max-h-[90vh] rounded-lg"
+              />
+            </div>
+
+            {/* Thumbnail Strip */}
+            {imageModal.images.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10 flex gap-2">
+                {imageModal.images.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setImageModal(prev => ({ ...prev, currentIndex: index }))}
+                    className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                      index === imageModal.currentIndex 
+                        ? 'border-white scale-110' 
+                        : 'border-transparent hover:border-white/50'
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`Thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {bookingDebug.open && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.4)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ background: 'white', padding: 24, borderRadius: 8, maxWidth: 600, width: '90vw', maxHeight: '80vh', overflow: 'auto', boxShadow: '0 2px 16px rgba(0,0,0,0.2)' }}>
