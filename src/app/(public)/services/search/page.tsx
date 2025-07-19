@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Image from 'next/image';
 import SearchBanner from '@/components/SearchBanner';
+import AuthModal from '@/components/AuthModal';
 
 // Real service type based on API response
 type Service = {
@@ -55,6 +56,8 @@ function SearchResultsPage() {
   const [results, setResults] = useState<Service[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -132,16 +135,13 @@ function SearchResultsPage() {
           console.log('Filtered services from backend:', filteredServices);
           setResults(filteredServices);
         } else {
-          // For unauthenticated users, try to fetch real data without authentication
+          // For unauthenticated users, fetch real data from public endpoint
           try {
-            // Try to fetch without authentication first
-            let response = await fetch(`${API_BASE_URL}/api/tasks/get/all`);
+            console.log('Fetching from public endpoint...');
+            const response = await fetch(`${API_BASE_URL}/api/tasks/public`);
             
-            // If that fails, try with a guest token or handle gracefully
             if (!response.ok) {
-              console.log('Public API call failed, trying alternative approach...');
-              // For now, we'll use a fallback approach
-              // In a real implementation, you might have a public endpoint
+              console.error('Public API call failed:', response.status, response.statusText);
               setError('Search is temporarily unavailable. Please try again later or sign up to access all features.');
               setResults([]);
               return;
@@ -205,9 +205,9 @@ function SearchResultsPage() {
       if (token) {
         router.push(`/tasks/view/${serviceId}`);
       } else {
-        // For unauthenticated users, show a message to sign up for booking
-        alert('Please sign up or log in to book appointments and access full service details.');
-        router.push('/register');
+        // For unauthenticated users, show auth modal
+        setAuthMode('login');
+        setShowAuthModal(true);
       }
     }
   };
@@ -473,6 +473,18 @@ function SearchResultsPage() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        mode={authMode}
+        onSuccess={() => {
+          // After successful login, redirect to the service details
+          // The user can now book appointments
+          console.log('User authenticated successfully');
+        }}
+      />
     </main>
   );
 } 
