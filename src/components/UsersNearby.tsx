@@ -70,10 +70,9 @@ const createTaskIcon = (images: string[] = []) => {
     html: `<div style="
       width: 60px;
       height: 60px;
-      border-radius: 12px;
+      border-radius: 50%;
       background: url('${imageUrl}') center/cover no-repeat;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 3px white;
-      border: 2px solid #3b82f6;
       transition: all 0.3s ease;
       cursor: pointer;
       position: relative;
