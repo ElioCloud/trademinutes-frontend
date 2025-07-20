@@ -672,7 +672,18 @@ export default function ServiceViewPage() {
                     onClick={handleOrder}
                     className="w-full bg-black text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 transition-colors"
                   >
-                    Book this service
+                    {(() => {
+                      const currentTier = service?.Tiers?.find(tier => tier.name === selectedTier);
+                      if (currentTier) {
+                        return (
+                          <div className="flex flex-col items-center">
+                            <span>Book {currentTier.name} Package</span>
+                            <span className="text-sm opacity-90">{currentTier.credits} Credits</span>
+                          </div>
+                        );
+                      }
+                      return 'Book this service';
+                    })()}
                   </button>
                   <button
                     onClick={handleContact}
