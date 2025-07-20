@@ -365,14 +365,14 @@ export default function CreateServicePage() {
 
   const renderStep1 = () => (
     <div className="space-y-8">
-      <div className="text-center mb-8">
-        <h3 className="text-2xl font-semibold text-gray-900">Basic Information</h3>
-        <p className="text-gray-600 mt-2">Start by providing the essential details about your service</p>
+      <div className="text-center mb-6">
+        <h3 className="text-xl font-semibold text-gray-900">Basic Information</h3>
+        <p className="text-gray-600 mt-1">Start by providing the essential details about your service</p>
       </div>
 
       {/* Cover Image Upload */}
       <div className="space-y-4">
-        <label className="block text-lg font-medium text-gray-700">Cover Image *</label>
+        <label className="block text-base font-medium text-gray-700">Cover Image *</label>
         {coverImagePreview ? (
           <div className="relative">
             <img
@@ -390,9 +390,9 @@ export default function CreateServicePage() {
           </div>
         ) : (
           <label htmlFor="cover-image" className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-gray-400 transition">
-            <FaUpload className="w-16 h-16 text-gray-400 mb-4" />
-            <span className="text-xl text-gray-500">Upload cover image</span>
-            <span className="text-sm text-gray-400 mt-2">Click to browse or drag and drop</span>
+            <FaUpload className="w-12 h-12 text-gray-400 mb-3" />
+            <span className="text-lg text-gray-500">Upload cover image</span>
+            <span className="text-sm text-gray-400 mt-1">Click to browse or drag and drop</span>
           </label>
         )}
         <input
@@ -406,7 +406,7 @@ export default function CreateServicePage() {
 
       {/* Content Images Upload */}
       <div className="space-y-4">
-        <label className="block text-lg font-medium text-gray-700">
+        <label className="block text-base font-medium text-gray-700">
           Content Images (Max 5)
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -445,12 +445,12 @@ export default function CreateServicePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-4">
-          <label className="block text-lg font-medium text-gray-700">Category *</label>
+          <label className="block text-base font-medium text-gray-700">Category *</label>
           <select
             name="category"
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full border border-gray-300 px-6 py-4 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors text-lg"
+            className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
             required
           >
             <option value="">Select a category</option>
@@ -463,12 +463,12 @@ export default function CreateServicePage() {
         </div>
 
         <div className="space-y-4">
-          <label className="block text-lg font-medium text-gray-700">Title *</label>
+          <label className="block text-base font-medium text-gray-700">Title *</label>
           <input
             type="text"
             name="title"
             placeholder="Enter your service title"
-            className="w-full border border-gray-300 px-6 py-4 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors text-lg"
+            className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
             value={formData.title}
             onChange={handleChange}
             required
@@ -477,12 +477,12 @@ export default function CreateServicePage() {
       </div>
 
       <div className="space-y-4">
-        <label className="block text-lg font-medium text-gray-700">Description *</label>
+        <label className="block text-base font-medium text-gray-700">Description *</label>
         <textarea
           name="description"
           placeholder="Describe your service in detail"
-          rows={6}
-          className="w-full border border-gray-300 px-6 py-4 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors resize-none text-lg"
+          rows={4}
+          className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors resize-none"
           value={formData.description}
           onChange={handleChange}
           required
@@ -794,13 +794,13 @@ export default function CreateServicePage() {
 
   return (
     <ProtectedLayout>
-      <div className="w-full">
-        {/* Page Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+      <div className="min-h-screen bg-white">
+        {/* Header Section */}
+        <div className="pt-8 pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Create New Service</h1>
-              <p className="text-gray-600 mt-2">
+              <p className="text-gray-500 text-base font-normal mt-1">
                 Step {currentStep} of {totalSteps}: {
                   currentStep === 1 ? 'Basic Information' : 
                   currentStep === 2 ? 'Location & Availability' :
@@ -808,11 +808,10 @@ export default function CreateServicePage() {
                 }
               </p>
             </div>
-
           </div>
           
           {/* Step Indicator */}
-          <div className="flex items-center space-x-4">
+          <div className="mt-6 flex items-center space-x-4">
             <div className={`w-4 h-4 rounded-full ${currentStep >= 1 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
             <div className={`flex-1 h-2 rounded ${currentStep >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
             <div className={`w-4 h-4 rounded-full ${currentStep >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
@@ -823,61 +822,65 @@ export default function CreateServicePage() {
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          {currentStep === 1 && renderStep1()}
-          {currentStep === 2 && renderStep2()}
-          {currentStep === 3 && renderStep3()}
-          {currentStep === 4 && renderStep4()}
-        </div>
+        {/* Content Section */}
+        <div className="py-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-lg p-8">
+              {currentStep === 1 && renderStep1()}
+              {currentStep === 2 && renderStep2()}
+              {currentStep === 3 && renderStep3()}
+              {currentStep === 4 && renderStep4()}
+            </div>
 
-        {/* Navigation */}
-        <div className="mt-8 flex items-center justify-between">
-          {currentStep > 1 ? (
-            <button
-              type="button"
-              onClick={prevStep}
-              className="flex items-center space-x-2 px-6 py-3 border border-gray-300 bg-white text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm"
-            >
-              <FaArrowLeft className="w-4 h-4" />
-              <span>Previous</span>
-            </button>
-          ) : (
-            <div></div>
-          )}
-          
-          {currentStep < totalSteps ? (
-            <button
-              type="button"
-              onClick={nextStep}
-              className="flex items-center space-x-2 px-8 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors shadow-lg font-medium"
-            >
-              <span>Next</span>
-              <FaArrowRight className="w-4 h-4" />
-            </button>
-          ) : (
-            <button
-              type="submit"
-              disabled={uploading}
-              onClick={handleSubmit}
-              className={`px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg ${
-                uploading 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 hover:shadow-xl'
-              } text-white flex items-center space-x-2`}
-            >
-              {uploading ? (
-                <>
-                  <LoadingSpinner size="sm" text="" />
-                  <span>Creating Service...</span>
-                </>
+            {/* Navigation */}
+            <div className="mt-8 flex items-center justify-between">
+              {currentStep > 1 ? (
+                <button
+                  type="button"
+                  onClick={prevStep}
+                  className="flex items-center space-x-2 px-6 py-3 border border-gray-300 bg-white text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm"
+                >
+                  <FaArrowLeft className="w-4 h-4" />
+                  <span>Previous</span>
+                </button>
               ) : (
-                <>
-                  <span>Create Service</span>
-                </>
+                <div></div>
               )}
-            </button>
-          )}
+              
+              {currentStep < totalSteps ? (
+                <button
+                  type="button"
+                  onClick={nextStep}
+                  className="flex items-center space-x-2 px-8 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors shadow-lg font-medium"
+                >
+                  <span>Next</span>
+                  <FaArrowRight className="w-4 h-4" />
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={uploading}
+                  onClick={handleSubmit}
+                  className={`px-8 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg ${
+                    uploading 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 hover:shadow-xl'
+                  } text-white flex items-center space-x-2`}
+                >
+                  {uploading ? (
+                    <>
+                      <LoadingSpinner size="sm" text="" />
+                      <span>Creating Service...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Create Service</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </ProtectedLayout>
