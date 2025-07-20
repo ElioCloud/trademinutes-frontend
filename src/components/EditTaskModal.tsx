@@ -71,6 +71,7 @@ export default function EditTaskModal({
 
   const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [coverImagePreview, setCoverImagePreview] = useState<string>("");
@@ -87,6 +88,7 @@ export default function EditTaskModal({
       return;
     }
     const fetchCategories = async () => {
+      setCategoriesLoading(true);
       try {
         const res = await fetch(`${API_BASE_URL}/api/tasks/categories`, {
           method: "GET",
@@ -95,18 +97,36 @@ export default function EditTaskModal({
             Authorization: `Bearer ${token}`,
           },
         });
+        
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        
         const data = await res.json();
-        setCategories(data);
+        
+        // Ensure categories is always an array
+        if (data && Array.isArray(data.categories)) {
+          setCategories(data.categories);
+        } else if (Array.isArray(data)) {
+          setCategories(data);
+        } else {
+          console.error("Invalid categories response format:", data);
+          setCategories([]);
+          showToast("❌ Invalid categories data format.", "error");
+        }
       } catch (err) {
         console.error("Failed to fetch categories", err);
+        setCategories([]);
         showToast("❌ Failed to load categories.", "error");
+      } finally {
+        setCategoriesLoading(false);
       }
     };
 
     if (isOpen) {
       fetchCategories();
     }
-  }, [isOpen, showToast]);
+  }, [isOpen, showToast, API_BASE_URL]);
 
   useEffect(() => {
     if (task && isOpen) {
@@ -398,9 +418,12 @@ export default function EditTaskModal({
           onChange={(e) => setSelectedCategory(e.target.value)}
           className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
           required
+          disabled={categoriesLoading}
         >
-          <option value="">Select a category</option>
-          {categories.map((cat, idx) => (
+          <option value="">
+            {categoriesLoading ? "Loading categories..." : "Select a category"}
+          </option>
+          {Array.isArray(categories) && categories.map((cat, idx) => (
             <option key={idx} value={cat}>
               {cat}
             </option>
