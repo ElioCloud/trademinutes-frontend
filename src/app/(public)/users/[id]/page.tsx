@@ -137,21 +137,25 @@ export default function UserProfilePage() {
       const REVIEW_API_BASE = process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086';
       const AUTH_API_BASE = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084';
       
-      // Fetch user's tasks to calculate completed tasks
-      const tasksRes = await fetch(`${TASK_API_BASE}/api/tasks/get/user/${userId}`);
-      
+      // Initialize default values
       let tasksCompleted = 0;
       let totalRating = 0;
       let reviewCount = 0;
       
-      if (tasksRes.ok) {
-        const tasksData = await tasksRes.json();
-        const tasks = tasksData.data || tasksData || [];
-        
-        // Count completed tasks
-        tasksCompleted = tasks.filter((task: any) => 
-          task.status === 'completed' || task.status === 'Completed'
-        ).length;
+      // Fetch user's tasks to calculate completed tasks
+      try {
+        const tasksRes = await fetch(`${TASK_API_BASE}/api/tasks/get/user/${userId}`);
+        if (tasksRes.ok) {
+          const tasksData = await tasksRes.json();
+          const tasks = tasksData.data || tasksData || [];
+          
+          // Count completed tasks
+          tasksCompleted = tasks.filter((task: any) => 
+            task.status === 'completed' || task.status === 'Completed'
+          ).length;
+        }
+      } catch (taskErr) {
+        console.error("Error fetching tasks for profile stats:", taskErr);
       }
       
       // Fetch reviews to calculate average rating
@@ -170,21 +174,7 @@ export default function UserProfilePage() {
           });
         }
       } catch (reviewErr) {
-        console.error("Error fetching reviews for stats:", reviewErr);
-      }
-      
-      // Fetch user creation date
-      let memberSince = '';
-      try {
-        const userRes = await fetch(`${AUTH_API_BASE}/api/auth/user/${userId}`);
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          if (userData.createdAt) {
-            memberSince = new Date(userData.createdAt).getFullYear().toString();
-          }
-        }
-      } catch (userErr) {
-        console.error("Error fetching user data for stats:", userErr);
+        console.error("Error fetching reviews for profile stats:", reviewErr);
       }
       
       const averageRating = reviewCount > 0 ? totalRating / reviewCount : 0;
@@ -197,6 +187,12 @@ export default function UserProfilePage() {
       
     } catch (error) {
       console.error("Error fetching profile stats:", error);
+      // Set default values if everything fails
+      setProfileStats({
+        credits: profile?.Credits || 0,
+        tasksCompleted: 0,
+        rating: 0
+      });
     } finally {
       setProfileStatsLoading(false);
     }
@@ -209,26 +205,31 @@ export default function UserProfilePage() {
       const REVIEW_API_BASE = process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086';
       const AUTH_API_BASE = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084';
       
-      // Fetch user's tasks
-      const tasksRes = await fetch(`${TASK_API_BASE}/api/tasks/get/user/${userId}`);
+      // Initialize default values
       let totalTasks = 0;
       let respondedTasks = 0;
+      let totalReviews = 0;
+      let memberSince = '2024';
       
-      if (tasksRes.ok) {
-        const tasksData = await tasksRes.json();
-        const tasks = tasksData.data || tasksData || [];
-        totalTasks = tasks.length;
-        
-        tasks.forEach((task: any) => {
-          if (task.status === 'completed' || task.status === 'in_progress') {
-            respondedTasks++;
-          }
-        });
+      // Fetch user's tasks with error handling
+      try {
+        const tasksRes = await fetch(`${TASK_API_BASE}/api/tasks/get/user/${userId}`);
+        if (tasksRes.ok) {
+          const tasksData = await tasksRes.json();
+          const tasks = tasksData.data || tasksData || [];
+          totalTasks = tasks.length;
+          
+          tasks.forEach((task: any) => {
+            if (task.status === 'completed' || task.status === 'in_progress') {
+              respondedTasks++;
+            }
+          });
+        }
+      } catch (taskErr) {
+        console.error("Error fetching tasks for stats:", taskErr);
       }
       
-      // Fetch reviews
-      let totalReviews = 0;
-      
+      // Fetch reviews with error handling
       try {
         const reviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`);
         if (reviewsRes.ok) {
@@ -238,10 +239,11 @@ export default function UserProfilePage() {
         }
       } catch (reviewErr) {
         console.error("Error fetching reviews for stats:", reviewErr);
+        // Set default values if review API fails
+        totalReviews = 0;
       }
       
-      // Fetch user creation date
-      let memberSince = '';
+      // Fetch user creation date with error handling
       try {
         const userRes = await fetch(`${AUTH_API_BASE}/api/auth/user/${userId}`);
         if (userRes.ok) {
@@ -261,11 +263,18 @@ export default function UserProfilePage() {
         totalReviews,
         responseRate,
         avgResponseTime: 2, // Default value
-        memberSince: memberSince || '2024'
+        memberSince: memberSince
       });
       
     } catch (error) {
       console.error("Error fetching user stats:", error);
+      // Set default stats if everything fails
+      setStats({
+        totalReviews: 0,
+        responseRate: 0,
+        avgResponseTime: 2,
+        memberSince: '2024'
+      });
     } finally {
       setStatsLoading(false);
     }
@@ -277,34 +286,41 @@ export default function UserProfilePage() {
       const REVIEW_API_BASE = process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086';
       const AUTH_API_BASE = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084';
       
-      // Fetch reviews for this user
-      const reviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`);
       let allReviews: Review[] = [];
       
-      if (reviewsRes.ok) {
-        const reviewsData = await reviewsRes.json();
-        const reviews = Array.isArray(reviewsData) ? reviewsData : (reviewsData.data || []);
-        
-        // Fetch reviewer names and profile pictures
-        for (const review of reviews) {
-          try {
-            const reviewerRes = await fetch(`${AUTH_API_BASE}/api/auth/user/${review.reviewerId}`);
-            if (reviewerRes.ok) {
-              const reviewerData = await reviewerRes.json();
-              review.reviewerName = reviewerData.Name || reviewerData.name || 'Unknown User';
+      // Fetch reviews for this user with error handling
+      try {
+        const reviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`);
+        if (reviewsRes.ok) {
+          const reviewsData = await reviewsRes.json();
+          const reviews = Array.isArray(reviewsData) ? reviewsData : (reviewsData.data || []);
+          
+          // Fetch reviewer names and profile pictures
+          for (const review of reviews) {
+            try {
+              const reviewerRes = await fetch(`${AUTH_API_BASE}/api/auth/user/${review.reviewerId}`);
+              if (reviewerRes.ok) {
+                const reviewerData = await reviewerRes.json();
+                review.reviewerName = reviewerData.Name || reviewerData.name || 'Unknown User';
+              }
+            } catch (err) {
+              review.reviewerName = 'Unknown User';
             }
-          } catch (err) {
-            review.reviewerName = 'Unknown User';
           }
+          
+          allReviews = reviews;
         }
-        
-        allReviews = reviews;
+      } catch (reviewErr) {
+        console.error("Error fetching reviews:", reviewErr);
+        // Set empty reviews array if API fails
+        allReviews = [];
       }
       
       setReviews(allReviews);
       
     } catch (error) {
       console.error("Error fetching user reviews:", error);
+      setReviews([]);
     } finally {
       setReviewsLoading(false);
     }
