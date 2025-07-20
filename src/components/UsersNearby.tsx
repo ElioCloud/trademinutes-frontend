@@ -416,36 +416,36 @@ export default function UsersNearby() {
                 }}
               >
                 <Popup className="custom-popup">
-                  <div className="p-4 w-80 bg-white rounded-xl shadow-xl border border-gray-200">
+                  <div className="p-3 w-64 bg-white rounded-lg shadow-xl border border-gray-200">
                     {/* Task Image */}
                     {task.images && task.images.length > 0 && (
-                      <div className="mb-4">
+                      <div className="mb-2">
                         <Image
                           src={task.images[0]}
                           alt={task.title}
-                          width={320}
-                          height={180}
-                          className="w-full h-32 object-cover rounded-lg"
+                          width={256}
+                          height={120}
+                          className="w-full h-20 object-cover rounded-md"
                         />
                       </div>
                     )}
 
                     {/* Task Details */}
-                    <div className="mb-4">
-                      <h4 className="font-semibold text-gray-900 text-lg mb-2">{task.title}</h4>
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{task.description}</p>
+                    <div className="mb-2">
+                      <h4 className="font-semibold text-gray-900 text-sm mb-1">{task.title}</h4>
+                      <p className="text-xs text-gray-600 mb-2 line-clamp-2">{task.description}</p>
                       
-                      <div className="flex items-center gap-2 mb-3">
-                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="flex items-center gap-1 mb-2">
+                        <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        <span className="text-sm text-gray-600">{task.location}</span>
+                        <span className="text-xs text-gray-600">{task.location}</span>
                       </div>
 
                       {task.category && (
-                        <div className="mb-3">
-                          <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                        <div className="mb-2">
+                          <span className="px-1.5 py-0.5 bg-purple-100 text-purple-800 text-xs rounded">
                             {task.category}
                           </span>
                         </div>
@@ -453,32 +453,32 @@ export default function UsersNearby() {
                     </div>
 
                     {/* Author Information */}
-                    <div className="border-t pt-4 mb-4">
-                      <div className="flex items-center gap-3 mb-3">
+                    <div className="border-t pt-2 mb-2">
+                      <div className="flex items-center gap-2 mb-2">
                         <Image
                           src={task.author.avatar}
                           alt={task.author.name}
-                          width={40}
-                          height={40}
-                          className="rounded-full object-cover border-2 border-blue-200"
+                          width={24}
+                          height={24}
+                          className="rounded-full object-cover border border-blue-200"
                         />
                         <div>
-                          <p className="font-medium text-gray-900 text-sm">{task.author.name}</p>
+                          <p className="font-medium text-gray-900 text-xs">{task.author.name}</p>
                           <p className="text-xs text-gray-500">{task.author.email}</p>
                         </div>
                       </div>
 
                       {(task.author.college || task.author.program) && (
-                        <div className="mb-3 p-2 bg-blue-50 rounded-lg">
-                          <p className="text-xs text-blue-800 font-medium">Education</p>
-                          <p className="text-xs text-blue-700">
+                        <div className="mb-2 p-1.5 bg-blue-50 rounded text-xs">
+                          <p className="text-blue-800 font-medium">Education</p>
+                          <p className="text-blue-700">
                             {task.author.college && task.author.program ? `${task.author.program} at ${task.author.college}` : task.author.college || task.author.program}
                           </p>
                         </div>
                       )}
 
                       {task.author.skills && task.author.skills.length > 0 && (
-                        <div className="mb-3">
+                        <div className="mb-2">
                           <p className="text-xs text-gray-700 font-medium mb-1">Skills</p>
                           <div className="flex flex-wrap gap-1">
                             {task.author.skills.slice(0, 2).map((skill: string, index: number) => (
@@ -488,7 +488,7 @@ export default function UsersNearby() {
                             ))}
                             {task.author.skills.length > 2 && (
                               <span className="px-1 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
-                                +{task.author.skills.length - 2} more
+                                +{task.author.skills.length - 2}
                               </span>
                             )}
                           </div>
@@ -497,31 +497,31 @@ export default function UsersNearby() {
                     </div>
 
                     {/* Task Stats */}
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                      <div className="text-center p-2 bg-gray-50 rounded-lg">
-                        <p className="text-lg font-bold text-blue-600">{task.credits}</p>
+                    <div className="grid grid-cols-2 gap-2 mb-2">
+                      <div className="text-center p-1.5 bg-gray-50 rounded">
+                        <p className="text-sm font-bold text-blue-600">{task.credits}</p>
                         <p className="text-xs text-gray-600">Credits</p>
                       </div>
-                      <div className="text-center p-2 bg-gray-50 rounded-lg">
-                        <p className="text-lg font-bold text-green-600">✓</p>
+                      <div className="text-center p-1.5 bg-gray-50 rounded">
+                        <p className="text-sm font-bold text-green-600">✓</p>
                         <p className="text-xs text-gray-600">Available</p>
                       </div>
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
                       <Link
                         href={`/services/view/${task.id}`}
-                        className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 text-sm"
+                        className="flex-1 inline-flex items-center justify-center px-2 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 text-xs"
                       >
                         <span>View Task</span>
-                        <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-2.5 h-2.5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
                       </Link>
                       <Link
                         href={`/users/${task.author.id}`}
-                        className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-all duration-200 text-sm"
+                        className="px-2 py-1.5 bg-gray-100 text-gray-700 rounded font-medium hover:bg-gray-200 transition-all duration-200 text-xs"
                       >
                         Profile
                       </Link>
