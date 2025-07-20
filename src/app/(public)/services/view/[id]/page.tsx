@@ -131,6 +131,37 @@ export default function ServiceViewPage() {
     return isOwn;
   };
 
+  // Track service view
+  const trackServiceView = async (serviceId: string, serviceAuthorId: string) => {
+    try {
+      // Only track if not viewing own service
+      if (isOwnService()) return;
+      
+      const API_BASE_URL = process.env.NEXT_PUBLIC_TASK_API_URL || 'http://localhost:8084';
+      
+      // Send view tracking request
+      await fetch(`${API_BASE_URL}/api/views`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        },
+        body: JSON.stringify({
+          serviceId: serviceId,
+          viewedUserId: serviceAuthorId,
+          viewerId: user?.ID || user?.id || 'anonymous',
+          type: 'service',
+          timestamp: new Date().toISOString()
+        })
+      });
+      
+      console.log('Service view tracked for service:', serviceId);
+    } catch (error) {
+      console.error('Error tracking service view:', error);
+      // Don't throw error - view tracking shouldn't break the page
+    }
+  };
+
   // Debug logging function
   const logToFile = async (message: string, data?: any) => {
     const timestamp = new Date().toISOString();
@@ -256,6 +287,12 @@ export default function ServiceViewPage() {
         });
         
         setService(data);
+        
+        // Track service view (only if not own service)
+        const serviceAuthorId = data.Author?.ID || data.Author?.id || data.author?.id;
+        if (serviceAuthorId) {
+          await trackServiceView(params.id as string, serviceAuthorId);
+        }
         
         // Handle tiers data - could be string or array
         let tiersData = data.Tiers || data.tiers;

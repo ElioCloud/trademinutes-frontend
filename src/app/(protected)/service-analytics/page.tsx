@@ -219,13 +219,28 @@ export default function ServiceAnalyticsPage() {
           reviews = Array.isArray(response) ? response : (response.data || []);
         }
 
+        // Fetch views for user's services and profile
+        const viewsRes = await fetch(`${API_BASE_URL}/api/views?userId=${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        let views: any[] = [];
+        if (viewsRes.ok) {
+          const response = await viewsRes.json();
+          views = Array.isArray(response) ? response : (response.data || []);
+        }
+
         console.log('Tasks:', tasks);
         console.log('Bookings as owner:', bookingsAsOwner);
         console.log('Reviews:', reviews);
+        console.log('Views:', views);
 
         // Calculate analytics from real data
         const totalServices = tasks.length;
         const activeServices = tasks.filter((task: any) => task.Status === 'active' || task.status === 'active').length;
+        
+        // Calculate total views from views data
+        const totalViews = views.length;
         
         // Calculate total revenue from completed bookings
         const totalRevenue = bookingsAsOwner
@@ -255,7 +270,8 @@ export default function ServiceAnalyticsPage() {
               title: taskTitle,
               bookings: 0,
               revenue: 0,
-              completed: 0
+              completed: 0,
+              views: 0
             };
           }
           
@@ -263,6 +279,13 @@ export default function ServiceAnalyticsPage() {
           if (booking.Status === 'completed' || booking.status === 'completed') {
             serviceMetrics[taskId].revenue += booking.Credits || booking.credits || 0;
             serviceMetrics[taskId].completed++;
+          }
+        });
+
+        // Add view counts to service metrics
+        views.forEach((view: any) => {
+          if (view.serviceId && serviceMetrics[view.serviceId]) {
+            serviceMetrics[view.serviceId].views++;
           }
         });
 
@@ -334,7 +357,7 @@ export default function ServiceAnalyticsPage() {
               id: service.id,
               title: service.title,
               category: task?.Category || task?.category || 'Uncategorized',
-              views: 0, // Not available in current backend
+              views: service.views,
               bookings: service.bookings,
               revenue: service.revenue,
               rating: avgRating,
@@ -353,7 +376,7 @@ export default function ServiceAnalyticsPage() {
         const analyticsData: ServiceAnalytics = {
           totalServices,
           activeServices,
-          totalViews: 0, // Not available in current backend
+          totalViews: totalViews,
           totalBookings: bookingsAsOwner.length,
           totalRevenue,
           averageRating,

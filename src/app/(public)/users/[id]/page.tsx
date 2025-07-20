@@ -91,6 +91,37 @@ export default function UserProfilePage() {
   // Check if current user is viewing their own profile
   const isOwnProfile = currentUser && (currentUser.ID === userId || currentUser.id === userId);
   
+  // Track profile view
+  const trackProfileView = async (viewedUserId: string) => {
+    try {
+      // Only track if not viewing own profile
+      if (isOwnProfile) return;
+      
+      const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+      const API_BASE_URL = process.env.NEXT_PUBLIC_TASK_API_URL || 'http://localhost:8084';
+      
+      // Send view tracking request
+      await fetch(`${API_BASE_URL}/api/views`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        },
+        body: JSON.stringify({
+          viewedUserId: viewedUserId,
+          viewerId: currentUser?.ID || currentUser?.id || 'anonymous',
+          type: 'profile',
+          timestamp: new Date().toISOString()
+        })
+      });
+      
+      console.log('Profile view tracked for user:', viewedUserId);
+    } catch (error) {
+      console.error('Error tracking profile view:', error);
+      // Don't throw error - view tracking shouldn't break the page
+    }
+  };
+  
   // Helper function for safe fetching with timeout
   const safeFetch = async (url: string, timeout: number = 5000) => {
     try {
@@ -516,6 +547,9 @@ export default function UserProfilePage() {
           program: userProfile.Program || '',
           yearOfStudy: userProfile.YearOfStudy || ''
         }));
+        
+        // Track profile view (only if not own profile)
+        await trackProfileView(userId);
         
         // Fetch user stats and reviews
         await fetchUserStats(userId);
