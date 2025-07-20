@@ -474,7 +474,7 @@ export default function UsersNearby() {
                     )}
 
                     {/* Task Details */}
-                    <div className="mb-2">
+                    <div className="mb-3">
                       <h4 className="font-semibold text-gray-900 text-sm mb-1">{task.title}</h4>
                       <p className="text-xs text-gray-600 mb-2 line-clamp-2">{task.description}</p>
                       
@@ -502,7 +502,7 @@ export default function UsersNearby() {
                     </div>
 
                     {/* Author Information */}
-                    <div className="border-t pt-2 mb-2">
+                    <div className="mb-2">
                       <div className="flex items-center gap-2 mb-2">
                         <Image
                           src={task.author.avatar}
