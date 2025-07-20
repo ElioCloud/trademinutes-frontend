@@ -420,7 +420,7 @@ export default function BookedByMePage() {
           </div>
 
           {/* Filter Tabs */}
-          <div className="bg-amber-50 p-4 mb-8">
+          <div className="p-4 mb-8">
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setSelectedStatus('all')}
