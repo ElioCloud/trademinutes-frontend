@@ -170,12 +170,237 @@ export default function ServiceAnalyticsPage() {
     const fetchAnalytics = async () => {
       setLoading(true);
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const data = generateMockAnalytics();
-        setAnalytics(data);
+        const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+        if (!token) throw new Error("No authentication token");
+
+        // Get user profile to get user ID
+        const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8081'}/api/auth/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        if (!profileRes.ok) throw new Error("Failed to fetch user profile");
+        const profileData = await profileRes.json();
+        const userId = profileData.ID || profileData.id;
+        
+        if (!userId) throw new Error("User ID not found");
+
+        const API_BASE_URL = process.env.NEXT_PUBLIC_TASK_API_URL || 'http://localhost:8084';
+        
+        // Fetch user's tasks/services
+        const tasksRes = await fetch(`${API_BASE_URL}/api/tasks?userId=${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        let tasks: any[] = [];
+        if (tasksRes.ok) {
+          const response = await tasksRes.json();
+          tasks = Array.isArray(response) ? response : (response.data || []);
+        }
+
+        // Fetch bookings as owner (services provided)
+        const bookingsAsOwnerRes = await fetch(`${API_BASE_URL}/api/bookings?id=${userId}&role=owner`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        let bookingsAsOwner: any[] = [];
+        if (bookingsAsOwnerRes.ok) {
+          const response = await bookingsAsOwnerRes.json();
+          bookingsAsOwner = Array.isArray(response) ? response : (response.data || []);
+        }
+
+        // Fetch reviews for user's services
+        const reviewsRes = await fetch(`${API_BASE_URL}/api/reviews?userId=${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        let reviews: any[] = [];
+        if (reviewsRes.ok) {
+          const response = await reviewsRes.json();
+          reviews = Array.isArray(response) ? response : (response.data || []);
+        }
+
+        console.log('Tasks:', tasks);
+        console.log('Bookings as owner:', bookingsAsOwner);
+        console.log('Reviews:', reviews);
+
+        // Calculate analytics from real data
+        const totalServices = tasks.length;
+        const activeServices = tasks.filter((task: any) => task.Status === 'active' || task.status === 'active').length;
+        
+        // Calculate total revenue from completed bookings
+        const totalRevenue = bookingsAsOwner
+          .filter((booking: any) => booking.Status === 'completed' || booking.status === 'completed')
+          .reduce((sum: number, booking: any) => sum + (booking.Credits || booking.credits || 0), 0);
+        
+        // Calculate average rating from reviews
+        const averageRating = reviews.length > 0 
+          ? reviews.reduce((sum: number, review: any) => sum + (review.Rating || review.rating || 0), 0) / reviews.length
+          : 0;
+        
+        // Calculate completion rate
+        const completedBookings = bookingsAsOwner.filter((booking: any) => 
+          booking.Status === 'completed' || booking.status === 'completed'
+        ).length;
+        const completionRate = bookingsAsOwner.length > 0 ? (completedBookings / bookingsAsOwner.length) * 100 : 0;
+
+        // Group bookings by task to calculate per-service metrics
+        const serviceMetrics: { [key: string]: any } = {};
+        bookingsAsOwner.forEach((booking: any) => {
+          const taskId = booking.TaskID || booking.taskID || booking.task?.ID || booking.task?.id;
+          const taskTitle = booking.TaskTitle || booking.taskTitle || booking.task?.Title || booking.task?.title || 'Unknown Service';
+          
+          if (!serviceMetrics[taskId]) {
+            serviceMetrics[taskId] = {
+              id: taskId,
+              title: taskTitle,
+              bookings: 0,
+              revenue: 0,
+              completed: 0
+            };
+          }
+          
+          serviceMetrics[taskId].bookings++;
+          if (booking.Status === 'completed' || booking.status === 'completed') {
+            serviceMetrics[taskId].revenue += booking.Credits || booking.credits || 0;
+            serviceMetrics[taskId].completed++;
+          }
+        });
+
+        // Find top performing service
+        const topPerformingService = Object.values(serviceMetrics)
+          .sort((a: any, b: any) => b.revenue - a.revenue)[0] || {
+            title: 'No services yet',
+            bookings: 0,
+            revenue: 0,
+            rating: 0
+          };
+
+        // Calculate category performance
+        const categoryBreakdown: { [key: string]: any } = {};
+        tasks.forEach((task: any) => {
+          const category = task.Category || task.category || 'Uncategorized';
+          if (!categoryBreakdown[category]) {
+            categoryBreakdown[category] = {
+              category,
+              services: 0,
+              bookings: 0,
+              revenue: 0,
+              rating: 0
+            };
+          }
+          categoryBreakdown[category].services++;
+        });
+
+        // Add booking data to categories
+        bookingsAsOwner.forEach((booking: any) => {
+          const task = tasks.find((t: any) => t.ID === booking.TaskID || t.id === booking.taskID);
+          if (task) {
+            const category = task.Category || task.category || 'Uncategorized';
+            if (categoryBreakdown[category]) {
+              categoryBreakdown[category].bookings++;
+              if (booking.Status === 'completed' || booking.status === 'completed') {
+                categoryBreakdown[category].revenue += booking.Credits || booking.credits || 0;
+              }
+            }
+          }
+        });
+
+        // Calculate average rating per category
+        reviews.forEach((review: any) => {
+          const task = tasks.find((t: any) => t.ID === review.TaskID || t.id === review.taskID);
+          if (task) {
+            const category = task.Category || task.category || 'Uncategorized';
+            if (categoryBreakdown[category]) {
+              categoryBreakdown[category].rating = 
+                (categoryBreakdown[category].rating + (review.Rating || review.rating || 0)) / 2;
+            }
+          }
+        });
+
+        const categoryPerformance = Object.values(categoryBreakdown);
+
+        // Create top services list
+        const topServices = Object.values(serviceMetrics)
+          .map((service: any) => {
+            const task = tasks.find((t: any) => t.ID === service.id || t.id === service.id);
+            const serviceReviews = reviews.filter((r: any) => 
+              r.TaskID === service.id || r.taskID === service.id
+            );
+            const avgRating = serviceReviews.length > 0 
+              ? serviceReviews.reduce((sum: number, r: any) => sum + (r.Rating || r.rating || 0), 0) / serviceReviews.length
+              : 0;
+            
+            return {
+              id: service.id,
+              title: service.title,
+              category: task?.Category || task?.category || 'Uncategorized',
+              views: 0, // Not available in current backend
+              bookings: service.bookings,
+              revenue: service.revenue,
+              rating: avgRating,
+              status: task?.Status || task?.status || 'active'
+            };
+          })
+          .sort((a: any, b: any) => b.revenue - a.revenue)
+          .slice(0, 10);
+
+        // Calculate client insights
+        const uniqueClients = new Set(bookingsAsOwner.map((b: any) => b.BookerID || b.bookerID));
+        const totalClients = uniqueClients.size;
+        const repeatClients = bookingsAsOwner.length > totalClients ? totalClients : 0;
+        const newClients = totalClients;
+
+        const analyticsData: ServiceAnalytics = {
+          totalServices,
+          activeServices,
+          totalViews: 0, // Not available in current backend
+          totalBookings: bookingsAsOwner.length,
+          totalRevenue,
+          averageRating,
+          totalReviews: reviews.length,
+          responseRate: 100, // Assuming all bookings are responded to
+          completionRate,
+          averageResponseTime: 24, // Mock data
+          topPerformingService: {
+            title: topPerformingService.title,
+            views: 0,
+            bookings: topPerformingService.bookings,
+            revenue: topPerformingService.revenue,
+            rating: 0
+          },
+          monthlyTrends: [
+            { month: "Jan", views: 0, bookings: 0, revenue: 0 },
+            { month: "Feb", views: 0, bookings: 0, revenue: 0 },
+            { month: "Mar", views: 0, bookings: 0, revenue: 0 },
+            { month: "Apr", views: 0, bookings: 0, revenue: 0 },
+            { month: "May", views: 0, bookings: 0, revenue: 0 },
+            { month: "Jun", views: 0, bookings: 0, revenue: 0 }
+          ],
+          categoryPerformance,
+          topServices,
+          clientInsights: {
+            totalClients,
+            repeatClients,
+            newClients,
+            averageClientRating: averageRating,
+            topClientLocations: ['Local', 'National', 'International']
+          },
+          engagementMetrics: {
+            likes: 0,
+            shares: 0,
+            bookmarks: 0,
+            inquiries: bookingsAsOwner.length,
+            conversionRate: bookingsAsOwner.length > 0 ? 100 : 0
+          }
+        };
+
+        setAnalytics(analyticsData);
       } catch (error) {
         console.error("Error fetching analytics:", error);
+        // Fallback to mock data if backend is not available
+        console.log("Falling back to mock data...");
+        const data = generateMockAnalytics();
+        setAnalytics(data);
       } finally {
         setLoading(false);
       }
