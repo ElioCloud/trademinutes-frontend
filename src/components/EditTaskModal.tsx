@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FaTimes, FaMapMarkerAlt, FaClock, FaCoins, FaUpload, FaTrash } from "react-icons/fa";
+import { FaUpload, FaTimes, FaImage, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import LoadingSpinner from "./common/LoadingSpinner";
 
-interface Availability {
-  Date: string;
-  TimeFrom: string;
-  TimeTo: string;
+interface EditTaskModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  task: any;
+  onUpdated: () => void;
+  showToast: (msg: string, type: "success" | "error") => void;
 }
 
 interface Tier {
@@ -20,31 +22,6 @@ interface Tier {
   maxDays: number;
 }
 
-interface Task {
-  id: string;
-  Title: string;
-  Description: string;
-  Location: string;
-  Latitude: number;
-  longitude: number;
-  LocationType: string;
-  Credits: number;
-  Availability: Availability[];
-  Type?: string;
-  Category?: string;
-  Status?: string;
-  Images?: string[];
-  Tiers?: Tier[];
-}
-
-interface EditTaskModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  task: Task | null;
-  onUpdated: () => void;
-  showToast: (msg: string, type: "success" | "error") => void;
-}
-
 export default function EditTaskModal({
   isOpen,
   onClose,
@@ -52,16 +29,16 @@ export default function EditTaskModal({
   onUpdated,
   showToast,
 }: EditTaskModalProps) {
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     location: "",
-    locationType: "Online",
-    credits: 0,
-    category: "",
-    type: "",
-    availability: [{ date: "", timeFrom: "", timeTo: "" }],
+    latitude: "",
+    longitude: "",
+    locationType: "in-person",
   });
+
   const [tiers, setTiers] = useState<Tier[]>([
     {
       name: "Basic",
@@ -91,10 +68,44 @@ export default function EditTaskModal({
       maxDays: 30
     }
   ]);
-  const [images, setImages] = useState<File[]>([]);
-  const [existingImages, setExistingImages] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
+  const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [coverImage, setCoverImage] = useState<File | null>(null);
+  const [coverImagePreview, setCoverImagePreview] = useState<string>("");
+  const [contentImages, setContentImages] = useState<File[]>([]);
+  const [contentImagePreviews, setContentImagePreviews] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const API_BASE_URL = process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084";
+  const MAPBOX_TOKEN = "pk.eyJ1IjoibmVlbGFtZ2F1Y2hhbiIsImEiOiJjbWMwbzg0dXgwNGlnMmxwcmlncWVycnBnIn0.ARZnElbDY2SOiInY94w6aA";
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return;
+    }
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/tasks/categories`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        setCategories(data);
+      } catch (err) {
+        console.error("Failed to fetch categories", err);
+        showToast("❌ Failed to load categories.", "error");
+      }
+    };
+
+    if (isOpen) {
+      fetchCategories();
+    }
+  }, [isOpen, showToast]);
 
   useEffect(() => {
     if (task && isOpen) {
@@ -102,17 +113,16 @@ export default function EditTaskModal({
         title: task.Title || "",
         description: task.Description || "",
         location: task.Location || "",
-        locationType: task.LocationType || "Online",
-        credits: task.Credits || 0,
-        category: task.Category || "",
-        type: task.Type || "",
-        availability: task.Availability?.map(av => ({
-          date: av.Date || "",
-          timeFrom: av.TimeFrom || "",
-          timeTo: av.TimeTo || "",
-        })) || [{ date: "", timeFrom: "", timeTo: "" }],
+        latitude: task.Latitude?.toString() || "",
+        longitude: task.longitude?.toString() || "",
+        locationType: task.LocationType || "in-person",
       });
-      setExistingImages(task.Images || []);
+      setSelectedCategory(task.Category || "");
+      
+      // Set cover image preview if task has images
+      if (task.Images && task.Images.length > 0) {
+        setCoverImagePreview(task.Images[0]);
+      }
       
       // Set tiers from task if available
       if (task.Tiers && task.Tiers.length > 0) {
@@ -121,85 +131,120 @@ export default function EditTaskModal({
     }
   }, [task, isOpen]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  if (!isOpen) return null;
+
+  const handleChange = (e: any) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAvailabilityChange = (index: number, field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      availability: prev.availability.map((av, i) =>
-        i === index ? { ...av, [field]: value } : av
-      ),
-    }));
-  };
-
-  const addAvailability = () => {
-    setFormData(prev => ({
-      ...prev,
-      availability: [...prev.availability, { date: "", timeFrom: "", timeTo: "" }],
-    }));
-  };
-
-  const removeAvailability = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      availability: prev.availability.filter((_, i) => i !== index),
-    }));
-  };
-
-  const handleTierChange = (index: number, field: keyof Tier, value: any) => {
-    setTiers(prev => prev.map((tier, i) => 
-      i === index ? { ...tier, [field]: value } : tier
+  const handleTierChange = (tierIndex: number, field: keyof Tier, value: any) => {
+    setTiers(prev => prev.map((tier, index) => 
+      index === tierIndex ? { ...tier, [field]: value } : tier
     ));
   };
 
-  const addTierFeature = (tierIndex: number) => {
-    setTiers(prev => prev.map((tier, i) => 
-      i === tierIndex ? { ...tier, features: [...tier.features, ""] } : tier
-    ));
-  };
+  const handleLocationInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setFormData((prev) => ({ ...prev, location: query }));
 
-  const removeTierFeature = (tierIndex: number, featureIndex: number) => {
-    setTiers(prev => prev.map((tier, i) => 
-      i === tierIndex ? { ...tier, features: tier.features.filter((_, fi) => fi !== featureIndex) } : tier
-    ));
-  };
+    if (query.length > 2) {
+      try {
+        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+          query + " Toronto"
+        )}.json?access_token=${MAPBOX_TOKEN}&autocomplete=true&country=CA&types=address&limit=5`;
 
-  const updateTierFeature = (tierIndex: number, featureIndex: number, value: string) => {
-    setTiers(prev => prev.map((tier, i) => 
-      i === tierIndex ? { 
-        ...tier, 
-        features: tier.features.map((feature, fi) => fi === featureIndex ? value : feature)
-      } : tier
-    ));
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newImages = Array.from(e.target.files);
-      setImages(prev => [...prev, ...newImages]);
+        const res = await fetch(url);
+        const data = await res.json();
+        setLocationSuggestions(data.features);
+      } catch (err) {
+        console.error("Mapbox error:", err);
+        showToast("❌ Failed to fetch locations.", "error");
+      }
+    } else {
+      setLocationSuggestions([]);
     }
   };
 
-  const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
+  const handleLocationSelect = (place: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      location: place.place_name,
+      latitude: place.geometry.coordinates[1],
+      longitude: place.geometry.coordinates[0],
+    }));
+    setLocationSuggestions([]);
   };
 
-  const removeExistingImage = (index: number) => {
-    setExistingImages(prev => prev.filter((_, i) => i !== index));
+  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        showToast("❌ Cover image must be less than 5MB", "error");
+        return;
+      }
+      setCoverImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setCoverImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleContentImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles = files.filter(file => {
+      if (file.size > 5 * 1024 * 1024) {
+        showToast("❌ Image must be less than 5MB", "error");
+        return false;
+      }
+      return true;
+    });
+
+    if (contentImages.length + validFiles.length > 5) {
+      showToast("❌ Maximum 5 content images allowed", "error");
+      return;
+    }
+
+    setContentImages(prev => [...prev, ...validFiles]);
+    
+    validFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setContentImagePreviews(prev => [...prev, e.target?.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeCoverImage = () => {
+    setCoverImage(null);
+    setCoverImagePreview("");
+  };
+
+  const removeContentImage = (index: number) => {
+    setContentImages(prev => prev.filter((_, i) => i !== index));
+    setContentImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const nextStep = () => {
+    if (currentStep < 2) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     if (!task) return;
 
-    setLoading(true);
-    setError(null);
+    setUploading(true);
 
     try {
       const token = localStorage.getItem("token");
@@ -207,31 +252,25 @@ export default function EditTaskModal({
         throw new Error("No authentication token found");
       }
 
-      const API_BASE_URL = process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084";
-
-      // Create FormData for multipart/form-data
       const formDataToSend = new FormData();
       formDataToSend.append("title", formData.title);
       formDataToSend.append("description", formData.description);
       formDataToSend.append("location", formData.location);
+      formDataToSend.append("latitude", formData.latitude);
+      formDataToSend.append("longitude", formData.longitude);
       formDataToSend.append("locationType", formData.locationType);
-      formDataToSend.append("credits", formData.credits.toString());
-      formDataToSend.append("category", formData.category);
-      formDataToSend.append("type", formData.type);
-
-      // Add availability
-      formDataToSend.append("availability", JSON.stringify(formData.availability));
-
-      // Add tiers
+      formDataToSend.append("category", selectedCategory);
       formDataToSend.append("tiers", JSON.stringify(tiers));
 
-      // Add new images
-      images.forEach((image) => {
-        formDataToSend.append("images", image);
-      });
+      // Handle cover image
+      if (coverImage) {
+        formDataToSend.append("coverImage", coverImage);
+      }
 
-      // Add existing images that weren't removed
-      formDataToSend.append("existingImages", JSON.stringify(existingImages));
+      // Handle content images
+      contentImages.forEach((image) => {
+        formDataToSend.append("contentImages", image);
+      });
 
       const response = await fetch(`${API_BASE_URL}/api/tasks/update/${task.id}`, {
         method: "PUT",
@@ -251,24 +290,254 @@ export default function EditTaskModal({
       onClose();
     } catch (err) {
       console.error("Update error:", err);
-      setError(err instanceof Error ? err.message : "Failed to update task");
       showToast("❌ Failed to update task", "error");
     } finally {
-      setLoading(false);
+      setUploading(false);
     }
   };
 
-  if (!isOpen || !task) return null;
+  const renderStep1 = () => (
+    <div className="space-y-5">
+      {/* Cover Image Upload */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Cover Image *</label>
+        {coverImagePreview ? (
+          <div className="relative">
+            <img
+              src={coverImagePreview}
+              alt="Cover preview"
+              className="w-full h-32 object-cover rounded-lg border"
+            />
+            <button
+              type="button"
+              onClick={removeCoverImage}
+              className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+            >
+              <FaTimes className="w-3 h-3" />
+            </button>
+          </div>
+        ) : (
+          <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition">
+            <FaUpload className="w-8 h-8 text-gray-400 mb-2" />
+            <span className="text-sm text-gray-500">Upload cover image</span>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleCoverImageChange}
+              className="hidden"
+            />
+          </label>
+        )}
+      </div>
+
+      {/* Content Images Upload */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">
+          Content Images (Max 5)
+        </label>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {contentImagePreviews.map((preview, index) => (
+            <div key={index} className="relative">
+              <img
+                src={preview}
+                alt={`Content ${index + 1}`}
+                className="w-full h-20 object-cover rounded-lg border"
+              />
+              <button
+                type="button"
+                onClick={() => removeContentImage(index)}
+                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+              >
+                <FaTimes className="w-2 h-2" />
+              </button>
+            </div>
+          ))}
+          {contentImagePreviews.length < 5 && (
+            <label className="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition">
+              <FaImage className="w-4 h-4 text-gray-400 mb-1" />
+              <span className="text-xs text-gray-500">Add image</span>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleContentImagesChange}
+                className="hidden"
+              />
+            </label>
+          )}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Category *</label>
+        <select
+          name="category"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+          required
+        >
+          <option value="">Select a category</option>
+          {categories.map((cat, idx) => (
+            <option key={idx} value={cat}>
+              {cat}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Title *</label>
+        <input
+          type="text"
+          name="title"
+          placeholder="Enter your service title"
+          className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+          value={formData.title}
+          onChange={handleChange}
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Description *</label>
+        <textarea
+          name="description"
+          placeholder="Describe your service in detail"
+          rows={3}
+          className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors resize-none"
+          value={formData.description}
+          onChange={handleChange}
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Location *</label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="relative">
+            <input
+              type="text"
+              name="location"
+              placeholder="Enter a Canadian location"
+              className="border border-gray-300 px-4 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+              value={formData.location}
+              onChange={handleLocationInput}
+              required
+            />
+            {locationSuggestions.length > 0 && (
+              <ul className="absolute z-10 bg-white border border-gray-200 rounded-xl mt-1 w-full max-h-48 overflow-y-auto shadow-lg">
+                {locationSuggestions.map((place) => (
+                  <li
+                    key={place.id}
+                    className="px-4 py-3 hover:bg-purple-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                    onClick={() => handleLocationSelect(place)}
+                  >
+                    {place.place_name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <select
+            name="locationType"
+            value={formData.locationType}
+            onChange={handleChange}
+            className="border border-gray-300 px-4 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+            required
+          >
+            <option value="in-person">In-person</option>
+            <option value="remote">Remote</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderStep2 = () => (
+    <div className="space-y-6">
+      <div className="text-center mb-6">
+        <h3 className="text-lg font-semibold text-gray-900">Configure Service Tiers</h3>
+        <p className="text-sm text-gray-600">Set up your pricing tiers and time commitments</p>
+      </div>
+
+      {tiers.map((tier, index) => (
+        <div key={index} className="border border-gray-200 rounded-xl p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <h4 className="text-lg font-semibold text-gray-900">{tier.name} Tier</h4>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-500">Credits:</span>
+              <input
+                type="number"
+                value={tier.credits}
+                onChange={(e) => handleTierChange(index, 'credits', parseInt(e.target.value) || 0)}
+                className="w-20 border border-gray-300 px-2 py-1 rounded text-sm"
+                min="0"
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+            <input
+              type="text"
+              value={tier.title}
+              onChange={(e) => handleTierChange(index, 'title', e.target.value)}
+              className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              placeholder={`${tier.name} package title`}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea
+              value={tier.description}
+              onChange={(e) => handleTierChange(index, 'description', e.target.value)}
+              className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+              rows={2}
+              placeholder={`Describe what's included in the ${tier.name} package`}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Available Time Slot</label>
+              <input
+                type="text"
+                value={tier.availableTimeSlot}
+                onChange={(e) => handleTierChange(index, 'availableTimeSlot', e.target.value)}
+                className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="e.g., 9:00 AM - 5:00 PM"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Max Days</label>
+              <input
+                type="number"
+                value={tier.maxDays}
+                onChange={(e) => handleTierChange(index, 'maxDays', parseInt(e.target.value) || 0)}
+                className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                min="1"
+              />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-      <div className="bg-white max-w-4xl w-full rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+      <div className="bg-white max-w-4xl w-full rounded-2xl shadow-2xl overflow-hidden max-h-[95vh] relative">
         {/* Header */}
         <div className="bg-white border-b border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Edit Listing</h2>
-              <p className="text-gray-600 mt-1">Update your service listing details</p>
+              <p className="text-gray-600 mt-1">
+                Step {currentStep} of 2: {currentStep === 1 ? 'Basic Information' : 'Pricing Tiers'}
+              </p>
             </div>
             <button
               onClick={onClose}
@@ -277,384 +546,69 @@ export default function EditTaskModal({
               <FaTimes className="w-6 h-6" />
             </button>
           </div>
+          
+          {/* Step Indicator */}
+          <div className="flex items-center mt-4 space-x-2">
+            <div className={`w-3 h-3 rounded-full ${currentStep >= 1 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
+            <div className={`flex-1 h-1 rounded ${currentStep >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
+            <div className={`w-3 h-3 rounded-full ${currentStep >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="p-6 overflow-y-auto max-h-[calc(95vh-220px)]">
+          {currentStep === 1 ? renderStep1() : renderStep2()}
         </div>
 
-        {/* Content */}
-        <div className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Basic Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Title *</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  placeholder="Enter service title"
-                  className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Category</label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                >
-                  <option value="">Select Category</option>
-                  <option value="Technology">Technology</option>
-                  <option value="Design">Design</option>
-                  <option value="Marketing">Marketing</option>
-                  <option value="Writing">Writing</option>
-                  <option value="Consulting">Consulting</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Description */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Description *</label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="Describe your service in detail"
-                rows={4}
-                className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                required
-              />
-            </div>
-
-            {/* Location and Credits */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Location *</label>
-                <div className="relative">
-                  <FaMapMarkerAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    type="text"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleChange}
-                    placeholder="Enter location"
-                    className="w-full border border-gray-300 pl-10 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Location Type</label>
-                <select
-                  name="locationType"
-                  value={formData.locationType}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                >
-                  <option value="Online">Online</option>
-                  <option value="On-site">On-site</option>
-                  <option value="Hybrid">Hybrid</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Credits *</label>
-                <div className="relative">
-                  <FaCoins className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    type="number"
-                    name="credits"
-                    value={formData.credits}
-                    onChange={handleChange}
-                    placeholder="Enter credits"
-                    min="1"
-                    className="w-full border border-gray-300 pl-10 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Availability */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="block text-sm font-medium text-gray-700">Availability</label>
-                <button
-                  type="button"
-                  onClick={addAvailability}
-                  className="text-green-600 hover:text-green-700 text-sm font-medium"
-                >
-                  + Add Time Slot
-                </button>
-              </div>
-              
-              {formData.availability.map((av, index) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-xl">
-                  <div className="space-y-2">
-                    <label className="block text-xs font-medium text-gray-600">Date</label>
-                    <input
-                      type="date"
-                      value={av.date}
-                      onChange={(e) => handleAvailabilityChange(index, "date", e.target.value)}
-                      className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-xs font-medium text-gray-600">From</label>
-                    <input
-                      type="time"
-                      value={av.timeFrom}
-                      onChange={(e) => handleAvailabilityChange(index, "timeFrom", e.target.value)}
-                      className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-xs font-medium text-gray-600">To</label>
-                    <input
-                      type="time"
-                      value={av.timeTo}
-                      onChange={(e) => handleAvailabilityChange(index, "timeTo", e.target.value)}
-                      className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                    />
-                  </div>
-                  <div className="flex items-end">
-                    {formData.availability.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeAvailability(index)}
-                        className="text-red-500 hover:text-red-700 p-2"
-                      >
-                        <FaTrash className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Tiers */}
-            <div className="space-y-4">
-              <label className="block text-sm font-medium text-gray-700">Service Tiers</label>
-              <p className="text-sm text-gray-600">Configure your pricing tiers and what's included in each package</p>
-              
-              {tiers.map((tier, index) => (
-                <div key={index} className="border border-gray-200 rounded-xl p-4 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-semibold text-gray-900">{tier.name} Tier</h4>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-500">Credits:</span>
-                      <input
-                        type="number"
-                        value={tier.credits}
-                        onChange={(e) => handleTierChange(index, 'credits', parseInt(e.target.value) || 0)}
-                        className="w-20 border border-gray-300 px-2 py-1 rounded text-sm"
-                        min="0"
-                        placeholder="0"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                    <input
-                      type="text"
-                      value={tier.title}
-                      onChange={(e) => handleTierChange(index, 'title', e.target.value)}
-                      className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder={`${tier.name} package title`}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                    <textarea
-                      value={tier.description}
-                      onChange={(e) => handleTierChange(index, 'description', e.target.value)}
-                      className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
-                      rows={2}
-                      placeholder={`Describe what's included in the ${tier.name} package`}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Available Time Slot</label>
-                      <input
-                        type="text"
-                        value={tier.availableTimeSlot}
-                        onChange={(e) => handleTierChange(index, 'availableTimeSlot', e.target.value)}
-                        className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                        placeholder="e.g., 9:00 AM - 5:00 PM"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Max Days</label>
-                      <input
-                        type="number"
-                        value={tier.maxDays}
-                        onChange={(e) => handleTierChange(index, 'maxDays', parseInt(e.target.value) || 0)}
-                        className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                        min="1"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Features */}
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="block text-sm font-medium text-gray-700">Features</label>
-                      <button
-                        type="button"
-                        onClick={() => addTierFeature(index)}
-                        className="text-green-600 hover:text-green-700 text-sm font-medium"
-                      >
-                        + Add Feature
-                      </button>
-                    </div>
-                    <div className="space-y-2">
-                      {tier.features.map((feature, featureIndex) => (
-                        <div key={featureIndex} className="flex gap-2">
-                          <input
-                            type="text"
-                            value={feature}
-                            onChange={(e) => updateTierFeature(index, featureIndex, e.target.value)}
-                            className="flex-1 border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            placeholder="Enter feature description"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeTierFeature(index, featureIndex)}
-                            className="text-red-500 hover:text-red-700 p-2"
-                          >
-                            <FaTrash className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Images */}
-            <div className="space-y-4">
-              <label className="block text-sm font-medium text-gray-700">Images</label>
-              
-              {/* Existing Images */}
-              {existingImages.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-600">Current Images:</p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {existingImages.map((image, index) => (
-                      <div key={index} className="relative group">
-                        <img
-                          src={image}
-                          alt={`Image ${index + 1}`}
-                          className="w-full h-24 object-cover rounded-lg"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeExistingImage(index)}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <FaTrash className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* New Images */}
-              <div className="space-y-2">
-                <label className="block text-sm text-gray-600">Add New Images:</label>
-                <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
-                  <FaUpload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="hidden"
-                    id="image-upload"
-                  />
-                  <label
-                    htmlFor="image-upload"
-                    className="cursor-pointer text-green-600 hover:text-green-700 font-medium"
-                  >
-                    Choose files
-                  </label>
-                  <p className="text-sm text-gray-500 mt-1">or drag and drop</p>
-                </div>
-              </div>
-
-              {/* Preview New Images */}
-              {images.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-600">New Images:</p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {images.map((image, index) => (
-                      <div key={index} className="relative group">
-                        <img
-                          src={URL.createObjectURL(image)}
-                          alt={`New image ${index + 1}`}
-                          className="w-full h-24 object-cover rounded-lg"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <FaTrash className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                <p className="text-red-600 text-sm">{error}</p>
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <div className="flex gap-3 pt-4">
+        {/* Footer with Navigation */}
+        <div className="border-t border-gray-200 pb-12 pt-4 pr-10 bg-gray-50">
+          <div className="flex items-center justify-between">
+            {currentStep > 1 ? (
               <button
                 type="button"
-                onClick={onClose}
-                className="flex-1 px-4 py-3 rounded-xl text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                onClick={prevStep}
+                className="flex items-center space-x-2 ml-8 px-6 py-3 border border-gray-300 bg-white text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm"
               >
-                Cancel
+                <FaArrowLeft className="w-4 h-4" />
+                <span>Previous</span>
               </button>
+            ) : (
+              <div></div>
+            )}
+            
+            {currentStep < 2 ? (
+              <button
+                type="button"
+                onClick={nextStep}
+                className="flex items-center space-x-2 px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors shadow-lg font-medium"
+              >
+                <span>Next</span>
+                <FaArrowRight className="w-4 h-4" />
+              </button>
+            ) : (
               <button
                 type="submit"
-                disabled={loading}
-                className={`flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                  loading
-                    ? 'bg-gray-400 cursor-not-allowed text-white'
-                    : 'bg-green-500 hover:bg-green-600 text-white'
-                }`}
+                disabled={uploading}
+                onClick={handleSubmit}
+                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg ${
+                  uploading 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-black hover:bg-gray-800 hover:shadow-xl'
+                } text-white flex items-center space-x-2`}
               >
-                {loading ? (
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Updating...</span>
-                  </div>
+                {uploading ? (
+                  <>
+                    <LoadingSpinner size="sm" text="" />
+                    <span>Updating Listing...</span>
+                  </>
                 ) : (
-                  'Update Listing'
+                  <>
+                    <span>Update Listing</span>
+                  </>
                 )}
               </button>
-            </div>
-          </form>
+            )}
+          </div>
         </div>
       </div>
     </div>
