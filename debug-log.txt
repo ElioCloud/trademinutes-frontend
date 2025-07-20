@@ -1,0 +1,37 @@
+=== TRADEMINUTES DEBUG LOG ===
+Created: $(date)
+
+This file will be used to log debug information, errors, and troubleshooting steps for the TradeMinutes application.
+
+=== CURRENT ISSUES ===
+1. Tier data not displaying on services/view page
+2. "No pricing tiers available" message showing
+3. Need to verify data flow from CreateTaskModal to services/view page
+
+=== DEBUG STEPS ===
+1. Create a new service using CreateTaskModal
+2. Check browser console for "TIERS DEBUG" logs
+3. Verify API response format
+4. Check if tiers are stored as JSON string or array
+5. Verify field names in API response
+
+=== EXPECTED TIER DATA STRUCTURE ===
+{
+  "name": "Basic",
+  "title": "Basic Package",
+  "description": "Essential services",
+  "credits": 50,
+  "features": ["Feature 1", "Feature 2"],
+  "availableTimeSlot": "9:00 AM - 5:00 PM",
+  "maxDays": 7
+}
+
+=== API ENDPOINTS ===
+- Create Service: POST /api/tasks/create
+- View Service: GET /api/tasks/public/{id}
+
+=== LOG ENTRIES ===
+[Add log entries here as issues are discovered]
+
+=== RESOLUTION NOTES ===
+[Add resolution steps and fixes here] 

@@ -91,6 +91,21 @@ export default function ServiceViewPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [reviews, setReviews] = useState<Review[]>([]);
 
+  // Debug logging function
+  const logToFile = (message: string, data?: any) => {
+    const timestamp = new Date().toISOString();
+    const logEntry = `[${timestamp}] ${message}${data ? '\nData: ' + JSON.stringify(data, null, 2) : ''}\n\n`;
+    
+    // Log to console
+    console.log(logEntry);
+    
+    // In a real app, you'd send this to a logging service
+    // For now, we'll just use console.log
+    console.log('=== DEBUG LOG ENTRY ===');
+    console.log(logEntry);
+    console.log('=== END DEBUG LOG ===');
+  };
+
   // Mock reviews data
   const mockReviews: Review[] = [
     {
@@ -172,35 +187,36 @@ export default function ServiceViewPage() {
         console.log("Data keys:", Object.keys(data || {}));
         
         // Debug tiers data specifically
-        console.log("=== TIERS DEBUG ===");
-        console.log("Tiers property:", data.Tiers);
-        console.log("tiers property:", data.tiers);
-        console.log("Tiers type:", typeof data.Tiers);
-        console.log("tiers type:", typeof data.tiers);
-        console.log("Tiers is array:", Array.isArray(data.Tiers));
-        console.log("tiers is array:", Array.isArray(data.tiers));
-        console.log("Tiers length:", data.Tiers?.length);
-        console.log("tiers length:", data.tiers?.length);
-        if (data.Tiers) {
-          console.log("First tier:", data.Tiers[0]);
-        }
-        if (data.tiers) {
-          console.log("First tier (lowercase):", data.tiers[0]);
-        }
-        console.log("=== END TIERS DEBUG ===");
+        logToFile("TIERS DEBUG START", {
+          tiersProperty: data.Tiers,
+          tiersPropertyLowercase: data.tiers,
+          tiersType: typeof data.Tiers,
+          tiersTypeLowercase: typeof data.tiers,
+          tiersIsArray: Array.isArray(data.Tiers),
+          tiersIsArrayLowercase: Array.isArray(data.tiers),
+          tiersLength: data.Tiers?.length,
+          tiersLengthLowercase: data.tiers?.length,
+          firstTier: data.Tiers?.[0],
+          firstTierLowercase: data.tiers?.[0]
+        });
         
         setService(data);
         
         // Handle tiers data - could be string or array
         let tiersData = data.Tiers || data.tiers;
         
+        logToFile("TIERS PARSING START", {
+          originalTiersData: tiersData,
+          originalType: typeof tiersData
+        });
+        
         // If tiers is a string, try to parse it
         if (typeof tiersData === 'string') {
           try {
             tiersData = JSON.parse(tiersData);
-            console.log("Parsed tiers from string:", tiersData);
+            logToFile("SUCCESSFULLY PARSED TIERS FROM STRING", tiersData);
           } catch (e) {
-            console.error("Failed to parse tiers string:", e);
+            logToFile("FAILED TO PARSE TIERS STRING", { error: e, originalString: tiersData });
             tiersData = [];
           }
         }
@@ -208,12 +224,23 @@ export default function ServiceViewPage() {
         // Update the data object with parsed tiers
         if (tiersData && Array.isArray(tiersData)) {
           data.Tiers = tiersData;
-          console.log("Final tiers data:", data.Tiers);
+          logToFile("FINAL TIERS DATA SET", data.Tiers);
+        } else {
+          logToFile("NO VALID TIERS DATA FOUND", { tiersData, isArray: Array.isArray(tiersData) });
         }
         
         // Set initial selected tier if tiers are available
         if (data.Tiers && data.Tiers.length > 0) {
           setSelectedTier(data.Tiers[0].name);
+          logToFile("SET INITIAL SELECTED TIER", { 
+            selectedTier: data.Tiers[0].name,
+            availableTiers: data.Tiers.map((t: Tier) => t.name)
+          });
+        } else {
+          logToFile("NO TIERS AVAILABLE FOR INITIAL SELECTION", { 
+            tiersLength: data.Tiers?.length,
+            tiersData: data.Tiers
+          });
         }
         
         // Fetch real reviews for this service
