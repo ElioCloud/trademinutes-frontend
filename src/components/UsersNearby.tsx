@@ -100,6 +100,26 @@ const createTaskIcon = (images: string[] = []) => {
 };
 
 export default function UsersNearby() {
+  // Custom CSS to override Leaflet popup styles
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .custom-popup .leaflet-popup-content-wrapper {
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .custom-popup .leaflet-popup-content {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   const [center, setCenter] = useState<[number, number]>([43.6532, -79.3832]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
@@ -457,7 +477,7 @@ export default function UsersNearby() {
                   click: () => setSelectedTask(task),
                 }}
               >
-                <Popup className="custom-popup">
+                <Popup className="custom-popup !p-0 !m-0">
                   <div className="w-64 bg-white rounded-lg overflow-hidden">
                     {/* Task Image */}
                     {task.images && task.images.length > 0 && (
