@@ -619,7 +619,7 @@ export default function CreateTaskModal({
               <button
                 type="button"
                 onClick={prevStep}
-                className="flex items-center space-x-2 px-6 py-3 border border-gray-300 bg-white text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm"
+                className="flex items-center space-x-2 ml-8 px-6 py-3 border border-gray-300 bg-white text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm"
               >
                 <FaArrowLeft className="w-4 h-4" />
                 <span>Previous</span>
