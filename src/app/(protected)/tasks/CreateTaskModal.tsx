@@ -96,7 +96,18 @@ export default function CreateTaskModal({
           },
         });
         const data = await res.json();
-        setCategories(data);
+        // Ensure data is an array before setting it
+        if (Array.isArray(data)) {
+          setCategories(data);
+        } else if (data && Array.isArray(data.categories)) {
+          setCategories(data.categories);
+        } else if (data && Array.isArray(data.data)) {
+          setCategories(data.data);
+        } else {
+          console.error("Invalid categories data format:", data);
+          setCategories([]);
+          showToast("❌ Invalid categories data format.", "error");
+        }
       } catch (err) {
         console.error("Failed to fetch categories", err);
         showToast("❌ Failed to load categories.", "error");
@@ -428,7 +439,7 @@ export default function CreateTaskModal({
           required
         >
           <option value="">Select a category</option>
-          {categories.map((cat, idx) => (
+          {Array.isArray(categories) && categories.map((cat, idx) => (
             <option key={idx} value={cat}>
               {cat}
             </option>
