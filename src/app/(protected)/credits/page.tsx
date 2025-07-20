@@ -112,16 +112,7 @@ interface CreditStats {
   showBuyCredits: boolean;
 }
 
-interface CreditGoal {
-  id: string;
-  title: string;
-  targetAmount: number;
-  currentAmount: number;
-  deadline: number;
-  category: string;
-  status: 'active' | 'completed' | 'overdue';
-  progress: number; // percentage
-}
+
 
 interface CreditTier {
   name: string;
@@ -135,11 +126,11 @@ interface CreditTier {
 export default function CreditsPage() {
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [stats, setStats] = useState<CreditStats | null>(null);
-  const [goals, setGoals] = useState<CreditGoal[]>([]);
+
   const [tiers, setTiers] = useState<CreditTier[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedView, setSelectedView] = useState<'overview' | 'transactions' | 'goals' | 'tiers'>('overview');
+  const [selectedView, setSelectedView] = useState<'overview' | 'transactions' | 'tiers'>('overview');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -352,29 +343,7 @@ export default function CreditsPage() {
           showBuyCredits: currentCredits < 50 // Show buy credits option when balance is low
         };
 
-        // Create mock goals and tiers since they don't exist in backend
-        const mockGoals: CreditGoal[] = [
-          {
-            id: "1",
-            title: "Save for Premium Tools",
-            targetAmount: 500,
-            currentAmount: currentCredits,
-            deadline: Date.now() + 86400000 * 30,
-            category: "Tools",
-            status: currentCredits >= 500 ? 'completed' : 'active',
-            progress: Math.min((currentCredits / 500) * 100, 100)
-          },
-          {
-            id: "2",
-            title: "Monthly Target",
-            targetAmount: 1000,
-            currentAmount: monthlyEarnings,
-            deadline: Date.now() + 86400000 * 15,
-            category: "Earnings",
-            status: 'active',
-            progress: Math.min((monthlyEarnings / 1000) * 100, 100)
-          }
-        ];
+
 
         const mockTiers: CreditTier[] = [
           {
@@ -413,7 +382,6 @@ export default function CreditsPage() {
 
         setTransactions(transformedTransactions);
         setStats(transformedStats);
-        setGoals(mockGoals);
         setTiers(mockTiers);
         setError(null);
       } catch (err: any) {
@@ -487,28 +455,7 @@ export default function CreditsPage() {
           showBuyCredits: false
         };
 
-        const mockGoals: CreditGoal[] = [
-          {
-            id: "1",
-            title: "Save for Premium Tools",
-            targetAmount: 500,
-            currentAmount: 2847.50,
-            deadline: Date.now() + 86400000 * 30,
-            category: "Tools",
-            status: 'completed',
-            progress: 100
-          },
-          {
-            id: "2",
-            title: "Monthly Target",
-            targetAmount: 1000,
-            currentAmount: 650,
-            deadline: Date.now() + 86400000 * 15,
-            category: "Earnings",
-            status: 'active',
-            progress: 65
-          }
-        ];
+
 
         const mockTiers: CreditTier[] = [
           {
@@ -547,7 +494,6 @@ export default function CreditsPage() {
 
         setTransactions(mockTransactions);
         setStats(mockStats);
-        setGoals(mockGoals);
         setTiers(mockTiers);
       } finally {
         setLoading(false);
@@ -742,17 +688,7 @@ export default function CreditsPage() {
               <FaHistory className="w-4 h-4 inline mr-2" />
               Transactions
             </button>
-            <button
-              onClick={() => setSelectedView("goals")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedView === "goals"
-                  ? "bg-emerald-700 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              <FaTrophy className="w-4 h-4 inline mr-2" />
-              Goals
-            </button>
+
             <button
               onClick={() => setSelectedView("tiers")}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -1035,62 +971,7 @@ export default function CreditsPage() {
             </div>
           )}
 
-          {selectedView === "goals" && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {goals.map((goal) => (
-                  <div key={goal.id} className="bg-white rounded-xl p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">{goal.title}</h3>
-                      <span className={`inline-block px-2 py-1 text-xs font-semibold rounded ${
-                        goal.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        goal.status === 'overdue' ? 'bg-red-100 text-red-800' :
-                        'bg-blue-100 text-blue-800'
-                      }`}>
-                        {goal.status.toUpperCase()}
-                      </span>
-                    </div>
-                    
-                    <div className="mb-4">
-                      <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
-                        <span>Progress</span>
-                        <span>{goal.progress}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className={`h-2 rounded-full ${
-                            goal.status === 'completed' ? 'bg-green-500' :
-                            goal.status === 'overdue' ? 'bg-red-500' :
-                            'bg-emerald-500'
-                          }`}
-                          style={{ width: `${Math.min(goal.progress, 100)}%` }}
-                        ></div>
-                      </div>
-                    </div>
 
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Current:</span>
-                        <span className="font-semibold text-gray-900">{formatCurrency(goal.currentAmount)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Target:</span>
-                        <span className="font-semibold text-gray-900">{formatCurrency(goal.targetAmount)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Deadline:</span>
-                        <span className="font-semibold text-gray-900">{formatDate(goal.deadline)}</span>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <span className="text-xs text-gray-500">{goal.category}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {selectedView === "tiers" && (
             <div className="space-y-6">
