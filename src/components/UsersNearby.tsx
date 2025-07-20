@@ -240,7 +240,7 @@ export default function UsersNearby() {
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-6"></div>
-            <p className="text-gray-700 text-lg font-medium">Discovering nearby users...</p>
+            <p className="text-gray-700 text-lg font-medium">Discovering nearby services...</p>
             <p className="text-gray-500 text-sm mt-2">Finding service providers in your area</p>
           </div>
         </div>
@@ -282,10 +282,10 @@ export default function UsersNearby() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
-            <p className="text-gray-700 text-lg font-medium mb-2">No users found nearby</p>
-            <p className="text-gray-500 text-sm">Users will appear here once they create tasks with location</p>
+            <p className="text-gray-700 text-lg font-medium mb-2">No services found nearby</p>
+            <p className="text-gray-500 text-sm">Services will appear here once providers set their location</p>
             <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-              <p className="text-blue-700 text-sm font-medium">💡 Tip: Create a task with your location to appear on the map!</p>
+              <p className="text-blue-700 text-sm font-medium">💡 Tip: Set your location in your profile to appear on the map!</p>
             </div>
           </div>
         </div>
@@ -299,7 +299,7 @@ export default function UsersNearby() {
       <div className="absolute top-0 left-0 right-0 z-10 bg-white/90 backdrop-blur-sm border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Nearby Service Providers</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Nearby Services</h3>
             <p className="text-sm text-gray-600">{filteredUsers.length} of {users.length} users found</p>
           </div>
           <div className="flex items-center space-x-3">
