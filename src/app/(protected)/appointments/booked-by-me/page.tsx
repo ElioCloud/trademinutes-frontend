@@ -3,6 +3,27 @@
 import { useEffect, useState } from "react";
 import ProtectedLayout from "@/components/Layout/ProtectedLayout";
 import dayjs from "dayjs";
+import { 
+  FaCalendarAlt, 
+  FaClock, 
+  FaCheckCircle, 
+  FaTimesCircle, 
+  FaHourglassHalf, 
+  FaUserTie,
+  FaCheck,
+  FaPlay,
+  FaExclamationTriangle,
+  FaEye,
+  FaPhone,
+  FaEnvelope,
+  FaMapMarkerAlt,
+  FaStar,
+  FaCoins,
+  FaCheckDouble
+} from "react-icons/fa";
+import { FaCheckDouble as FaCheckDoubleIcon } from "react-icons/fa6";
+import { useAuth } from '@/contexts/AuthContext';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 interface Booking {
   id: string;
@@ -12,42 +33,30 @@ interface Booking {
   timeTo: string;
   status: string;
   taskId?: string;
+  providerName?: string;
+  providerEmail?: string;
+  providerPhone?: string;
+  providerProfilePicture?: string;
+  providerId?: string;
+  location?: string;
+  credits?: number;
+  notes?: string;
+  coverImage?: string;
+  taskImages?: string[];
 }
 
 export default function BookedByMePage() {
+  const { refreshUser } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [dialog, setDialog] = useState<{ open: boolean; message: string; isError: boolean }>({ open: false, message: '', isError: false });
   const [showReviewModal, setShowReviewModal] = useState<string | null>(null);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
   const [reviewSubmittedId, setReviewSubmittedId] = useState<string | null>(null);
   const [reviewedTaskIds, setReviewedTaskIds] = useState<string[]>([]);
-
-  // Confirm booking handler
-  const handleConfirm = async (bookingId: string) => {
-    setConfirmingId(bookingId);
-    try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
-      const API_BASE_URL = process.env.NEXT_PUBLIC_TASK_API_URL || 'http://localhost:8084';
-      const res = await fetch(`${API_BASE_URL}/api/bookings/accept`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ bookingId }),
-      });
-      if (!res.ok) throw new Error("Failed to confirm booking");
-      // Update UI
-      setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: "confirmed" } : b));
-    } catch (err) {
-      alert("Failed to confirm booking. Please try again.");
-    } finally {
-      setConfirmingId(null);
-    }
-  };
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -70,15 +79,123 @@ export default function BookedByMePage() {
         });
         if (!res.ok) throw new Error("Failed to fetch bookings");
         const data = await res.json();
-        const bookings = (data.data || data || []).map((b: any) => ({
-          id: b.ID || b.id || b._id,
-          taskTitle: b.TaskTitle || b.taskTitle || b.task?.Title || b.task?.title || "",
-          date: b.Timeslot?.Date || b.timeslot?.date || "",
-          timeFrom: b.Timeslot?.TimeFrom || b.timeslot?.timeFrom || "",
-          timeTo: b.Timeslot?.TimeTo || b.timeslot?.timeTo || "",
-          status: b.Status || b.status || "",
-          taskId: b.TaskID || b.TaskId || b.taskId || b.task?.ID || b.task?.id || "",
-        }));
+        const bookingsPromises = (data.data || data || []).map(async (b: any) => {
+          // Get task ID from booking
+          const taskId = b.TaskID || b.taskID || b.task?.ID || b.task?.id || b.taskId;
+          console.log(`Booking ${b.ID || b.id}: Task ID = ${taskId}`);
+          
+          // Get provider ID from booking
+          const providerId = b.TaskOwnerID || b.taskOwnerID || b.TaskOwner?.ID || b.taskOwner?.id || b.providerId;
+          console.log(`Booking ${b.ID || b.id}: Provider ID = ${providerId}`);
+          
+          let taskImages = [];
+          let providerName = b.TaskOwnerName || b.taskOwnerName || "Provider";
+          let providerEmail = b.TaskOwnerEmail || b.taskOwnerEmail || "";
+          let providerPhone = b.TaskOwnerPhone || b.taskOwnerPhone || "";
+          let providerProfilePicture = "";
+          
+          // Fetch task details to get images and provider info
+          if (taskId) {
+            try {
+              const taskRes = await fetch(`${API_BASE_URL}/api/tasks/get/${taskId}`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+              });
+              if (taskRes.ok) {
+                const taskData = await taskRes.json();
+                const task = taskData.data || taskData;
+                taskImages = task.Images || task.images || [];
+                console.log(`Fetched task ${taskId} images:`, taskImages);
+                
+                // Get provider details from the task's Author field (which contains the profile picture)
+                if (task.Author) {
+                  providerName = task.Author.Name || task.Author.name || providerName;
+                  providerEmail = task.Author.Email || task.Author.email || providerEmail;
+                  providerProfilePicture = task.Author.Avatar || task.Author.avatar || "";
+                  console.log(`✅ Using provider details from task Author:`, { 
+                    name: providerName, 
+                    email: providerEmail, 
+                    profilePicture: providerProfilePicture,
+                    taskAuthor: task.Author
+                  });
+                }
+              }
+            } catch (err) {
+              console.log(`Failed to fetch task ${taskId} details:`, err);
+            }
+          }
+          
+          // If we still don't have the profile picture, try fetching from auth service as fallback
+          if (!providerProfilePicture && providerId) {
+            try {
+              const providerRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084'}/api/auth/user/${providerId}`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+              });
+              if (providerRes.ok) {
+                const providerData = await providerRes.json();
+                const provider = providerData.data || providerData;
+                providerName = provider.Name || provider.name || providerName;
+                providerEmail = provider.Email || provider.email || providerEmail;
+                providerPhone = provider.Phone || provider.phone || providerPhone;
+                providerProfilePicture = provider.ProfilePictureURL || provider.profilePictureURL || provider.Avatar || provider.avatar || provider.ProfilePicture || provider.profilePicture || "";
+                console.log(`✅ Fetched provider ${providerId} details from auth service:`, { 
+                  name: providerName, 
+                  email: providerEmail, 
+                  phone: providerPhone, 
+                  profilePicture: providerProfilePicture,
+                  rawProviderData: provider
+                });
+                
+                // If no profile picture from auth service, try profile service for this specific user
+                if (!providerProfilePicture) {
+                  try {
+                    const profileRes = await fetch(`${process.env.NEXT_PUBLIC_PROFILE_API_URL || 'http://localhost:8081'}/api/profile/${providerId}`, {
+                      headers: token ? { Authorization: `Bearer ${token}` } : {},
+                    });
+                    if (profileRes.ok) {
+                      const profileData = await profileRes.json();
+                      providerProfilePicture = profileData.ProfilePictureURL || profileData.profilePictureURL || "";
+                      console.log(`✅ Fetched profile picture from profile service for user ${providerId}:`, providerProfilePicture);
+                    } else {
+                      console.log(`❌ Profile service returned:`, profileRes.status, profileRes.statusText);
+                    }
+                  } catch (profileErr) {
+                    console.log(`❌ Error fetching profile picture from profile service:`, profileErr);
+                  }
+                }
+              } else {
+                console.log(`❌ Failed to fetch provider ${providerId} details:`, providerRes.status, providerRes.statusText);
+                const errorText = await providerRes.text();
+                console.log(`❌ Error response:`, errorText);
+              }
+            } catch (err) {
+              console.log(`❌ Error fetching provider ${providerId} details:`, err);
+            }
+          } else if (!providerId) {
+            console.log(`⚠️ No provider ID found for booking ${b.ID || b.id}`);
+          }
+          
+          const booking = {
+            id: b.ID || b.id || b._id,
+            taskTitle: b.TaskTitle || b.taskTitle || b.task?.Title || b.task?.title || "",
+            date: b.Timeslot?.Date || b.timeslot?.date || "",
+            timeFrom: b.Timeslot?.TimeFrom || b.timeslot?.timeFrom || "",
+            timeTo: b.Timeslot?.TimeTo || b.timeslot?.timeTo || "",
+            status: b.Status || b.status || "",
+            providerName: providerName,
+            providerEmail: providerEmail,
+            providerPhone: providerPhone,
+            providerProfilePicture: providerProfilePicture,
+            providerId: providerId,
+            location: b.Location || b.location || "Location TBD",
+            credits: b.Credits || b.credits || 0,
+            notes: b.Notes || b.notes || "",
+            coverImage: b.CoverImage || b.coverImage || b.task?.CoverImage || b.task?.coverImage || "",
+            taskImages: taskImages
+          };
+          
+          return booking;
+        });
+        const bookings = await Promise.all(bookingsPromises);
         setBookings(bookings);
         setError(null);
       } catch (err: any) {
@@ -117,12 +234,6 @@ export default function BookedByMePage() {
     fetchReviewed();
   }, []);
 
-  // Group bookings by status
-  const completedBookings = bookings.filter(b => b.status && b.status.toLowerCase() === 'completed');
-  const confirmedBookings = bookings.filter(b => b.status && b.status.toLowerCase() === 'confirmed');
-  const pendingBookings = bookings.filter(b => b.status && b.status.toLowerCase() === 'pending');
-  const cancelledBookings = bookings.filter(b => b.status && b.status.toLowerCase() === 'cancelled');
-
   // Sort bookings: completed > confirmed > pending > cancelled
   const statusOrder = { completed: 0, confirmed: 1, pending: 2, cancelled: 3 };
   const sortedBookings = [...bookings].sort((a, b) => {
@@ -131,594 +242,466 @@ export default function BookedByMePage() {
     return (statusOrder[aStatus as keyof typeof statusOrder] ?? 99) - (statusOrder[bStatus as keyof typeof statusOrder] ?? 99);
   });
 
+  // Filter bookings based on selected status
+  const filteredBookings = selectedStatus === 'all' 
+    ? sortedBookings 
+    : sortedBookings.filter(b => b.status.toLowerCase() === selectedStatus);
+
+  // Group bookings by status for stats
+  const completedBookings = bookings.filter(b => b.status && b.status.toLowerCase() === 'completed');
+  const confirmedBookings = bookings.filter(b => b.status && b.status.toLowerCase() === 'confirmed');
+  const pendingBookings = bookings.filter(b => b.status && b.status.toLowerCase() === 'pending');
+  const cancelledBookings = bookings.filter(b => b.status && b.status.toLowerCase() === 'cancelled');
+
+  const getStatusIcon = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return <FaCheckDoubleIcon className="w-5 h-5 text-green-600" />;
+      case 'confirmed':
+        return <FaCheck className="w-5 h-5 text-blue-600" />;
+      case 'pending':
+        return <FaHourglassHalf className="w-5 h-5 text-yellow-600" />;
+      case 'cancelled':
+        return <FaTimesCircle className="w-5 h-5 text-red-600" />;
+      default:
+        return <FaExclamationTriangle className="w-5 h-5 text-gray-600" />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'confirmed':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusBgColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return 'bg-green-50';
+      case 'confirmed':
+        return 'bg-blue-50';
+      case 'pending':
+        return 'bg-yellow-50';
+      case 'cancelled':
+        return 'bg-red-50';
+      default:
+        return 'bg-gray-50';
+    }
+  };
+
+  if (loading) {
+    return (
+      <ProtectedLayout headerName="Booked by Me">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <LoadingSpinner size="lg" text="Loading your bookings..." />
+        </div>
+      </ProtectedLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <ProtectedLayout headerName="Booked by Me">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-red-500 text-lg mb-4">{error}</div>
+            <button 
+              onClick={() => window.location.reload()}
+              className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </ProtectedLayout>
+    );
+  }
+
   return (
     <ProtectedLayout headerName="Booked by Me">
-      <div className="min-h-screen bg-white p-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-extrabold mb-6 text-emerald-700">Booked by Me</h1>
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Booked by Me</h1>
+            <p className="text-gray-600">Manage your service bookings and track their progress</p>
+          </div>
+
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Bookings</p>
+                  <p className="text-2xl font-bold text-gray-900">{bookings.length}</p>
+                </div>
+                <div className="p-3 bg-blue-100 rounded-full">
+                  <FaCalendarAlt className="w-6 h-6 text-blue-600" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Completed</p>
+                  <p className="text-2xl font-bold text-green-600">{completedBookings.length}</p>
+                </div>
+                <div className="p-3 bg-green-100 rounded-full">
+                  <FaCheckDoubleIcon className="w-6 h-6 text-green-600" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Confirmed</p>
+                  <p className="text-2xl font-bold text-blue-600">{confirmedBookings.length}</p>
+                </div>
+                <div className="p-3 bg-blue-100 rounded-full">
+                  <FaCheck className="w-6 h-6 text-blue-600" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Pending</p>
+                  <p className="text-2xl font-bold text-yellow-600">{pendingBookings.length}</p>
+                </div>
+                <div className="p-3 bg-yellow-100 rounded-full">
+                  <FaHourglassHalf className="w-6 h-6 text-yellow-600" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Filter Tabs */}
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 mb-8">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setSelectedStatus('all')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  selectedStatus === 'all'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                All ({bookings.length})
+              </button>
+              <button
+                onClick={() => setSelectedStatus('completed')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  selectedStatus === 'completed'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Completed ({completedBookings.length})
+              </button>
+              <button
+                onClick={() => setSelectedStatus('confirmed')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  selectedStatus === 'confirmed'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Confirmed ({confirmedBookings.length})
+              </button>
+              <button
+                onClick={() => setSelectedStatus('pending')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  selectedStatus === 'pending'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Pending ({pendingBookings.length})
+              </button>
+              <button
+                onClick={() => setSelectedStatus('cancelled')}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  selectedStatus === 'cancelled'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Cancelled ({cancelledBookings.length})
+              </button>
+            </div>
+          </div>
+
+          {/* Bookings Grid */}
+          {filteredBookings.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FaCalendarAlt className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No bookings found</h3>
+              <p className="text-gray-600">
+                {selectedStatus === 'all' 
+                  ? "You haven't made any bookings yet."
+                  : `No ${selectedStatus} bookings found.`
+                }
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                             {filteredBookings.map((booking) => {
+                 const hasReviewed = reviewedTaskIds.includes(booking.taskId || "");
+                 const hasTaskImages = booking.taskImages && booking.taskImages.length > 0;
+                 const coverImage = hasTaskImages ? booking.taskImages![0] : null;
+                
+                return (
+                  <div key={booking.id} className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden ${getStatusBgColor(booking.status)}`}>
+                    {/* Cover Image */}
+                    <div className="relative h-48 bg-gradient-to-br from-blue-400 to-blue-600">
+                      {coverImage ? (
+                        <img
+                          src={coverImage}
+                          alt={booking.taskTitle}
+                          className="w-full h-full object-cover"
+                          style={{ zIndex: 1 }}
+                          onLoad={() => console.log(`✅ Cover image loaded successfully for booking ${booking.id}:`, coverImage)}
+                          onError={() => console.log(`❌ Cover image failed to load for booking ${booking.id}:`, coverImage)}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-white text-lg font-medium">Service Image</span>
+                        </div>
+                      )}
+                      
+                      {/* Status Badge */}
+                      <div className="absolute top-4 right-4">
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(booking.status)}`}>
+                          {getStatusIcon(booking.status)}
+                          <span className="ml-1">{booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                        {booking.taskTitle}
+                      </h3>
+
+                      {/* Date and Time */}
+                      <div className="flex items-center text-sm text-gray-600 mb-3">
+                        <FaCalendarAlt className="w-4 h-4 mr-2" />
+                        <span>{dayjs(booking.date).format('MMM DD, YYYY')}</span>
+                      </div>
+                      
+                      <div className="flex items-center text-sm text-gray-600 mb-4">
+                        <FaClock className="w-4 h-4 mr-2" />
+                        <span>{booking.timeFrom} - {booking.timeTo}</span>
+                      </div>
+
+                      {/* Provider Details */}
+                      <div className="border-t border-gray-100 pt-4 mb-4">
+                        <h4 className="text-sm font-medium text-gray-900 mb-2">Service Provider</h4>
+                        <div className="flex items-center space-x-3">
+                          {booking.providerProfilePicture ? (
+                            <img
+                              src={booking.providerProfilePicture}
+                              alt={booking.providerName}
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                              <span className="text-gray-600 text-sm font-medium">
+                                {booking.providerName?.charAt(0)?.toUpperCase() || 'P'}
+                              </span>
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                              {booking.providerName}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate">
+                              {booking.providerEmail}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Credits */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center text-sm text-gray-600">
+                          <FaCoins className="w-4 h-4 mr-2" />
+                          <span>{booking.credits} Credits</span>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600">
+                          <FaMapMarkerAlt className="w-4 h-4 mr-2" />
+                          <span>{booking.location}</span>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="space-y-2">
+                        {booking.status.toLowerCase() === 'completed' && !hasReviewed && (
+                          <button
+                            onClick={() => setShowReviewModal(booking.id)}
+                            className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                          >
+                            Leave a Review
+                          </button>
+                        )}
+                        
+                        {booking.status.toLowerCase() === 'completed' && hasReviewed && (
+                          <button
+                            disabled
+                            className="w-full bg-gray-300 text-gray-500 font-medium py-2 px-4 rounded-lg cursor-not-allowed"
+                          >
+                            Review Submitted
+                          </button>
+                        )}
+
+                        <button
+                          onClick={() => window.open(`/services/view/${booking.taskId}`, '_blank')}
+                          className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center"
+                        >
+                          <FaEye className="w-4 h-4 mr-2" />
+                          View Service
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
-        {/* Completed */}
-        <h2 className="text-xl font-bold mb-4 mt-8">Completed</h2>
-        {completedBookings.length === 0 ? (
-          <p>No completed bookings.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {completedBookings.map((b, idx) => {
-              const borderColors = [
-                'border-green-400',
-                'border-blue-400',
-                'border-pink-400',
-                'border-yellow-400',
-                'border-purple-400',
-                'border-orange-400',
-              ];
-              const borderClass = borderColors[idx % borderColors.length];
-              const hasReviewed = reviewedTaskIds.includes(b.taskId || "");
-              return (
-                <div
-                  key={b.id}
-                  className={`bg-white rounded-lg p-5 shadow-md hover:shadow-xl relative border-2 ${borderClass}`}
-                >
-                  <h3 className="text-lg font-semibold mb-1">{b.taskTitle}</h3>
-                  <p className="text-xs text-gray-500 mb-1">
-                    📅 {b.date} — ⏰ {b.timeFrom} to {b.timeTo}
-                  </p>
-                  <span
-                    className={`inline-block text-base font-semibold px-3 py-1 rounded-full bg-gray-100 border border-gray-300 mt-3 ${
-                      b.status === 'cancelled' ? 'bg-red-100 text-red-700 border-red-300' :
-                      b.status === 'confirmed' ? 'bg-green-100 text-green-700 border-green-300' :
-                      b.status === 'pending' ? 'bg-yellow-100 text-yellow-700 border-yellow-300' :
-                      ''
-                    }`}
-                    style={{ marginTop: '0.75rem' }}
-                  >
-                    {b.status.charAt(0).toUpperCase() + b.status.slice(1)}
-                  </span>
-                  {b.status && b.status.toLowerCase() === 'completed' && !hasReviewed && (
+
+        {/* Review Modal */}
+        {showReviewModal && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
+            <div className="bg-white rounded-xl p-8 shadow-xl w-full max-w-md mx-4">
+              <h2 className="text-xl font-bold mb-4">Leave a Review</h2>
+              <div className="mb-4">
+                <label className="block mb-2 font-medium">Rating:</label>
+                <div className="flex gap-1">
+                  {[1,2,3,4,5].map((star) => (
                     <button
-                      className="mt-4 w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
-                      onClick={() => setShowReviewModal(b.id)}
+                      key={star}
+                      type="button"
+                      className={star <= reviewRating ? "text-yellow-400 text-2xl" : "text-gray-300 text-2xl"}
+                      onClick={() => setReviewRating(star)}
+                      style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
+                      tabIndex={0}
+                      aria-label={`Set rating to ${star}`}
                     >
-                      Leave a Review
+                      ★
                     </button>
-                  )}
-                  {b.status && b.status.toLowerCase() === 'completed' && hasReviewed && (
-                    <button
-                      className="mt-4 w-full bg-gray-300 text-gray-500 font-semibold py-2 px-4 rounded-lg cursor-not-allowed"
-                      disabled
-                    >
-                      Review Submitted
-                    </button>
-                  )}
-                  {/* Review Modal */}
-                  {showReviewModal === b.id && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-white/30 backdrop-blur-sm z-50">
-                      <div className="bg-white rounded-lg p-8 shadow-xl w-full max-w-md">
-                        <h2 className="text-xl font-bold mb-4">Leave a Review</h2>
-                        <div className="mb-4">
-                          <label className="block mb-2 font-medium">Rating:</label>
-                          <div className="flex gap-1">
-                            {[1,2,3,4,5].map((star) => (
-                              <button
-                                key={star}
-                                type="button"
-                                className={star <= reviewRating ? "text-yellow-400 text-2xl" : "text-gray-300 text-2xl"}
-                                onClick={() => setReviewRating(star)}
-                                style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
-                                tabIndex={0}
-                                aria-label={`Set rating to ${star}`}
-                              >
-                                ★
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="mb-4">
-                          <label className="block mb-2 font-medium">Comment:</label>
-                          <textarea
-                            className="w-full border rounded p-2"
-                            rows={3}
-                            value={reviewComment}
-                            onChange={e => setReviewComment(e.target.value)}
-                          />
-                        </div>
-                        <div className="flex gap-4 justify-end">
-                          <button
-                            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
-                            onClick={() => setShowReviewModal(null)}
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            className="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700"
-                            onClick={async () => {
-                              // Submit review
-                              const token = localStorage.getItem("token");
-                              let userId = null;
-                              if (token) {
-                                const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084'}/api/auth/profile`, {
-                                  headers: { Authorization: `Bearer ${token}` },
-                                });
-                                if (profileRes.ok) {
-                                  const profileData = await profileRes.json();
-                                  userId = profileData.ID || profileData.id;
-                                }
-                              }
-                              if (!userId || !b.taskId) return;
-                              const API_BASE_URL = process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086';
-                              const res = await fetch(`${API_BASE_URL}/api/reviews`, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({
-                                  reviewerId: userId,
-                                  revieweeId: null, // You may want to fetch the owner ID if needed
-                                  taskId: b.taskId,
-                                  rating: reviewRating,
-                                  comment: reviewComment,
-                                }),
-                              });
-                              if (res.ok) {
-                                setReviewedTaskIds(prev => [...prev, b.taskId!]);
-                                setShowReviewModal(null);
-                                setReviewRating(0);
-                                setReviewComment("");
-                                setReviewSubmittedId(b.id);
-                              } else {
-                                alert("Failed to submit review");
-                              }
-                            }}
-                            disabled={reviewRating === 0}
-                          >
-                            Submit Review
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {reviewSubmittedId === b.id && (
-                    <div className="mt-4 text-green-700 font-semibold">Review submitted!</div>
-                  )}
+                  ))}
                 </div>
-              );
-            })}
+              </div>
+              <div className="mb-4">
+                <label className="block mb-2 font-medium">Comment:</label>
+                <textarea
+                  className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  rows={3}
+                  value={reviewComment}
+                  onChange={e => setReviewComment(e.target.value)}
+                  placeholder="Share your experience with this service..."
+                />
+              </div>
+              <div className="flex gap-4 justify-end">
+                <button
+                  className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition-colors"
+                  onClick={() => setShowReviewModal(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
+                  onClick={async () => {
+                    const booking = bookings.find(b => b.id === showReviewModal);
+                    if (!booking?.taskId) return;
+                    
+                    const token = localStorage.getItem("token");
+                    let userId = null;
+                    if (token) {
+                      const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084'}/api/auth/profile`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                      });
+                      if (profileRes.ok) {
+                        const profileData = await profileRes.json();
+                        userId = profileData.ID || profileData.id;
+                      }
+                    }
+                    if (!userId) return;
+                    
+                    const API_BASE_URL = process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086';
+                    const res = await fetch(`${API_BASE_URL}/api/reviews`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        reviewerId: userId,
+                        revieweeId: booking.providerId,
+                        taskId: booking.taskId,
+                        rating: reviewRating,
+                        comment: reviewComment,
+                      }),
+                    });
+                    if (res.ok) {
+                      setReviewedTaskIds(prev => [...prev, booking.taskId!]);
+                      setShowReviewModal(null);
+                      setReviewRating(0);
+                      setReviewComment("");
+                      setReviewSubmittedId(booking.id);
+                      setDialog({ open: true, message: "Review submitted successfully!", isError: false });
+                    } else {
+                      setDialog({ open: true, message: "Failed to submit review. Please try again.", isError: true });
+                    }
+                  }}
+                  disabled={reviewRating === 0}
+                >
+                  Submit Review
+                </button>
+              </div>
+            </div>
           </div>
         )}
-        {/* Confirmed */}
-        <h2 className="text-xl font-bold mb-4 mt-8">Confirmed</h2>
-        {confirmedBookings.length === 0 ? (
-          <p>No confirmed bookings.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {confirmedBookings.map((b, idx) => {
-              const borderColors = [
-                'border-green-400',
-                'border-blue-400',
-                'border-pink-400',
-                'border-yellow-400',
-                'border-purple-400',
-                'border-orange-400',
-              ];
-              const borderClass = borderColors[idx % borderColors.length];
-              const hasReviewed = reviewedTaskIds.includes(b.taskId || "");
-              return (
-                <div
-                  key={b.id}
-                  className={`bg-white rounded-lg p-5 shadow-md hover:shadow-xl relative border-2 ${borderClass}`}
-                >
-                  <h3 className="text-lg font-semibold mb-1">{b.taskTitle}</h3>
-                  <p className="text-xs text-gray-500 mb-1">
-                    📅 {b.date} — ⏰ {b.timeFrom} to {b.timeTo}
-                  </p>
-                  <span
-                    className={`inline-block text-base font-semibold px-3 py-1 rounded-full bg-gray-100 border border-gray-300 mt-3 ${
-                      b.status === 'cancelled' ? 'bg-red-100 text-red-700 border-red-300' :
-                      b.status === 'confirmed' ? 'bg-green-100 text-green-700 border-green-300' :
-                      b.status === 'pending' ? 'bg-yellow-100 text-yellow-700 border-yellow-300' :
-                      ''
-                    }`}
-                    style={{ marginTop: '0.75rem' }}
-                  >
-                    {b.status.charAt(0).toUpperCase() + b.status.slice(1)}
-                  </span>
-                  {b.status && b.status.toLowerCase() === 'completed' && !hasReviewed && (
-                    <button
-                      className="mt-4 w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
-                      onClick={() => setShowReviewModal(b.id)}
-                    >
-                      Leave a Review
-                    </button>
-                  )}
-                  {b.status && b.status.toLowerCase() === 'completed' && hasReviewed && (
-                    <button
-                      className="mt-4 w-full bg-gray-300 text-gray-500 font-semibold py-2 px-4 rounded-lg cursor-not-allowed"
-                      disabled
-                    >
-                      Review Submitted
-                    </button>
-                  )}
-                  {/* Review Modal */}
-                  {showReviewModal === b.id && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-white/30 backdrop-blur-sm z-50">
-                      <div className="bg-white rounded-lg p-8 shadow-xl w-full max-w-md">
-                        <h2 className="text-xl font-bold mb-4">Leave a Review</h2>
-                        <div className="mb-4">
-                          <label className="block mb-2 font-medium">Rating:</label>
-                          <div className="flex gap-1">
-                            {[1,2,3,4,5].map((star) => (
-                              <button
-                                key={star}
-                                type="button"
-                                className={star <= reviewRating ? "text-yellow-400 text-2xl" : "text-gray-300 text-2xl"}
-                                onClick={() => setReviewRating(star)}
-                                style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
-                                tabIndex={0}
-                                aria-label={`Set rating to ${star}`}
-                              >
-                                ★
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="mb-4">
-                          <label className="block mb-2 font-medium">Comment:</label>
-                          <textarea
-                            className="w-full border rounded p-2"
-                            rows={3}
-                            value={reviewComment}
-                            onChange={e => setReviewComment(e.target.value)}
-                          />
-                        </div>
-                        <div className="flex gap-4 justify-end">
-                          <button
-                            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
-                            onClick={() => setShowReviewModal(null)}
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            className="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700"
-                            onClick={async () => {
-                              // Submit review
-                              const token = localStorage.getItem("token");
-                              let userId = null;
-                              if (token) {
-                                const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084'}/api/auth/profile`, {
-                                  headers: { Authorization: `Bearer ${token}` },
-                                });
-                                if (profileRes.ok) {
-                                  const profileData = await profileRes.json();
-                                  userId = profileData.ID || profileData.id;
-                                }
-                              }
-                              if (!userId || !b.taskId) return;
-                              const API_BASE_URL = process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086';
-                              const res = await fetch(`${API_BASE_URL}/api/reviews`, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({
-                                  reviewerId: userId,
-                                  revieweeId: null, // You may want to fetch the owner ID if needed
-                                  taskId: b.taskId,
-                                  rating: reviewRating,
-                                  comment: reviewComment,
-                                }),
-                              });
-                              if (res.ok) {
-                                setReviewedTaskIds(prev => [...prev, b.taskId!]);
-                                setShowReviewModal(null);
-                                setReviewRating(0);
-                                setReviewComment("");
-                                setReviewSubmittedId(b.id);
-                              } else {
-                                alert("Failed to submit review");
-                              }
-                            }}
-                            disabled={reviewRating === 0}
-                          >
-                            Submit Review
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {reviewSubmittedId === b.id && (
-                    <div className="mt-4 text-green-700 font-semibold">Review submitted!</div>
+
+        {/* Success Dialog */}
+        {dialog.open && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
+            <div className="bg-white rounded-xl p-6 shadow-xl max-w-md mx-4">
+              <div className="text-center">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                  dialog.isError ? 'bg-red-100' : 'bg-green-100'
+                }`}>
+                  {dialog.isError ? (
+                    <FaTimesCircle className="w-6 h-6 text-red-600" />
+                  ) : (
+                    <FaCheck className="w-6 h-6 text-green-600" />
                   )}
                 </div>
-              );
-            })}
-          </div>
-        )}
-        {/* Pending */}
-        <h2 className="text-xl font-bold mb-4 mt-8">Pending</h2>
-        {pendingBookings.length === 0 ? (
-          <p>No pending bookings.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {pendingBookings.map((b, idx) => {
-              const borderColors = [
-                'border-green-400',
-                'border-blue-400',
-                'border-pink-400',
-                'border-yellow-400',
-                'border-purple-400',
-                'border-orange-400',
-              ];
-              const borderClass = borderColors[idx % borderColors.length];
-              const hasReviewed = reviewedTaskIds.includes(b.taskId || "");
-              return (
-                <div
-                  key={b.id}
-                  className={`bg-white rounded-lg p-5 shadow-md hover:shadow-xl relative border-2 ${borderClass}`}
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  {dialog.isError ? 'Error' : 'Success'}
+                </h3>
+                <p className="text-gray-600 mb-6">{dialog.message}</p>
+                <button
+                  onClick={() => setDialog({ open: false, message: '', isError: false })}
+                  className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors"
                 >
-                  <h3 className="text-lg font-semibold mb-1">{b.taskTitle}</h3>
-                  <p className="text-xs text-gray-500 mb-1">
-                    📅 {b.date} — ⏰ {b.timeFrom} to {b.timeTo}
-                  </p>
-                  <span
-                    className={`inline-block text-base font-semibold px-3 py-1 rounded-full bg-gray-100 border border-gray-300 mt-3 ${
-                      b.status === 'cancelled' ? 'bg-red-100 text-red-700 border-red-300' :
-                      b.status === 'confirmed' ? 'bg-green-100 text-green-700 border-green-300' :
-                      b.status === 'pending' ? 'bg-yellow-100 text-yellow-700 border-yellow-300' :
-                      ''
-                    }`}
-                    style={{ marginTop: '0.75rem' }}
-                  >
-                    {b.status.charAt(0).toUpperCase() + b.status.slice(1)}
-                  </span>
-                  {b.status && b.status.toLowerCase() === 'completed' && !hasReviewed && (
-                    <button
-                      className="mt-4 w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
-                      onClick={() => setShowReviewModal(b.id)}
-                    >
-                      Leave a Review
-                    </button>
-                  )}
-                  {b.status && b.status.toLowerCase() === 'completed' && hasReviewed && (
-                    <button
-                      className="mt-4 w-full bg-gray-300 text-gray-500 font-semibold py-2 px-4 rounded-lg cursor-not-allowed"
-                      disabled
-                    >
-                      Review Submitted
-                    </button>
-                  )}
-                  {/* Review Modal */}
-                  {showReviewModal === b.id && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-white/30 backdrop-blur-sm z-50">
-                      <div className="bg-white rounded-lg p-8 shadow-xl w-full max-w-md">
-                        <h2 className="text-xl font-bold mb-4">Leave a Review</h2>
-                        <div className="mb-4">
-                          <label className="block mb-2 font-medium">Rating:</label>
-                          <div className="flex gap-1">
-                            {[1,2,3,4,5].map((star) => (
-                              <button
-                                key={star}
-                                type="button"
-                                className={star <= reviewRating ? "text-yellow-400 text-2xl" : "text-gray-300 text-2xl"}
-                                onClick={() => setReviewRating(star)}
-                                style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
-                                tabIndex={0}
-                                aria-label={`Set rating to ${star}`}
-                              >
-                                ★
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="mb-4">
-                          <label className="block mb-2 font-medium">Comment:</label>
-                          <textarea
-                            className="w-full border rounded p-2"
-                            rows={3}
-                            value={reviewComment}
-                            onChange={e => setReviewComment(e.target.value)}
-                          />
-                        </div>
-                        <div className="flex gap-4 justify-end">
-                          <button
-                            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
-                            onClick={() => setShowReviewModal(null)}
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            className="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700"
-                            onClick={async () => {
-                              // Submit review
-                              const token = localStorage.getItem("token");
-                              let userId = null;
-                              if (token) {
-                                const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084'}/api/auth/profile`, {
-                                  headers: { Authorization: `Bearer ${token}` },
-                                });
-                                if (profileRes.ok) {
-                                  const profileData = await profileRes.json();
-                                  userId = profileData.ID || profileData.id;
-                                }
-                              }
-                              if (!userId || !b.taskId) return;
-                              const API_BASE_URL = process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086';
-                              const res = await fetch(`${API_BASE_URL}/api/reviews`, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({
-                                  reviewerId: userId,
-                                  revieweeId: null, // You may want to fetch the owner ID if needed
-                                  taskId: b.taskId,
-                                  rating: reviewRating,
-                                  comment: reviewComment,
-                                }),
-                              });
-                              if (res.ok) {
-                                setReviewedTaskIds(prev => [...prev, b.taskId!]);
-                                setShowReviewModal(null);
-                                setReviewRating(0);
-                                setReviewComment("");
-                                setReviewSubmittedId(b.id);
-                              } else {
-                                alert("Failed to submit review");
-                              }
-                            }}
-                            disabled={reviewRating === 0}
-                          >
-                            Submit Review
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {reviewSubmittedId === b.id && (
-                    <div className="mt-4 text-green-700 font-semibold">Review submitted!</div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-        {/* Cancelled */}
-        <h2 className="text-xl font-bold mb-4 mt-8">Cancelled</h2>
-        {cancelledBookings.length === 0 ? (
-          <p>No cancelled bookings.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {cancelledBookings.map((b, idx) => {
-              const borderColors = [
-                'border-green-400',
-                'border-blue-400',
-                'border-pink-400',
-                'border-yellow-400',
-                'border-purple-400',
-                'border-orange-400',
-              ];
-              const borderClass = borderColors[idx % borderColors.length];
-              const hasReviewed = reviewedTaskIds.includes(b.taskId || "");
-              return (
-                <div
-                  key={b.id}
-                  className={`bg-white rounded-lg p-5 shadow-md hover:shadow-xl relative border-2 ${borderClass}`}
-                >
-                  <h3 className="text-lg font-semibold mb-1">{b.taskTitle}</h3>
-                  <p className="text-xs text-gray-500 mb-1">
-                    📅 {b.date} — ⏰ {b.timeFrom} to {b.timeTo}
-                  </p>
-                  <span
-                    className={`inline-block text-base font-semibold px-3 py-1 rounded-full bg-gray-100 border border-gray-300 mt-3 ${
-                      b.status === 'cancelled' ? 'bg-red-100 text-red-700 border-red-300' :
-                      b.status === 'confirmed' ? 'bg-green-100 text-green-700 border-green-300' :
-                      b.status === 'pending' ? 'bg-yellow-100 text-yellow-700 border-yellow-300' :
-                      ''
-                    }`}
-                    style={{ marginTop: '0.75rem' }}
-                  >
-                    {b.status.charAt(0).toUpperCase() + b.status.slice(1)}
-                  </span>
-                  {b.status && b.status.toLowerCase() === 'completed' && !hasReviewed && (
-                    <button
-                      className="mt-4 w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
-                      onClick={() => setShowReviewModal(b.id)}
-                    >
-                      Leave a Review
-                    </button>
-                  )}
-                  {b.status && b.status.toLowerCase() === 'completed' && hasReviewed && (
-                    <button
-                      className="mt-4 w-full bg-gray-300 text-gray-500 font-semibold py-2 px-4 rounded-lg cursor-not-allowed"
-                      disabled
-                    >
-                      Review Submitted
-                    </button>
-                  )}
-                  {/* Review Modal */}
-                  {showReviewModal === b.id && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-white/30 backdrop-blur-sm z-50">
-                      <div className="bg-white rounded-lg p-8 shadow-xl w-full max-w-md">
-                        <h2 className="text-xl font-bold mb-4">Leave a Review</h2>
-                        <div className="mb-4">
-                          <label className="block mb-2 font-medium">Rating:</label>
-                          <div className="flex gap-1">
-                            {[1,2,3,4,5].map((star) => (
-                              <button
-                                key={star}
-                                type="button"
-                                className={star <= reviewRating ? "text-yellow-400 text-2xl" : "text-gray-300 text-2xl"}
-                                onClick={() => setReviewRating(star)}
-                                style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
-                                tabIndex={0}
-                                aria-label={`Set rating to ${star}`}
-                              >
-                                ★
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="mb-4">
-                          <label className="block mb-2 font-medium">Comment:</label>
-                          <textarea
-                            className="w-full border rounded p-2"
-                            rows={3}
-                            value={reviewComment}
-                            onChange={e => setReviewComment(e.target.value)}
-                          />
-                        </div>
-                        <div className="flex gap-4 justify-end">
-                          <button
-                            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
-                            onClick={() => setShowReviewModal(null)}
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            className="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700"
-                            onClick={async () => {
-                              // Submit review
-                              const token = localStorage.getItem("token");
-                              let userId = null;
-                              if (token) {
-                                const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084'}/api/auth/profile`, {
-                                  headers: { Authorization: `Bearer ${token}` },
-                                });
-                                if (profileRes.ok) {
-                                  const profileData = await profileRes.json();
-                                  userId = profileData.ID || profileData.id;
-                                }
-                              }
-                              if (!userId || !b.taskId) return;
-                              const API_BASE_URL = process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086';
-                              const res = await fetch(`${API_BASE_URL}/api/reviews`, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({
-                                  reviewerId: userId,
-                                  revieweeId: null, // You may want to fetch the owner ID if needed
-                                  taskId: b.taskId,
-                                  rating: reviewRating,
-                                  comment: reviewComment,
-                                }),
-                              });
-                              if (res.ok) {
-                                setReviewedTaskIds(prev => [...prev, b.taskId!]);
-                                setShowReviewModal(null);
-                                setReviewRating(0);
-                                setReviewComment("");
-                                setReviewSubmittedId(b.id);
-                              } else {
-                                alert("Failed to submit review");
-                              }
-                            }}
-                            disabled={reviewRating === 0}
-                          >
-                            Submit Review
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {reviewSubmittedId === b.id && (
-                    <div className="mt-4 text-green-700 font-semibold">Review submitted!</div>
-                  )}
-                </div>
-              );
-            })}
+                  OK
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
