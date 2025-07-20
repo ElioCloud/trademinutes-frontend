@@ -458,19 +458,27 @@ export default function UsersNearby() {
                 }}
               >
                 <Popup className="custom-popup">
-                  <div className="p-3 w-64 bg-white rounded-lg">
+                  <div className="w-64 bg-white rounded-lg overflow-hidden">
                     {/* Task Image */}
                     {task.images && task.images.length > 0 && (
-                      <div className="mb-2">
+                      <div className="relative">
                         <Image
                           src={task.images[0]}
                           alt={task.title}
                           width={256}
                           height={120}
-                          className="w-full h-20 object-cover rounded-md"
+                          className="w-full h-24 object-cover"
                         />
+                        {/* Close Button */}
+                        <button className="absolute top-2 right-2 w-6 h-6 bg-white rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors">
+                          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
                       </div>
                     )}
+                    
+                    <div className="p-3">
 
                     {/* Task Details */}
                     <div className="mb-3">
@@ -500,6 +508,9 @@ export default function UsersNearby() {
                       </div>
                     </div>
 
+                    {/* Divider */}
+                    <div className="border-t border-gray-200 my-3"></div>
+                    
                     {/* Author Information */}
                     <div className="mb-2">
                       <div className="flex items-center gap-2 mb-1">
@@ -589,6 +600,7 @@ export default function UsersNearby() {
                         Profile
                       </Link>
                     </div>
+                  </div>
                   </div>
                 </Popup>
               </Marker>
