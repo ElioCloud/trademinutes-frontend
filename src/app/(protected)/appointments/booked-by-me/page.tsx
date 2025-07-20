@@ -497,7 +497,7 @@ export default function BookedByMePage() {
                  const coverImage = hasTaskImages ? booking.taskImages![0] : null;
                 
                 return (
-                  <div key={booking.id} className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden ${getStatusBgColor(booking.status)}`}>
+                  <div key={booking.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     {/* Cover Image */}
                     <div className="relative h-48 bg-gradient-to-br from-blue-400 to-blue-600">
                       {coverImage ? (
