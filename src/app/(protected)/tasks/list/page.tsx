@@ -225,7 +225,7 @@ export default function TaskListPage() {
         ) : tasks.length === 0 ? (
           <div className="text-center py-12">
             <div className="bg-white rounded-2xl p-8 shadow-sm max-w-md mx-auto">
-              <div className="flex justify-center mb-4">
+              <div className="flex items-center justify-center mb-4">
                 <FaClipboardList className="w-16 h-16 text-gray-400" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">No listings yet</h3>
