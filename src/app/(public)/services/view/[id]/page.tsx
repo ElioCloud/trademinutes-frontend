@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaStar, FaMapMarkerAlt, FaClock, FaCoins, FaHeart, FaShare, FaEllipsisH, FaCheck, FaInfoCircle } from 'react-icons/fa';
+import { FaStar, FaMapMarkerAlt, FaClock, FaCoins, FaHeart, FaShare, FaEllipsisH, FaCheck, FaInfoCircle, FaTimes, FaEnvelope } from 'react-icons/fa';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
@@ -102,6 +102,16 @@ export default function ServiceViewPage() {
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
   const [messageText, setMessageText] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [isChatBoxOpen, setIsChatBoxOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<Array<{
+    id: string;
+    sender: 'user' | 'provider';
+    message: string;
+    timestamp: Date;
+  }>>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [sendingChatMessage, setSendingChatMessage] = useState(false);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
 
   // Helper function to check if service belongs to current user
   const isOwnService = () => {
@@ -337,6 +347,224 @@ export default function ServiceViewPage() {
     }
   };
 
+  const fetchConversationHistory = async () => {
+    if (!token || !service) return;
+
+    try {
+      console.log('=== FETCHING CONVERSATION HISTORY ===');
+      
+      // Get current user profile
+      const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8080'}/api/auth/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      if (!profileRes.ok) {
+        throw new Error("Failed to fetch user profile");
+      }
+      
+      const profileData = await profileRes.json();
+      const currentUserEmail = (profileData as any).email || (profileData as any).Email;
+      
+      // Get service provider email
+      const serviceProviderId = service.Author?.ID || service.Author?.id || service.author?.id;
+      if (!serviceProviderId) {
+        console.log('No service provider ID found');
+        return;
+      }
+
+      const providerProfileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8080'}/api/auth/user/${serviceProviderId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      if (!providerProfileRes.ok) {
+        console.log('Failed to fetch provider profile');
+        return;
+      }
+      
+      const providerProfileData = await providerProfileRes.json();
+      const serviceProviderEmail = (providerProfileData as any).email || (providerProfileData as any).Email;
+      
+      // Find existing conversation
+      const conversationsRes = await fetch(`${process.env.NEXT_PUBLIC_MESSAGING_API_URL || 'http://localhost:8085'}/api/conversations?userId=${currentUserEmail}`);
+      
+      if (conversationsRes.ok) {
+        const conversations = await conversationsRes.json();
+        console.log('Found conversations:', conversations);
+        
+        // Find conversation with this service provider
+        const existingConversation = conversations.find((conv: any) => 
+          conv.participants.includes(currentUserEmail) && 
+          conv.participants.includes(serviceProviderEmail) &&
+          conv.taskId === (service.ID || service.id)
+        );
+        
+        if (existingConversation) {
+          console.log('Found existing conversation:', existingConversation);
+          setCurrentConversationId(existingConversation.id);
+          
+          // Fetch messages for this conversation
+          const messagesRes = await fetch(`${process.env.NEXT_PUBLIC_MESSAGING_API_URL || 'http://localhost:8085'}/api/conversations/${existingConversation.id}/messages`);
+          
+          if (messagesRes.ok) {
+            const messages = await messagesRes.json();
+            console.log('Fetched messages:', messages);
+            
+            // Convert messages to chat format
+            const chatMessages = messages.map((msg: any) => ({
+              id: msg.id,
+              sender: msg.senderId === currentUserEmail ? 'user' as const : 'provider' as const,
+              message: msg.content,
+              timestamp: new Date(msg.timestamp * 1000)
+            }));
+            
+            setChatMessages(chatMessages);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching conversation history:', error);
+    }
+  };
+
+  // Auto-scroll to bottom when new messages are added
+  useEffect(() => {
+    const chatMessagesDiv = document.getElementById('chat-messages');
+    if (chatMessagesDiv) {
+      chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+    }
+  }, [chatMessages]);
+
+  const handleSendChatMessage = async () => {
+    if (!newMessage.trim() || sendingChatMessage || !token || !service) return;
+
+    console.log('=== CHAT MESSAGE DEBUG ===');
+    console.log('Service:', service);
+    console.log('Token:', token ? 'Present' : 'Missing');
+    console.log('Message:', newMessage.trim());
+
+    setSendingChatMessage(true);
+    try {
+      // Get current user profile
+      const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8080'}/api/auth/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      if (!profileRes.ok) {
+        throw new Error("Failed to fetch user profile");
+      }
+      
+      const profileData = await profileRes.json();
+      console.log('Profile data:', profileData);
+      
+      const currentUserId = profileData.ID || profileData.id;
+      const currentUserEmail = (profileData as any).email || (profileData as any).Email;
+      
+      console.log('Current user ID:', currentUserId);
+      console.log('Current user email:', currentUserEmail);
+      
+      if (!currentUserId) {
+        throw new Error("User ID not found");
+      }
+
+      // Get service provider email - we need to fetch the provider's profile
+      const serviceProviderId = service.Author?.ID || service.Author?.id || service.author?.id;
+      console.log('Service provider ID:', serviceProviderId);
+      console.log('Service Author:', service.Author);
+      console.log('Service author:', service.author);
+      
+      if (!serviceProviderId) {
+        throw new Error("Service provider ID not found");
+      }
+
+      // Fetch service provider's profile to get their email
+      const providerProfileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8080'}/api/auth/user/${serviceProviderId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      if (!providerProfileRes.ok) {
+        throw new Error("Failed to fetch service provider profile");
+      }
+      
+      const providerProfileData = await providerProfileRes.json();
+      const serviceProviderEmail = (providerProfileData as any).email || (providerProfileData as any).Email;
+      console.log('Service provider email:', serviceProviderEmail);
+      
+      if (!serviceProviderEmail) {
+        throw new Error("Service provider email not found");
+      }
+
+      // Use existing conversation ID or create new one
+      let conversationId = currentConversationId;
+      
+      if (!conversationId) {
+        // 1. Create/find conversation
+        const conversationRes = await fetch(`${process.env.NEXT_PUBLIC_MESSAGING_API_URL || 'http://localhost:8085'}/api/conversations`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            type: "direct",
+            name: `Service: ${service.Title || service.title}`,
+            avatar: service.Author?.Avatar || service.author?.avatar || "",
+            participants: [currentUserEmail, serviceProviderEmail].sort(),
+            taskId: service.ID || service.id
+          })
+        });
+
+        if (!conversationRes.ok) {
+          throw new Error("Failed to create conversation");
+        }
+
+        const conversationData = await conversationRes.json();
+        conversationId = conversationData.$oid || conversationData;
+        setCurrentConversationId(conversationId);
+      }
+
+      // 2. Send message
+      const messageRes = await fetch(`${process.env.NEXT_PUBLIC_MESSAGING_API_URL || 'http://localhost:8085'}/api/conversations/${conversationId}/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          content: newMessage.trim(),
+          senderId: currentUserEmail,
+          senderName: profileData.name || profileData.Name || "User",
+          senderAvatar: profileData.avatar || profileData.Avatar || "",
+          type: "text"
+        })
+      });
+
+      if (!messageRes.ok) {
+        throw new Error("Failed to send message");
+      }
+
+      // Add user message to chat UI
+      const userMessage = {
+        id: Date.now().toString(),
+        sender: 'user' as const,
+        message: newMessage.trim(),
+        timestamp: new Date(),
+      };
+
+      setChatMessages(prev => [...prev, userMessage]);
+      setNewMessage('');
+      
+      // Refresh conversation history to get the latest messages
+      setTimeout(() => {
+        fetchConversationHistory();
+      }, 500);
+
+    } catch (error) {
+      console.error('Error sending chat message:', error);
+    } finally {
+      setSendingChatMessage(false);
+    }
+  };
+
   if (loading) {
     return (
       <main className="min-h-screen bg-gray-50">
@@ -539,13 +767,21 @@ export default function ServiceViewPage() {
                 reviews.map((review) => (
                   <div key={review.id || review._id} className="border-b border-gray-100 pb-6 mb-6 last:border-b-0">
                     <div className="flex items-start space-x-4">
-                      <Image
-                        src={review.reviewer?.avatar || '/api/placeholder/40/40'}
-                        alt={review.reviewer?.name || 'Reviewer'}
-                        width={40}
-                        height={40}
-                        className="rounded-full"
-                      />
+                      {review.reviewer?.avatar ? (
+                        <Image
+                          src={review.reviewer.avatar}
+                          alt={review.reviewer?.name || 'Reviewer'}
+                          width={40}
+                          height={40}
+                          className="rounded-full"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                          <span className="text-gray-600 text-sm font-medium">
+                            {review.reviewer?.name?.charAt(0)?.toUpperCase() || 'A'}
+                          </span>
+                        </div>
+                      )}
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-2">
                           <span className="font-semibold text-gray-900">{review.reviewer?.name || 'Anonymous'}</span>
@@ -682,20 +918,7 @@ export default function ServiceViewPage() {
                           return 'Book this service';
                         })()}
                       </button>
-                      <button
-                        onClick={() => {
-                          if (token) {
-                            // Show message dialog
-                            setIsMessageModalOpen(true);
-                          } else {
-                            // Show login modal
-                            setIsAuthModalOpen(true);
-                          }
-                        }}
-                        className="w-full border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-                      >
-                        Contact me
-                      </button>
+
                     </>
                   )}
                 </div>
@@ -704,13 +927,21 @@ export default function ServiceViewPage() {
                 {!isOwnService() && (
                   <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-3 mb-3">
-                      <Image
-                        src={avatar || '/api/placeholder/40/40'}
-                        alt={serviceProvider}
-                        width={40}
-                        height={40}
-                        className="rounded-full"
-                      />
+                      {avatar ? (
+                        <Image
+                          src={avatar}
+                          alt={serviceProvider}
+                          width={40}
+                          height={40}
+                          className="rounded-full"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                          <span className="text-gray-600 text-sm font-medium">
+                            {serviceProvider?.charAt(0)?.toUpperCase() || 'U'}
+                          </span>
+                        </div>
+                      )}
                       <div>
                         <h4 className="font-medium text-gray-900">About {serviceProvider}</h4>
                         <div className="flex items-center space-x-2 mt-1">
@@ -744,12 +975,11 @@ export default function ServiceViewPage() {
         <div className="fixed bottom-6 right-6">
           <div 
             className="bg-white rounded-full shadow-lg p-4 cursor-pointer hover:shadow-xl transition-shadow"
-            onClick={() => {
+            onClick={async () => {
               if (token) {
-                // Open chat box - you can implement this functionality
-                console.log('Opening chat with', serviceProvider);
-                // For now, just show an alert
-                alert('Chat functionality coming soon!');
+                // Open chat box and fetch conversation history
+                setIsChatBoxOpen(true);
+                await fetchConversationHistory();
               } else {
                 // Show login modal
                 setIsAuthModalOpen(true);
@@ -757,13 +987,21 @@ export default function ServiceViewPage() {
             }}
           >
             <div className="flex items-center space-x-3">
-              <Image
-                src={avatar || '/api/placeholder/40/40'}
-                alt={serviceProvider}
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
+              {avatar ? (
+                <Image
+                  src={avatar}
+                  alt={serviceProvider}
+                  width={40}
+                  height={40}
+                  className="rounded-full"
+                />
+              ) : (
+                <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                  <span className="text-gray-600 text-sm font-medium">
+                    {serviceProvider?.charAt(0)?.toUpperCase() || 'U'}
+                  </span>
+                </div>
+              )}
               <div className="text-sm">
                 <p className="font-medium text-gray-900">Message {serviceProvider}</p>
                 <p className="text-gray-500">Click to chat</p>
@@ -828,30 +1066,229 @@ export default function ServiceViewPage() {
               </button>
               <button
                 onClick={async () => {
-                  if (!messageText.trim()) return;
+                  if (!messageText.trim() || !token || !service) return;
                   
                   setSendingMessage(true);
                   try {
-                    // Here you would implement the actual message sending logic
-                    console.log('Sending message:', messageText);
-                    // Simulate API call
-                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    console.log('=== CONTACT ME MESSAGE DEBUG ===');
+                    console.log('Service:', service);
+                    console.log('Token:', token ? 'Present' : 'Missing');
+                    console.log('Message:', messageText.trim());
+
+                    // Get current user profile
+                    const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8080'}/api/auth/profile`, {
+                      headers: { Authorization: `Bearer ${token}` },
+                    });
                     
-                    // Show success message
-                    alert('Message sent successfully!');
+                    if (!profileRes.ok) {
+                      throw new Error("Failed to fetch user profile");
+                    }
+                    
+                    const profileData = await profileRes.json();
+                    console.log('Profile data:', profileData);
+                    
+                    const currentUserId = profileData.ID || profileData.id;
+                    const currentUserEmail = (profileData as any).email || (profileData as any).Email;
+                    
+                    console.log('Current user ID:', currentUserId);
+                    console.log('Current user email:', currentUserEmail);
+                    
+                    if (!currentUserId) {
+                      throw new Error("User ID not found");
+                    }
+
+                    // Get service provider email - we need to fetch the provider's profile
+                    const serviceProviderId = service.Author?.ID || service.Author?.id || service.author?.id;
+                    console.log('Service provider ID:', serviceProviderId);
+                    console.log('Service Author:', service.Author);
+                    console.log('Service author:', service.author);
+                    
+                    if (!serviceProviderId) {
+                      throw new Error("Service provider ID not found");
+                    }
+
+                    // Fetch service provider's profile to get their email
+                    const providerProfileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8080'}/api/auth/user/${serviceProviderId}`, {
+                      headers: { Authorization: `Bearer ${token}` },
+                    });
+                    
+                    if (!providerProfileRes.ok) {
+                      throw new Error("Failed to fetch service provider profile");
+                    }
+                    
+                    const providerProfileData = await providerProfileRes.json();
+                    const serviceProviderEmail = (providerProfileData as any).email || (providerProfileData as any).Email;
+                    console.log('Service provider email:', serviceProviderEmail);
+                    
+                    if (!serviceProviderEmail) {
+                      throw new Error("Service provider email not found");
+                    }
+
+                    // 1. Create/find conversation
+                    const conversationRes = await fetch(`${process.env.NEXT_PUBLIC_MESSAGING_API_URL || 'http://localhost:8085'}/api/conversations`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                      },
+                      body: JSON.stringify({
+                        type: "direct",
+                        name: `Service: ${service.Title || service.title}`,
+                        avatar: service.Author?.Avatar || service.author?.avatar || "",
+                        participants: [currentUserEmail, serviceProviderEmail].sort(),
+                        taskId: service.ID || service.id
+                      })
+                    });
+
+                    if (!conversationRes.ok) {
+                      throw new Error("Failed to create conversation");
+                    }
+
+                    const conversationData = await conversationRes.json();
+                    const conversationId = conversationData.$oid || conversationData;
+
+                    // 2. Send message
+                    const messageRes = await fetch(`${process.env.NEXT_PUBLIC_MESSAGING_API_URL || 'http://localhost:8085'}/api/conversations/${conversationId}/messages`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                      },
+                      body: JSON.stringify({
+                        content: messageText.trim(),
+                        senderId: currentUserEmail,
+                        senderName: profileData.name || profileData.Name || "User",
+                        senderAvatar: profileData.avatar || profileData.Avatar || "",
+                        type: "text"
+                      })
+                    });
+
+                    if (!messageRes.ok) {
+                      throw new Error("Failed to send message");
+                    }
+
+                    // Close modal and clear message
                     setIsMessageModalOpen(false);
                     setMessageText('');
+                    
                   } catch (error) {
-                    alert('Failed to send message. Please try again.');
+                    console.error('Error sending message:', error);
+                    // Don't show alert, just log the error
                   } finally {
                     setSendingMessage(false);
                   }
                 }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                 disabled={sendingMessage || !messageText.trim()}
               >
                 {sendingMessage ? 'Sending...' : 'Send Message'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Chat Box */}
+      {isChatBoxOpen && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <div className="bg-white rounded-xl shadow-2xl border border-gray-200 w-80 h-96 flex flex-col overflow-hidden">
+            {/* Chat Header */}
+            <div className="bg-gradient-to-r from-green-500 to-green-600 px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                {avatar ? (
+                  <Image
+                    src={avatar}
+                    alt={serviceProvider}
+                    width={36}
+                    height={36}
+                    className="rounded-full border-2 border-white"
+                  />
+                ) : (
+                  <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center border-2 border-white">
+                    <span className="text-white text-sm font-medium">
+                      {serviceProvider?.charAt(0)?.toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                )}
+                <div>
+                  <h4 className="font-semibold text-white text-sm">{serviceProvider}</h4>
+                  <div className="flex items-center space-x-1">
+                    <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></div>
+                    <p className="text-green-100 text-xs">Available now</p>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsChatBoxOpen(false)}
+                className="text-white/80 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10"
+              >
+                <FaTimes className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Chat Messages */}
+            <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50" id="chat-messages">
+              {chatMessages.length === 0 ? (
+                <div className="text-center text-gray-500 py-8">
+                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <FaEnvelope className="w-6 h-6 text-gray-400" />
+                  </div>
+                  <p className="font-medium text-gray-700 mb-1">Start a conversation</p>
+                  <p className="text-sm">Ask {serviceProvider} about their service</p>
+                </div>
+              ) : (
+                chatMessages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-xs px-4 py-3 rounded-2xl text-sm shadow-sm ${
+                        message.sender === 'user'
+                          ? 'bg-green-500 text-white'
+                          : 'bg-white text-gray-900 border border-gray-200'
+                      }`}
+                    >
+                      <p className="leading-relaxed">{message.message}</p>
+                      <p className={`text-xs mt-2 ${
+                        message.sender === 'user' ? 'text-green-100' : 'text-gray-400'
+                      }`}>
+                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Chat Input */}
+            <div className="p-4 bg-white border-t border-gray-200">
+              <div className="flex space-x-3">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && newMessage.trim()) {
+                      handleSendChatMessage();
+                    }
+                  }}
+                  placeholder="Type your message..."
+                  className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                  disabled={sendingChatMessage}
+                />
+                <button
+                  onClick={handleSendChatMessage}
+                  disabled={!newMessage.trim() || sendingChatMessage}
+                  className="bg-green-500 text-white px-4 py-3 rounded-xl text-sm font-medium hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[60px]"
+                >
+                  {sendingChatMessage ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    'Send'
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
