@@ -144,7 +144,16 @@ export default function UserProfilePage() {
       
       // Fetch user's tasks to calculate completed tasks
       try {
-        const tasksRes = await fetch(`${TASK_API_BASE}/api/tasks/get/user/${userId}`);
+        // Add timeout to prevent hanging
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        
+        const tasksRes = await fetch(`${TASK_API_BASE}/api/tasks/get/user/${userId}`, {
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
         if (tasksRes.ok) {
           const tasksData = await tasksRes.json();
           const tasks = tasksData.data || tasksData || [];
@@ -156,11 +165,22 @@ export default function UserProfilePage() {
         }
       } catch (taskErr) {
         console.error("Error fetching tasks for profile stats:", taskErr);
+        // Ensure we have fallback values
+        tasksCompleted = 0;
       }
       
       // Fetch reviews to calculate average rating
       try {
-        const reviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`);
+        // Add timeout to prevent hanging
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        
+        const reviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`, {
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
         if (reviewsRes.ok) {
           const reviewsData = await reviewsRes.json();
           const reviews = Array.isArray(reviewsData) ? reviewsData : (reviewsData.data || []);
@@ -175,6 +195,9 @@ export default function UserProfilePage() {
         }
       } catch (reviewErr) {
         console.error("Error fetching reviews for profile stats:", reviewErr);
+        // Ensure we have fallback values
+        totalRating = 0;
+        reviewCount = 0;
       }
       
       const averageRating = reviewCount > 0 ? totalRating / reviewCount : 0;
@@ -213,7 +236,16 @@ export default function UserProfilePage() {
       
       // Fetch user's tasks with error handling
       try {
-        const tasksRes = await fetch(`${TASK_API_BASE}/api/tasks/get/user/${userId}`);
+        // Add timeout to prevent hanging
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        
+        const tasksRes = await fetch(`${TASK_API_BASE}/api/tasks/get/user/${userId}`, {
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
         if (tasksRes.ok) {
           const tasksData = await tasksRes.json();
           const tasks = tasksData.data || tasksData || [];
@@ -227,11 +259,23 @@ export default function UserProfilePage() {
         }
       } catch (taskErr) {
         console.error("Error fetching tasks for stats:", taskErr);
+        // Ensure we have fallback values
+        totalTasks = 0;
+        respondedTasks = 0;
       }
       
       // Fetch reviews with error handling
       try {
-        const reviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`);
+        // Add timeout to prevent hanging
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        
+        const reviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`, {
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
         if (reviewsRes.ok) {
           const reviewsData = await reviewsRes.json();
           const reviews = Array.isArray(reviewsData) ? reviewsData : (reviewsData.data || []);
@@ -245,7 +289,16 @@ export default function UserProfilePage() {
       
       // Fetch user creation date with error handling
       try {
-        const userRes = await fetch(`${AUTH_API_BASE}/api/auth/user/${userId}`);
+        // Add timeout to prevent hanging
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        
+        const userRes = await fetch(`${AUTH_API_BASE}/api/auth/user/${userId}`, {
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
         if (userRes.ok) {
           const userData = await userRes.json();
           if (userData.createdAt) {
@@ -290,7 +343,16 @@ export default function UserProfilePage() {
       
       // Fetch reviews for this user with error handling
       try {
-        const reviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`);
+        // Add timeout to prevent hanging
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        
+        const reviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`, {
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
         if (reviewsRes.ok) {
           const reviewsData = await reviewsRes.json();
           const reviews = Array.isArray(reviewsData) ? reviewsData : (reviewsData.data || []);
@@ -298,7 +360,15 @@ export default function UserProfilePage() {
           // Fetch reviewer names and profile pictures
           for (const review of reviews) {
             try {
-              const reviewerRes = await fetch(`${AUTH_API_BASE}/api/auth/user/${review.reviewerId}`);
+              const reviewerController = new AbortController();
+              const reviewerTimeoutId = setTimeout(() => reviewerController.abort(), 3000); // 3 second timeout
+              
+              const reviewerRes = await fetch(`${AUTH_API_BASE}/api/auth/user/${review.reviewerId}`, {
+                signal: reviewerController.signal
+              });
+              
+              clearTimeout(reviewerTimeoutId);
+              
               if (reviewerRes.ok) {
                 const reviewerData = await reviewerRes.json();
                 review.reviewerName = reviewerData.Name || reviewerData.name || 'Unknown User';
