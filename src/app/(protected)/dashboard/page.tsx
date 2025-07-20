@@ -253,6 +253,10 @@ export default function ProfileDashboardPage() {
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [isLive, setIsLive] = useState(true);
 
+  // Recent Activity state
+  const [activities, setActivities] = useState<any[]>([]);
+  const [activitiesLoading, setActivitiesLoading] = useState(true);
+
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     setIsDarkMode(savedTheme === "dark");
@@ -623,6 +627,31 @@ export default function ProfileDashboardPage() {
     };
   }, [router, isLive]);
 
+  // Fetch recent activities for the user
+  useEffect(() => {
+    const fetchActivities = async () => {
+      setActivitiesLoading(true);
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8080'}/api/auth/activity/recent`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          }
+        );
+        if (!res.ok) throw new Error('Failed to fetch activities');
+        const data = await res.json();
+        setActivities(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setActivities([]);
+      } finally {
+        setActivitiesLoading(false);
+      }
+    };
+    fetchActivities();
+  }, []);
+
   useEffect(() => {
     const root = document.documentElement;
     if (isDarkMode) {
@@ -718,44 +747,44 @@ export default function ProfileDashboardPage() {
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+                <div className="bg-[#FAF6ED] rounded-xl p-6 text-gray-900">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm opacity-90">Monthly Earnings</span>
-                    <FaDollarSign className="w-5 h-5" />
+                    <span className="text-sm text-gray-600">Monthly Earnings</span>
+                    <FaDollarSign className="w-5 h-5 text-emerald-700" />
                   </div>
-                  <div className="text-3xl font-bold">${profile?.totalEarnings || serviceStats.earnings || 0}</div>
-                  <div className="text-sm opacity-90">
+                  <div className="text-3xl font-bold text-gray-900">${profile?.totalEarnings || serviceStats.earnings || 0}</div>
+                  <div className="text-sm text-gray-600">
                     {profile?.totalEarnings && profile.totalEarnings > 0 ? '+12% from last month' : 'Start earning today'}
                   </div>
                 </div>
                 
-                <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
+                <div className="bg-[#FAF6ED] rounded-xl p-6 text-gray-900">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm opacity-90">Services Completed</span>
-                    <FaCheck className="w-5 h-5" />
+                    <span className="text-sm text-gray-600">Services Completed</span>
+                    <FaCheck className="w-5 h-5 text-emerald-700" />
                   </div>
-                  <div className="text-3xl font-bold">{profile?.completedServices || serviceStats.total || 0}</div>
-                  <div className="text-sm opacity-90">This month</div>
+                  <div className="text-3xl font-bold text-gray-900">{profile?.completedServices || serviceStats.total || 0}</div>
+                  <div className="text-sm text-gray-600">This month</div>
                 </div>
                 
-                <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
+                <div className="bg-[#FAF6ED] rounded-xl p-6 text-gray-900">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm opacity-90">Average Rating</span>
-                    <FaStar className="w-5 h-5" />
+                    <span className="text-sm text-gray-600">Average Rating</span>
+                    <FaStar className="w-5 h-5 text-emerald-700" />
                   </div>
-                  <div className="text-3xl font-bold">{profile?.rating || marketplaceStats.averageRating}</div>
-                  <div className="text-sm opacity-90">
+                  <div className="text-3xl font-bold text-gray-900">{profile?.rating || marketplaceStats.averageRating}</div>
+                  <div className="text-sm text-gray-600">
                     {profile?.rating ? `${Math.floor(Math.random() * 50) + 10} reviews` : 'No reviews yet'}
                   </div>
                 </div>
                 
-                <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
+                <div className="bg-[#FAF6ED] rounded-xl p-6 text-gray-900">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm opacity-90">Active Bookings</span>
-                    <FaCalendar className="w-5 h-5" />
+                    <span className="text-sm text-gray-600">Active Bookings</span>
+                    <FaCalendar className="w-5 h-5 text-emerald-700" />
                   </div>
-                  <div className="text-3xl font-bold">{upcomingAppointments.length || upcomingBookings.length || 0}</div>
-                  <div className="text-sm opacity-90">Upcoming</div>
+                  <div className="text-3xl font-bold text-gray-900">{upcomingAppointments.length || upcomingBookings.length || 0}</div>
+                  <div className="text-sm text-gray-600">Upcoming</div>
                 </div>
               </div>
             </div>
@@ -764,8 +793,8 @@ export default function ProfileDashboardPage() {
             <div className="mb-8">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <button className="flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors">
-                  <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                <button className="flex items-center gap-3 p-4 bg-[#FAF6ED] hover:bg-[#F5F0E0] rounded-xl transition-colors">
+                  <div className="w-10 h-10 bg-emerald-700 rounded-lg flex items-center justify-center">
                     <FaPlus className="w-5 h-5 text-white" />
                   </div>
                   <div className="text-left">
@@ -774,8 +803,8 @@ export default function ProfileDashboardPage() {
                   </div>
                 </button>
                 
-                <button className="flex items-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-xl transition-colors">
-                  <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                <button className="flex items-center gap-3 p-4 bg-[#FAF6ED] hover:bg-[#F5F0E0] rounded-xl transition-colors">
+                  <div className="w-10 h-10 bg-emerald-700 rounded-lg flex items-center justify-center">
                     <FaCalendar className="w-5 h-5 text-white" />
                   </div>
                   <div className="text-left">
@@ -784,8 +813,8 @@ export default function ProfileDashboardPage() {
                   </div>
                 </button>
                 
-                <button className="flex items-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-xl transition-colors">
-                  <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                <button className="flex items-center gap-3 p-4 bg-[#FAF6ED] hover:bg-[#F5F0E0] rounded-xl transition-colors">
+                  <div className="w-10 h-10 bg-emerald-700 rounded-lg flex items-center justify-center">
                     <FaEnvelope className="w-5 h-5 text-white" />
                   </div>
                   <div className="text-left">
@@ -794,8 +823,8 @@ export default function ProfileDashboardPage() {
                   </div>
                 </button>
                 
-                <button className="flex items-center gap-3 p-4 bg-orange-50 hover:bg-orange-100 rounded-xl transition-colors">
-                  <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+                <button className="flex items-center gap-3 p-4 bg-[#FAF6ED] hover:bg-[#F5F0E0] rounded-xl transition-colors">
+                  <div className="w-10 h-10 bg-emerald-700 rounded-lg flex items-center justify-center">
                     <FaStar className="w-5 h-5 text-white" />
                   </div>
                   <div className="text-left">
@@ -897,16 +926,16 @@ export default function ProfileDashboardPage() {
                 ) : (
                   // No services message
                   <div className="col-span-full">
-                    <div className="bg-white rounded-xl shadow-sm p-8 text-center">
+                    <div className="bg-[#FAF6ED] rounded-xl p-8 text-center">
                       <div className="flex justify-center mb-4">
-                        <FaClipboardList className="w-16 h-16 text-gray-400" />
+                        <FaClipboardList className="w-16 h-16 text-emerald-700" />
                       </div>
                       <h4 className="text-lg font-semibold text-gray-900 mb-2">No services yet</h4>
                       <p className="text-gray-600 mb-4">You haven't created any service listings yet.</p>
                       <div className="flex justify-center">
                         <button
                           onClick={() => router.push('/tasks/explore')}
-                          className="bg-black text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-800 hover:shadow-lg transition-all flex items-center gap-2"
+                          className="bg-emerald-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-emerald-800 hover:shadow-lg transition-all flex items-center gap-2"
                         >
                           <FaPlus className="text-lg" />
                           Create Your First Service
@@ -919,7 +948,7 @@ export default function ProfileDashboardPage() {
             </div>
 
       
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Bookings</h3>
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -1100,49 +1129,33 @@ export default function ProfileDashboardPage() {
 
 
 
-          {/* Recent Activity Section */}
+          {/* Recent Activity Section (dynamic) */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
               <FaClock className="w-4 h-4 text-gray-400" />
             </div>
-            
             <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">Service completed</p>
-                  <p className="text-xs text-gray-600">Web Development for John Smith</p>
-                  <p className="text-xs text-gray-500">2 hours ago</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">New booking</p>
-                  <p className="text-xs text-gray-600">Logo Design from Lisa Brown</p>
-                  <p className="text-xs text-gray-500">5 hours ago</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">Review received</p>
-                  <p className="text-xs text-gray-600">5-star rating for Content Writing</p>
-                  <p className="text-xs text-gray-500">1 day ago</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 bg-orange-500 rounded-full mt-2"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">Payment received</p>
-                  <p className="text-xs text-gray-600">$150 for Web Development</p>
-                  <p className="text-xs text-gray-500">2 days ago</p>
-                </div>
-              </div>
+              {activitiesLoading ? (
+                <div className="text-gray-400">Loading...</div>
+              ) : activities.length === 0 ? (
+                <div className="text-gray-400">No recent activity.</div>
+              ) : (
+                activities.map((activity, idx) => (
+                  <div key={idx} className="flex items-start gap-3">
+                    <div className={`w-2 h-2 rounded-full mt-2 ${
+                      activity.type === 'service_completed' ? 'bg-green-500' :
+                      activity.type === 'booking' ? 'bg-blue-500' :
+                      activity.type === 'review' ? 'bg-purple-500' : 'bg-gray-400'
+                    }`}></div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">{activity.type.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}</p>
+                      <p className="text-xs text-gray-600">{activity.description}</p>
+                      <p className="text-xs text-gray-500">{new Date(activity.timestamp).toLocaleString()}</p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 

@@ -104,7 +104,7 @@ export default function UserProfilePage() {
       clearTimeout(timeoutId);
       return response;
     } catch (error) {
-      console.error(`Safe fetch error for ${url}:`, error);
+      console.warn(`Safe fetch warning for ${url}:`, error);
       return null;
     }
   };
@@ -188,32 +188,19 @@ export default function UserProfilePage() {
       }
       
       // Fetch reviews to calculate average rating
-      try {
-        // Add timeout to prevent hanging
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-        
-        const reviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`, {
-          signal: controller.signal
+      const reviewsRes = await safeFetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`);
+      if (reviewsRes && reviewsRes.ok) {
+        const reviewsData = await reviewsRes.json();
+        const reviews = Array.isArray(reviewsData) ? reviewsData : (reviewsData.data || []);
+        reviews.forEach((review: any) => {
+          const rating = review.rating || review.Rating || 0;
+          if (rating > 0) {
+            totalRating += rating;
+            reviewCount++;
+          }
         });
-        
-        clearTimeout(timeoutId);
-        
-        if (reviewsRes.ok) {
-          const reviewsData = await reviewsRes.json();
-          const reviews = Array.isArray(reviewsData) ? reviewsData : (reviewsData.data || []);
-          
-          reviews.forEach((review: any) => {
-            const rating = review.rating || review.Rating || 0;
-            if (rating > 0) {
-              totalRating += rating;
-              reviewCount++;
-            }
-          });
-        }
-      } catch (reviewErr) {
-        console.error("Error fetching reviews for profile stats:", reviewErr);
-        // Ensure we have fallback values
+      } else {
+        console.warn("Warning: Could not fetch reviews for profile stats, using 0 as fallback.");
         totalRating = 0;
         reviewCount = 0;
       }
@@ -283,25 +270,13 @@ export default function UserProfilePage() {
       }
       
       // Fetch reviews with error handling
-      try {
-        // Add timeout to prevent hanging
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-        
-        const reviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`, {
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (reviewsRes.ok) {
-          const reviewsData = await reviewsRes.json();
-          const reviews = Array.isArray(reviewsData) ? reviewsData : (reviewsData.data || []);
-          totalReviews = reviews.length;
-        }
-      } catch (reviewErr) {
-        console.error("Error fetching reviews for stats:", reviewErr);
-        // Set default values if review API fails
+      const reviewsRes = await safeFetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`);
+      if (reviewsRes && reviewsRes.ok) {
+        const reviewsData = await reviewsRes.json();
+        const reviews = Array.isArray(reviewsData) ? reviewsData : (reviewsData.data || []);
+        totalReviews = reviews.length;
+      } else {
+        console.warn("Warning: Could not fetch reviews for stats, using 0 as fallback.");
         totalReviews = 0;
       }
       
@@ -606,103 +581,113 @@ export default function UserProfilePage() {
 
         <div className="flex flex-col md:flex-row gap-6">
           {/* Left: Profile Card */}
-          <div className="w-full md:w-1/4 bg-white rounded-xl shadow-sm overflow-hidden p-6 flex flex-col gap-6">
-            <div className="flex flex-col items-center gap-4">
+          <div className="w-full md:w-1/4 bg-white rounded-xl shadow-sm overflow-hidden p-4 flex flex-col gap-4">
+            <div className="flex flex-col items-center gap-2">
               <div className="relative">
-                <Image 
-                  src={profile.ProfilePictureURL || "/categories-banner.png"} 
-                  alt="User" 
-                  width={96} 
-                  height={96} 
-                  className="rounded-full border-4 border-white shadow-lg object-cover w-24 h-24" 
-                />
+                {(() => {
+                  // Robustly check both fields
+                  const pic = (profile.ProfilePictureURL && profile.ProfilePictureURL.trim() !== '')
+                    ? profile.ProfilePictureURL
+                    : ((profile as any).profilePictureURL && typeof (profile as any).profilePictureURL === 'string' && (profile as any).profilePictureURL.trim() !== '')
+                      ? (profile as any).profilePictureURL
+                      : "/categories-banner.png";
+                  console.log('User profile picture used:', pic);
+                  return (
+                    <Image
+                      src={pic}
+                      alt="User"
+                      width={80}
+                      height={80}
+                      className="rounded-full border-4 border-white shadow-lg object-cover w-20 h-20"
+                    />
+                  );
+                })()}
               </div>
               <div className="text-center">
-                <h2 className="text-xl font-bold text-gray-900">{profile.Name || 'TradeMinutes User'}</h2>
-                <p className="text-sm text-gray-500">Marketplace Member</p>
-              </div>
-            </div>
-
-            {/* Profile Stats */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg text-white">
-                <div className="flex items-center gap-3">
-                  <FiDollarSign className="w-5 h-5" />
-                  <div>
-                    <p className="text-sm opacity-90">Credits</p>
-                    {profileStatsLoading ? (
-                      <div className="animate-pulse bg-white/20 h-6 w-12 rounded"></div>
-                    ) : (
-                      <p className="text-xl font-bold">{profileStats.credits}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-lg text-white">
-                <div className="flex items-center gap-3">
-                  <FiCheck className="w-5 h-5" />
-                  <div>
-                    <p className="text-sm opacity-90">Tasks Completed</p>
-                    {profileStatsLoading ? (
-                      <div className="animate-pulse bg-white/20 h-6 w-12 rounded"></div>
-                    ) : (
-                      <p className="text-xl font-bold">{profileStats.tasksCompleted}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg text-white">
-                <div className="flex items-center gap-3">
-                  <FiStar className="w-5 h-5" />
-                  <div>
-                    <p className="text-sm opacity-90">Rating</p>
-                    {profileStatsLoading ? (
-                      <div className="animate-pulse bg-white/20 h-6 w-12 rounded"></div>
-                    ) : (
-                      <p className="text-xl font-bold">{profileStats.rating > 0 ? `${profileStats.rating}/5` : 'No ratings'}</p>
-                    )}
-                  </div>
-                </div>
+                <h2 className="text-lg font-bold text-gray-900">{profile.Name || 'TradeMinutes User'}</h2>
+                <p className="text-xs text-gray-500">Marketplace Member</p>
               </div>
             </div>
 
             {/* Profile Info */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
                 <FiMail className="w-4 h-4 text-gray-500" />
                 <div>
                   <p className="text-xs text-gray-500">Email</p>
-                  <p className="text-sm font-medium text-gray-900">{profile.Email}</p>
+                  <p className="text-xs font-medium text-gray-900">{profile.Email}</p>
                 </div>
               </div>
-              
               {profile.College && (
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
                   <FiAward className="w-4 h-4 text-gray-500" />
                   <div>
                     <p className="text-xs text-gray-500">College</p>
-                    <p className="text-sm font-medium text-gray-900">{profile.College}</p>
+                    <p className="text-xs font-medium text-gray-900">{profile.College}</p>
                   </div>
                 </div>
               )}
-              
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
                 <FiUser className="w-4 h-4 text-gray-500" />
                 <div className="flex-1">
                   <p className="text-xs text-gray-500">Program</p>
-                  <p className="text-sm font-medium text-gray-900">{editData.program || 'Not specified'}</p>
+                  <p className="text-xs font-medium text-gray-900">{editData.program || 'Not specified'}</p>
                 </div>
               </div>
-              
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
                 <FaClock className="w-4 h-4 text-gray-500" />
                 <div className="flex-1">
                   <p className="text-xs text-gray-500">Year of Study</p>
-                  <p className="text-sm font-medium text-gray-900">{editData.yearOfStudy || 'Not specified'}</p>
+                  <p className="text-xs font-medium text-gray-900">{editData.yearOfStudy || 'Not specified'}</p>
                 </div>
               </div>
+            </div>
+
+            {/* Quick Stats (moved from right column) */}
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden p-4 mt-2">
+              <h3 className="text-base font-bold mb-3 text-gray-900 flex items-center gap-2">
+                <FiTrendingUp className="w-5 h-5 text-gray-600" />
+                Quick Stats
+              </h3>
+              {statsLoading ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">Total Reviews</span>
+                    <div className="animate-pulse bg-gray-200 h-4 w-8 rounded"></div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">Response Rate</span>
+                    <div className="animate-pulse bg-gray-200 h-4 w-8 rounded"></div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">Avg. Response Time</span>
+                    <div className="animate-pulse bg-gray-200 h-4 w-8 rounded"></div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">Member Since</span>
+                    <div className="animate-pulse bg-gray-200 h-4 w-8 rounded"></div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">Total Reviews</span>
+                    <span className="font-semibold text-gray-900 text-xs">{stats.totalReviews}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">Response Rate</span>
+                    <span className="font-semibold text-gray-900 text-xs">{stats.responseRate}%</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">Avg. Response Time</span>
+                    <span className="font-semibold text-gray-900 text-xs">{stats.avgResponseTime}h</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">Member Since</span>
+                    <span className="font-semibold text-gray-900 text-xs">{stats.memberSince}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -934,53 +919,6 @@ export default function UserProfilePage() {
                   })
                 )}
               </div>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden p-6">
-              <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">
-                <FiTrendingUp className="w-5 h-5 text-gray-600" />
-                Quick Stats
-              </h3>
-              {statsLoading ? (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Total Reviews</span>
-                    <div className="animate-pulse bg-gray-200 h-4 w-8 rounded"></div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Response Rate</span>
-                    <div className="animate-pulse bg-gray-200 h-4 w-8 rounded"></div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Avg. Response Time</span>
-                    <div className="animate-pulse bg-gray-200 h-4 w-8 rounded"></div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Member Since</span>
-                    <div className="animate-pulse bg-gray-200 h-4 w-8 rounded"></div>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Total Reviews</span>
-                    <span className="font-semibold text-gray-900">{stats.totalReviews}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Response Rate</span>
-                    <span className="font-semibold text-gray-900">{stats.responseRate}%</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Avg. Response Time</span>
-                    <span className="font-semibold text-gray-900">{stats.avgResponseTime}h</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Member Since</span>
-                    <span className="font-semibold text-gray-900">{stats.memberSince}</span>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>

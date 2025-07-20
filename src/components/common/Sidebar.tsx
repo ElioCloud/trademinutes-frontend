@@ -186,57 +186,12 @@ export default function Sidebar() {
                 icon={<FiHome size={22} />}
               />
               <SidebarButton
-                href="/tasks/explore"
-                label="Explore Services"
-                pathname={pathname}
-                icon={<FiSearch size={22} />}
-              />
-              <SidebarButton
                 href="/tasks/list"
                 label="My Listings"
                 pathname={pathname}
                 icon={<FiList size={22} />}
               />
-
-            </div>
-          </div>
-
-          {/* Business Section */}
-          <div className="mb-4">
-            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-4">Business</h4>
-            <div className="flex flex-col gap-2">
-              <SidebarButton
-                href="/earnings"
-                label="Earnings Dashboard"
-                pathname={pathname}
-                icon={<FiDollarSign size={22} />}
-              />
-              <SidebarButton
-                href="/analytics"
-                label="Service Analytics"
-                pathname={pathname}
-                icon={<FiTrendingUp size={22} />}
-              />
-              <SidebarButton
-                href="/reviews"
-                label="My Reviews"
-                pathname={pathname}
-                icon={<FiAward size={22} />}
-              />
-              <SidebarButton
-                href="/clients"
-                label="Client Directory"
-                pathname={pathname}
-                icon={<FiUsers size={22} />}
-              />
-            </div>
-          </div>
-
-          {/* Communication Section */}
-          <div className="mb-4">
-            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-4">Communication</h4>
-            <div className="flex flex-col gap-2">
-              {/* Collapsible Appointments Menu */}
+              {/* Collapsible My Bookings Menu */}
               <div>
                 <button
                   className={`flex items-center gap-3 w-full py-2 px-4 rounded-full font-medium transition-colors text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 bg-white/80 ${pathname.startsWith('/appointments') ? 'font-bold' : ''}`}
@@ -265,6 +220,51 @@ export default function Sidebar() {
                   </div>
                 )}
               </div>
+
+            </div>
+          </div>
+
+          {/* Business Section */}
+          <div className="mb-4">
+            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-4">Business</h4>
+            <div className="flex flex-col gap-2">
+              <SidebarButton
+                href="/earnings"
+                label="Earnings Dashboard"
+                pathname={pathname}
+                icon={<FiDollarSign size={22} />}
+              />
+              <SidebarButton
+                href="/service-analytics"
+                label="Service Analytics"
+                pathname={pathname}
+                icon={<FiTrendingUp size={22} />}
+              />
+              <SidebarButton
+                href="/reviews"
+                label="My Reviews"
+                pathname={pathname}
+                icon={<FiAward size={22} />}
+              />
+              <SidebarButton
+                href="/clients"
+                label="Client Directory"
+                pathname={pathname}
+                icon={<FiUsers size={22} />}
+              />
+              <SidebarButton
+                href="/credits"
+                label="Credits"
+                pathname={pathname}
+                icon={<FiDollarSign size={22} />}
+              />
+            </div>
+          </div>
+
+          {/* Communication Section */}
+          <div className="mb-4">
+            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-4">Communication</h4>
+            <div className="flex flex-col gap-2">
               <SidebarButton
                 href="/messages"
                 label="Messages"
@@ -358,7 +358,7 @@ function SidebarButton({
       href={href}
       className={`flex items-center gap-3 w-full py-2 px-4 rounded-full font-medium transition-colors text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 ${
         isActive
-          ? "bg-emerald-500 text-white shadow-md"
+          ? "bg-emerald-700 text-white shadow-md"
           : "bg-white/80"
       }`}
       style={{ minHeight: 44 }}
