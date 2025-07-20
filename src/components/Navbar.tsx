@@ -81,7 +81,6 @@ export default function Navbar() {
                 <span className="text-sm font-medium text-green-600">{credits || 0}</span>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">Hi,</span>
                 <span className="text-sm font-medium text-gray-900">{userName}</span>
               </div>
               <Link href="/dashboard">
@@ -123,7 +122,6 @@ export default function Navbar() {
                 <span className="font-medium text-green-600">{credits || 0}</span>
               </div>
               <div className="flex items-center justify-between py-2">
-                <span className="text-gray-600">Hi,</span>
                 <span className="font-medium text-gray-900">{userName}</span>
               </div>
               <Link href="/dashboard">
