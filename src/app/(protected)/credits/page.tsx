@@ -484,6 +484,67 @@ export default function CreditsPage() {
     }
   };
 
+  // Export credit transactions to CSV
+  const exportToCSV = () => {
+    if (!transactions || transactions.length === 0) {
+      alert('No transactions to export');
+      return;
+    }
+
+    try {
+      // Create CSV headers
+      const headers = [
+        'Date',
+        'Type',
+        'Amount',
+        'Description',
+        'Category',
+        'Status',
+        'Reference',
+        'Client/Service',
+        'Tags'
+      ];
+
+      // Create CSV rows
+      const csvRows = [
+        headers.join(','),
+        ...transactions.map(transaction => [
+          formatDate(transaction.date),
+          transaction.type.toUpperCase(),
+          formatCurrency(transaction.amount),
+          `"${transaction.description.replace(/"/g, '""')}"`, // Escape quotes in description
+          transaction.category,
+          transaction.status,
+          transaction.reference || '',
+          transaction.clientName || '',
+          transaction.tags.join('; ')
+        ].join(','))
+      ];
+
+      // Create CSV content
+      const csvContent = csvRows.join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `credit-transactions-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the URL object
+      URL.revokeObjectURL(url);
+      
+      console.log(`Exported ${transactions.length} transactions to CSV`);
+    } catch (error) {
+      console.error('Error exporting transactions:', error);
+      alert('Failed to export transactions. Please try again.');
+    }
+  };
+
   const filteredTransactions = transactions.filter(transaction => {
     const matchesType = selectedType === 'all' || transaction.type === selectedType;
     const matchesCategory = selectedCategory === 'all' || transaction.category === selectedCategory;
@@ -536,7 +597,10 @@ export default function CreditsPage() {
                 <FaRedo className="w-4 h-4 text-gray-400" />
                 <span className="text-sm text-gray-500">Last updated: {new Date().toLocaleTimeString()}</span>
               </div>
-              <button className="bg-emerald-700 text-white px-4 py-2 rounded-lg hover:bg-emerald-800 transition-colors flex items-center gap-2">
+              <button 
+                onClick={exportToCSV}
+                className="bg-emerald-700 text-white px-4 py-2 rounded-lg hover:bg-emerald-800 transition-colors flex items-center gap-2"
+              >
                 <FaDownload className="w-4 h-4" />
                 Export
               </button>
