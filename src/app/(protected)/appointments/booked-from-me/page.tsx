@@ -3,6 +3,24 @@
 import { useEffect, useState } from "react";
 import ProtectedLayout from "@/components/Layout/ProtectedLayout";
 import dayjs from "dayjs";
+import { 
+  FaCalendarAlt, 
+  FaClock, 
+  FaCheckCircle, 
+  FaTimesCircle, 
+  FaHourglassHalf, 
+  FaUserTie,
+  FaCheck,
+  FaPlay,
+  FaExclamationTriangle,
+  FaEye,
+  FaPhone,
+  FaEnvelope,
+  FaMapMarkerAlt,
+  FaStar,
+  FaCoins
+} from "react-icons/fa";
+import { FaCheckDouble } from "react-icons/fa6";
 
 interface Booking {
   id: string;
@@ -11,6 +29,16 @@ interface Booking {
   timeFrom: string;
   timeTo: string;
   status: string;
+  bookerName?: string;
+  bookerEmail?: string;
+  bookerPhone?: string;
+  bookerProfilePicture?: string;
+  bookerId?: string;
+  location?: string;
+  credits?: number;
+  notes?: string;
+  coverImage?: string;
+  taskImages?: string[];
 }
 
 export default function BookedFromMePage() {
@@ -19,6 +47,7 @@ export default function BookedFromMePage() {
   const [error, setError] = useState<string | null>(null);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const [completingId, setCompletingId] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [dialog, setDialog] = useState<{ open: boolean; message: string; isError: boolean }>({ open: false, message: '', isError: false });
 
   // Confirm booking handler
@@ -90,14 +119,130 @@ export default function BookedFromMePage() {
         });
         if (!res.ok) throw new Error("Failed to fetch bookings");
         const data = await res.json();
-        const bookings = (data.data || data || []).map((b: any) => ({
-          id: b.ID || b.id || b._id,
-          taskTitle: b.TaskTitle || b.taskTitle || b.task?.Title || b.task?.title || "",
-          date: b.Timeslot?.Date || b.timeslot?.date || "",
-          timeFrom: b.Timeslot?.TimeFrom || b.timeslot?.timeFrom || "",
-          timeTo: b.Timeslot?.TimeTo || b.timeslot?.timeTo || "",
-          status: b.Status || b.status || "",
-        }));
+        const bookingsPromises = (data.data || data || []).map(async (b: any) => {
+          // Get task ID from booking
+          const taskId = b.TaskID || b.taskID || b.task?.ID || b.task?.id || b.taskId;
+          console.log(`Booking ${b.ID || b.id}: Task ID = ${taskId}`);
+          
+          // Get booker ID from booking
+          const bookerId = b.BookerID || b.bookerID || b.Booker?.ID || b.booker?.id || b.bookerId;
+          console.log(`Booking ${b.ID || b.id}: Booker ID = ${bookerId}`);
+          console.log(`Raw booking booker fields:`, {
+            BookerID: b.BookerID,
+            bookerID: b.bookerID,
+            Booker: b.Booker,
+            booker: b.booker,
+            bookerId: b.bookerId
+          });
+          
+          let taskImages = [];
+          let bookerName = b.BookerName || b.bookerName || "Client";
+          let bookerEmail = b.BookerEmail || b.bookerEmail || "";
+          let bookerPhone = b.BookerPhone || b.bookerPhone || "";
+          let bookerProfilePicture = "";
+          
+          // Fetch task details to get images
+          if (taskId) {
+            try {
+              const taskRes = await fetch(`${API_BASE_URL}/api/tasks/get/${taskId}`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+              });
+              if (taskRes.ok) {
+                const taskData = await taskRes.json();
+                const task = taskData.data || taskData;
+                taskImages = task.Images || task.images || [];
+                console.log(`Fetched task ${taskId} images:`, taskImages);
+              }
+            } catch (err) {
+              console.log(`Failed to fetch task ${taskId} details:`, err);
+            }
+          }
+          
+          // Fetch booker details to get real name
+          if (bookerId) {
+            try {
+              const bookerRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084'}/api/auth/user/${bookerId}`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+              });
+              if (bookerRes.ok) {
+                const bookerData = await bookerRes.json();
+                const booker = bookerData.data || bookerData;
+                bookerName = booker.Name || booker.name || bookerName;
+                bookerEmail = booker.Email || booker.email || bookerEmail;
+                bookerPhone = booker.Phone || booker.phone || bookerPhone;
+                bookerProfilePicture = booker.ProfilePictureURL || booker.profilePictureURL || booker.Avatar || booker.avatar || booker.ProfilePicture || booker.profilePicture || "";
+                console.log(`✅ Fetched booker ${bookerId} details:`, { 
+                  name: bookerName, 
+                  email: bookerEmail, 
+                  phone: bookerPhone, 
+                  profilePicture: bookerProfilePicture,
+                  rawBookerData: booker
+                });
+              } else {
+                console.log(`❌ Failed to fetch booker ${bookerId} details:`, bookerRes.status, bookerRes.statusText);
+                const errorText = await bookerRes.text();
+                console.log(`❌ Error response:`, errorText);
+              }
+            } catch (err) {
+              console.log(`❌ Error fetching booker ${bookerId} details:`, err);
+            }
+          } else {
+            console.log(`⚠️ No booker ID found for booking ${b.ID || b.id}`);
+          }
+          
+          const booking = {
+            id: b.ID || b.id || b._id,
+            taskTitle: b.TaskTitle || b.taskTitle || b.task?.Title || b.task?.title || "",
+            date: b.Timeslot?.Date || b.timeslot?.date || "",
+            timeFrom: b.Timeslot?.TimeFrom || b.timeslot?.timeFrom || "",
+            timeTo: b.Timeslot?.TimeTo || b.timeslot?.timeTo || "",
+            status: b.Status || b.status || "",
+            bookerName: bookerName,
+            bookerEmail: bookerEmail,
+            bookerPhone: bookerPhone,
+            bookerProfilePicture: bookerProfilePicture,
+            bookerId: bookerId,
+            location: b.Location || b.location || "Location TBD",
+            credits: b.Credits || b.credits || 0,
+            notes: b.Notes || b.notes || "",
+            coverImage: b.CoverImage || b.coverImage || b.task?.CoverImage || b.task?.coverImage || "",
+            taskImages: taskImages
+          };
+          
+          // Debug logging to see what data we're getting
+          console.log('=== RAW BOOKING DATA ===');
+          console.log('Raw booking object:', b);
+          console.log('Task object:', b.task);
+          console.log('Client info from booking:');
+          console.log('  - BookerName:', b.BookerName);
+          console.log('  - bookerName:', b.bookerName);
+          console.log('  - BookerEmail:', b.BookerEmail);
+          console.log('  - bookerEmail:', b.bookerEmail);
+          console.log('  - BookerPhone:', b.BookerPhone);
+          console.log('  - bookerPhone:', b.bookerPhone);
+          console.log('  - BookerID:', b.BookerID);
+          console.log('  - bookerID:', b.bookerID);
+          console.log('  - Booker:', b.Booker);
+          console.log('  - booker:', b.booker);
+          console.log('TaskImages from booking:', b.TaskImages);
+          console.log('taskImages from booking:', b.taskImages);
+          console.log('Images from task:', b.task?.Images);
+          console.log('images from task:', b.task?.images);
+          console.log('=== PROCESSED BOOKING DATA ===');
+          console.log('Booking data:', {
+            id: booking.id,
+            taskTitle: booking.taskTitle,
+            bookerName: booking.bookerName,
+            bookerEmail: booking.bookerEmail,
+            bookerPhone: booking.bookerPhone,
+            coverImage: booking.coverImage,
+            taskImages: booking.taskImages,
+            hasTaskImages: booking.taskImages && booking.taskImages.length > 0
+          });
+          
+          return booking;
+        });
+        const bookings = await Promise.all(bookingsPromises);
         setBookings(bookings);
         setError(null);
       } catch (err: any) {
@@ -117,269 +262,525 @@ export default function BookedFromMePage() {
     return (statusOrder[aStatus as keyof typeof statusOrder] ?? 99) - (statusOrder[bStatus as keyof typeof statusOrder] ?? 99);
   });
 
-  // Group bookings by status
+  // Filter bookings based on selected status
+  const filteredBookings = selectedStatus === 'all' 
+    ? sortedBookings 
+    : sortedBookings.filter(b => b.status.toLowerCase() === selectedStatus);
+
+  // Group bookings by status for stats
   const completedBookings = bookings.filter(b => b.status && b.status.toLowerCase() === 'completed');
   const confirmedBookings = bookings.filter(b => b.status && b.status.toLowerCase() === 'confirmed');
   const pendingBookings = bookings.filter(b => b.status && b.status.toLowerCase() === 'pending');
   const cancelledBookings = bookings.filter(b => b.status && b.status.toLowerCase() === 'cancelled');
 
+  const getStatusIcon = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return <FaCheckDouble className="w-5 h-5 text-green-600" />;
+      case 'confirmed':
+        return <FaCheck className="w-5 h-5 text-blue-600" />;
+      case 'pending':
+        return <FaHourglassHalf className="w-5 h-5 text-yellow-600" />;
+      case 'cancelled':
+        return <FaTimesCircle className="w-5 h-5 text-red-600" />;
+      default:
+        return <FaExclamationTriangle className="w-5 h-5 text-gray-600" />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'confirmed':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusBgColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200';
+      case 'confirmed':
+        return 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200';
+      case 'pending':
+        return 'bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200';
+      case 'cancelled':
+        return 'bg-gradient-to-br from-red-50 to-pink-50 border-red-200';
+      default:
+        return 'bg-gradient-to-br from-gray-50 to-slate-50 border-gray-200';
+    }
+  };
+
+  if (loading) {
+    return (
+      <ProtectedLayout headerName="Booked from Me">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading your bookings...</p>
+          </div>
+        </div>
+      </ProtectedLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <ProtectedLayout headerName="Booked from Me">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <FaExclamationTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Bookings</h2>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </ProtectedLayout>
+    );
+  }
+
   return (
     <ProtectedLayout headerName="Booked from Me">
-      <div className="min-h-screen bg-white p-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-extrabold mb-6 text-emerald-700">New Bookings</h1>
+      <div className="min-h-screen bg-white">
+        {/* Header Section */}
+        <div className="bg-white border-b border-gray-200 px-6 py-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">My Service Bookings</h1>
+                <p className="text-gray-600">Manage and track all bookings for your services</p>
+              </div>
+              <div className="mt-4 lg:mt-0">
+                <div className="flex items-center gap-4 text-sm text-gray-600">
+                                     <div className="flex items-center gap-2">
+                     <FaCheckDouble className="w-4 h-4 text-green-600" />
+                     <span>{completedBookings.length} Completed</span>
+                   </div>
+                  <div className="flex items-center gap-2">
+                    <FaCheck className="w-4 h-4 text-blue-600" />
+                    <span>{confirmedBookings.length} Confirmed</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaHourglassHalf className="w-4 h-4 text-yellow-600" />
+                    <span>{pendingBookings.length} Pending</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        {/* Completed */}
-        <h2 className="text-xl font-bold mb-4 mt-8">Completed</h2>
-        {completedBookings.length === 0 ? (
-          <p>No completed bookings.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {completedBookings.map((b, idx) => {
-              const borderColors = [
-                'border-green-400',
-                'border-blue-400',
-                'border-pink-400',
-                'border-yellow-400',
-                'border-purple-400',
-                'border-orange-400',
-              ];
-              const borderClass = borderColors[idx % borderColors.length];
-              return (
-                <div
-                  key={b.id}
-                  className={`bg-white rounded-lg p-5 shadow-md hover:shadow-xl relative border-2 ${borderClass}`}
-                >
-                  <h3 className="text-lg font-semibold mb-1">{b.taskTitle}</h3>
-                  <p className="text-xs text-gray-500 mb-1">
-                    📅 {b.date} — ⏰ {b.timeFrom} to {b.timeTo}
-                  </p>
-                  <span
-                    className={`inline-block text-base font-semibold px-3 py-1 rounded-full bg-gray-100 border border-gray-300 mt-3 ${
-                      b.status === 'cancelled' ? 'bg-red-100 text-red-700 border-red-300' :
-                      b.status === 'confirmed' ? 'bg-green-100 text-green-700 border-green-300' :
-                      b.status === 'pending' ? 'bg-yellow-100 text-yellow-700 border-yellow-300' :
-                      b.status === 'completed' ? 'bg-gray-200 text-emerald-700 border-emerald-300' :
-                      ''
-                    }`}
-                    style={{ marginTop: '0.75rem' }}
-                  >
-                    {b.status.charAt(0).toUpperCase() + b.status.slice(1)}
-                  </span>
-                  {/* Confirm button for pending bookings */}
-                  {b.status === 'pending' && (
-                    <button
-                      className="mt-4 w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
-                      onClick={() => handleConfirm(b.id)}
-                      disabled={confirmingId === b.id}
-                    >
-                      {confirmingId === b.id ? 'Confirming...' : 'Confirm'}
-                    </button>
-                  )}
-                  {b.status === 'confirmed' && (
-                    <button
-                      className="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
-                      onClick={() => handleComplete(b.id)}
-                      disabled={completingId === b.id}
-                    >
-                      {completingId === b.id ? 'Completing...' : 'Mark as Completed'}
-                    </button>
-                  )}
+
+        {/* Stats Cards */}
+        <div className="px-6 py-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+              <div className="bg-amber-50 rounded-xl p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-black">Total Bookings</p>
+                    <p className="text-2xl font-bold text-black">{bookings.length}</p>
+                  </div>
+                  <FaCalendarAlt className="w-6 h-6 text-emerald-700" />
                 </div>
-              );
-            })}
-          </div>
-        )}
-        {/* Confirmed */}
-        <h2 className="text-xl font-bold mb-4 mt-8">Confirmed</h2>
-        {confirmedBookings.length === 0 ? (
-          <p>No confirmed bookings.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {confirmedBookings.map((b, idx) => {
-              const borderColors = [
-                'border-green-400',
-                'border-blue-400',
-                'border-pink-400',
-                'border-yellow-400',
-                'border-purple-400',
-                'border-orange-400',
-              ];
-              const borderClass = borderColors[idx % borderColors.length];
-              return (
-                <div
-                  key={b.id}
-                  className={`bg-white rounded-lg p-5 shadow-md hover:shadow-xl relative border-2 ${borderClass}`}
-                >
-                  <h3 className="text-lg font-semibold mb-1">{b.taskTitle}</h3>
-                  <p className="text-xs text-gray-500 mb-1">
-                    📅 {b.date} — ⏰ {b.timeFrom} to {b.timeTo}
-                  </p>
-                  <span
-                    className={`inline-block text-base font-semibold px-3 py-1 rounded-full bg-gray-100 border border-gray-300 mt-3 ${
-                      b.status === 'cancelled' ? 'bg-red-100 text-red-700 border-red-300' :
-                      b.status === 'confirmed' ? 'bg-green-100 text-green-700 border-green-300' :
-                      b.status === 'pending' ? 'bg-yellow-100 text-yellow-700 border-yellow-300' :
-                      b.status === 'completed' ? 'bg-gray-200 text-emerald-700 border-emerald-300' :
-                      ''
-                    }`}
-                    style={{ marginTop: '0.75rem' }}
-                  >
-                    {b.status.charAt(0).toUpperCase() + b.status.slice(1)}
-                  </span>
-                  {/* Confirm button for pending bookings */}
-                  {b.status === 'pending' && (
-                    <button
-                      className="mt-4 w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
-                      onClick={() => handleConfirm(b.id)}
-                      disabled={confirmingId === b.id}
-                    >
-                      {confirmingId === b.id ? 'Confirming...' : 'Confirm'}
-                    </button>
-                  )}
-                  {b.status === 'confirmed' && (
-                    <button
-                      className="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
-                      onClick={() => handleComplete(b.id)}
-                      disabled={completingId === b.id}
-                    >
-                      {completingId === b.id ? 'Completing...' : 'Mark as Completed'}
-                    </button>
-                  )}
+              </div>
+              
+              <div className="bg-amber-50 rounded-xl p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-black">Pending</p>
+                    <p className="text-2xl font-bold text-black">{pendingBookings.length}</p>
+                  </div>
+                  <FaHourglassHalf className="w-6 h-6 text-emerald-700" />
                 </div>
-              );
-            })}
-          </div>
-        )}
-        {/* Pending */}
-        <h2 className="text-xl font-bold mb-4 mt-8">Pending</h2>
-        {pendingBookings.length === 0 ? (
-          <p>No pending bookings.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {pendingBookings.map((b, idx) => {
-              const borderColors = [
-                'border-green-400',
-                'border-blue-400',
-                'border-pink-400',
-                'border-yellow-400',
-                'border-purple-400',
-                'border-orange-400',
-              ];
-              const borderClass = borderColors[idx % borderColors.length];
-              return (
-                <div
-                  key={b.id}
-                  className={`bg-white rounded-lg p-5 shadow-md hover:shadow-xl relative border-2 ${borderClass}`}
-                >
-                  <h3 className="text-lg font-semibold mb-1">{b.taskTitle}</h3>
-                  <p className="text-xs text-gray-500 mb-1">
-                    📅 {b.date} — ⏰ {b.timeFrom} to {b.timeTo}
-                  </p>
-                  <span
-                    className={`inline-block text-base font-semibold px-3 py-1 rounded-full bg-gray-100 border border-gray-300 mt-3 ${
-                      b.status === 'cancelled' ? 'bg-red-100 text-red-700 border-red-300' :
-                      b.status === 'confirmed' ? 'bg-green-100 text-green-700 border-green-300' :
-                      b.status === 'pending' ? 'bg-yellow-100 text-yellow-700 border-yellow-300' :
-                      b.status === 'completed' ? 'bg-gray-200 text-emerald-700 border-emerald-300' :
-                      ''
-                    }`}
-                    style={{ marginTop: '0.75rem' }}
-                  >
-                    {b.status.charAt(0).toUpperCase() + b.status.slice(1)}
-                  </span>
-                  {/* Confirm button for pending bookings */}
-                  {b.status === 'pending' && (
-                    <button
-                      className="mt-4 w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
-                      onClick={() => handleConfirm(b.id)}
-                      disabled={confirmingId === b.id}
-                    >
-                      {confirmingId === b.id ? 'Confirming...' : 'Confirm'}
-                    </button>
-                  )}
-                  {b.status === 'confirmed' && (
-                    <button
-                      className="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
-                      onClick={() => handleComplete(b.id)}
-                      disabled={completingId === b.id}
-                    >
-                      {completingId === b.id ? 'Completing...' : 'Mark as Completed'}
-                    </button>
-                  )}
+              </div>
+              
+              <div className="bg-amber-50 rounded-xl p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-black">Confirmed</p>
+                    <p className="text-2xl font-bold text-black">{confirmedBookings.length}</p>
+                  </div>
+                  <FaCheck className="w-6 h-6 text-emerald-700" />
                 </div>
-              );
-            })}
-          </div>
-        )}
-        {/* Cancelled */}
-        <h2 className="text-xl font-bold mb-4 mt-8">Cancelled</h2>
-        {cancelledBookings.length === 0 ? (
-          <p>No cancelled bookings.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {cancelledBookings.map((b, idx) => {
-              const borderColors = [
-                'border-green-400',
-                'border-blue-400',
-                'border-pink-400',
-                'border-yellow-400',
-                'border-purple-400',
-                'border-orange-400',
-              ];
-              const borderClass = borderColors[idx % borderColors.length];
-              return (
-                <div
-                  key={b.id}
-                  className={`bg-white rounded-lg p-5 shadow-md hover:shadow-xl relative border-2 ${borderClass}`}
-                >
-                  <h3 className="text-lg font-semibold mb-1">{b.taskTitle}</h3>
-                  <p className="text-xs text-gray-500 mb-1">
-                    📅 {b.date} — ⏰ {b.timeFrom} to {b.timeTo}
-                  </p>
-                  <span
-                    className={`inline-block text-base font-semibold px-3 py-1 rounded-full bg-gray-100 border border-gray-300 mt-3 ${
-                      b.status === 'cancelled' ? 'bg-red-100 text-red-700 border-red-300' :
-                      b.status === 'confirmed' ? 'bg-green-100 text-green-700 border-green-300' :
-                      b.status === 'pending' ? 'bg-yellow-100 text-yellow-700 border-yellow-300' :
-                      b.status === 'completed' ? 'bg-gray-200 text-emerald-700 border-emerald-300' :
-                      ''
-                    }`}
-                    style={{ marginTop: '0.75rem' }}
-                  >
-                    {b.status.charAt(0).toUpperCase() + b.status.slice(1)}
-                  </span>
-                  {/* Confirm button for pending bookings */}
-                  {b.status === 'pending' && (
-                    <button
-                      className="mt-4 w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
-                      onClick={() => handleConfirm(b.id)}
-                      disabled={confirmingId === b.id}
-                    >
-                      {confirmingId === b.id ? 'Confirming...' : 'Confirm'}
-                    </button>
-                  )}
-                  {b.status === 'confirmed' && (
-                    <button
-                      className="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50"
-                      onClick={() => handleComplete(b.id)}
-                      disabled={completingId === b.id}
-                    >
-                      {completingId === b.id ? 'Completing...' : 'Mark as Completed'}
-                    </button>
-                  )}
+              </div>
+              
+              <div className="bg-amber-50 rounded-xl p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-black">Completed</p>
+                    <p className="text-2xl font-bold text-black">{completedBookings.length}</p>
+                  </div>
+                  <FaCheckDouble className="w-6 h-6 text-emerald-700" />
                 </div>
-              );
-            })}
+              </div>
+            </div>
           </div>
-        )}
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="px-6 mb-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setSelectedStatus('all')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  selectedStatus === 'all'
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                }`}
+              >
+                All ({bookings.length})
+              </button>
+              <button
+                onClick={() => setSelectedStatus('pending')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  selectedStatus === 'pending'
+                    ? 'bg-yellow-600 text-white'
+                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                }`}
+              >
+                Pending ({pendingBookings.length})
+              </button>
+              <button
+                onClick={() => setSelectedStatus('confirmed')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  selectedStatus === 'confirmed'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                }`}
+              >
+                Confirmed ({confirmedBookings.length})
+              </button>
+              <button
+                onClick={() => setSelectedStatus('completed')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  selectedStatus === 'completed'
+                    ? 'bg-green-600 text-white'
+                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                }`}
+              >
+                Completed ({completedBookings.length})
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Bookings Grid */}
+        <div className="px-6 pb-8">
+          <div className="max-w-7xl mx-auto">
+            {filteredBookings.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FaCalendarAlt className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No bookings found</h3>
+                <p className="text-gray-600">
+                  {selectedStatus === 'all' 
+                    ? "You don't have any bookings yet." 
+                    : `No ${selectedStatus} bookings found.`
+                  }
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {filteredBookings.map((booking, idx) => {
+                  // Define gradients for fallback images (same as tasks/list)
+                  const gradients = [
+                    'from-blue-400 to-blue-600',
+                    'from-purple-400 to-purple-600', 
+                    'from-green-400 to-green-600',
+                    'from-pink-400 to-pink-600',
+                    'from-yellow-400 to-yellow-600',
+                    'from-orange-400 to-orange-600'
+                  ];
+                  
+                  // Debug image rendering (same as tasks/list)
+                  console.log(`=== RENDERING BOOKING ${idx + 1}: ${booking.taskTitle} ===`);
+                  console.log('Booking taskImages:', booking.taskImages);
+                  console.log('Has taskImages:', booking.taskImages && booking.taskImages.length > 0);
+                  console.log('First taskImage:', booking.taskImages && booking.taskImages.length > 0 ? booking.taskImages[0] : 'None');
+                  
+                  // Convert taskImages to string array if needed (exact same as tasks/list)
+                  const imageUrls = booking.taskImages && Array.isArray(booking.taskImages) ? booking.taskImages : [];
+                  console.log('Image URLs:', imageUrls);
+                  console.log('Has image URLs:', imageUrls.length > 0);
+                  console.log('Will show image:', imageUrls.length > 0);
+                  console.log('Image URL to use:', imageUrls[0]);
+                  
+                  return (
+                    <div
+                      key={booking.id}
+                      className="bg-white rounded-xl shadow-sm transition-all duration-200 hover:shadow-lg overflow-hidden"
+                    >
+                      {/* Cover Image - Exact same implementation as tasks/list */}
+                      <div className="h-48 relative">
+                        {imageUrls.length > 0 ? (
+                          <img
+                            src={imageUrls[0]}
+                            alt={booking.taskTitle}
+                            className="w-full h-full object-cover"
+                            style={{ zIndex: 1 }}
+                            onLoad={() => {
+                              console.log(`Image loaded successfully for booking ${idx + 1}:`, imageUrls[0]);
+                              console.log(`Image element for booking ${idx + 1}:`, document.querySelector(`img[src="${imageUrls[0]}"]`));
+                            }}
+                            onError={(e) => {
+                              console.log(`Image failed to load for booking ${idx + 1}:`, imageUrls[0]);
+                              console.log('Error event:', e);
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              // Show fallback
+                              const fallback = target.nextElementSibling;
+                              if (fallback) {
+                                fallback.classList.remove('hidden');
+                              }
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          className={`absolute inset-0 bg-gradient-to-br ${gradients[idx % gradients.length]} ${imageUrls.length > 0 ? 'hidden' : ''}`}
+                          style={{ zIndex: 0 }}
+                        ></div>
+                       {/* Status Badge Overlay */}
+                       <div className="absolute top-3 right-3">
+                         <div className="flex items-center gap-2">
+                           {getStatusIcon(booking.status)}
+                           <span className={`px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-sm bg-white/80 ${getStatusColor(booking.status)}`}>
+                             {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                           </span>
+                         </div>
+                       </div>
+                     </div>
+
+                     {/* Header */}
+                     <div className="p-6">
+                       <div className="flex items-start justify-between mb-4">
+                         <div className="flex-1">
+                           <h3 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-2">
+                             {booking.taskTitle}
+                           </h3>
+                         </div>
+                         {!booking.coverImage && !booking.taskImages?.length && (
+                           <div className="flex items-center gap-2">
+                             {getStatusIcon(booking.status)}
+                             <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(booking.status)}`}>
+                               {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                             </span>
+                           </div>
+                         )}
+                       </div>
+
+                       {/* Client Information */}
+                       <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                         <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                           <FaUserTie className="w-4 h-4 text-emerald-600" />
+                           Client Details
+                         </h4>
+                         <div className="flex items-center gap-3 p-3 bg-white rounded-lg hover:bg-gray-50 transition-colors cursor-pointer" 
+                              onClick={() => {
+                                if (booking.bookerId) {
+                                  window.open(`/users/${booking.bookerId}`, '_blank');
+                                }
+                              }}>
+                           {/* Profile Picture */}
+                           <div className="flex-shrink-0">
+                             {booking.bookerProfilePicture ? (
+                               <img
+                                 src={booking.bookerProfilePicture}
+                                 alt={booking.bookerName || "Client"}
+                                 className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                                 onLoad={() => console.log(`✅ Profile picture loaded for ${booking.bookerName}:`, booking.bookerProfilePicture)}
+                                 onError={(e) => {
+                                   console.log(`❌ Profile picture failed to load for ${booking.bookerName}:`, booking.bookerProfilePicture);
+                                   const target = e.target as HTMLImageElement;
+                                   target.style.display = 'none';
+                                   target.nextElementSibling?.classList.remove('hidden');
+                                 }}
+                               />
+                             ) : (
+                               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-semibold text-lg">
+                                 {(booking.bookerName || "C").charAt(0).toUpperCase()}
+                               </div>
+                             )}
+                           </div>
+                           
+                           {/* Client Info */}
+                           <div className="flex-1 min-w-0">
+                             <div className="text-sm font-semibold text-gray-900 truncate">
+                               {booking.bookerName || "Client"}
+                             </div>
+                             {booking.bookerEmail && (
+                               <div className="text-xs text-gray-600 truncate flex items-center gap-1">
+                                 <FaEnvelope className="w-3 h-3" />
+                                 {booking.bookerEmail}
+                               </div>
+                             )}
+                           </div>
+                           
+                           {/* Click Indicator */}
+                           <div className="flex-shrink-0">
+                             <FaEye className="w-4 h-4 text-gray-400" />
+                           </div>
+                         </div>
+                         
+                         {booking.bookerPhone && (
+                           <div className="mt-2 flex items-center gap-2 text-sm text-gray-700">
+                             <FaPhone className="w-3 h-3 text-gray-500" />
+                             <span className="font-medium">Phone:</span>
+                             <span className="text-blue-600">{booking.bookerPhone}</span>
+                           </div>
+                         )}
+                       </div>
+
+                       {/* Service Details */}
+                       <div className="space-y-2">
+                         <div className="flex items-center gap-3 text-sm text-gray-600">
+                           <FaCalendarAlt className="w-4 h-4 text-emerald-600" />
+                           <span>{booking.date}</span>
+                         </div>
+                         <div className="flex items-center gap-3 text-sm text-gray-600">
+                           <FaClock className="w-4 h-4 text-blue-600" />
+                           <span>{booking.timeFrom} - {booking.timeTo}</span>
+                         </div>
+                         {booking.credits && (
+                           <div className="flex items-center gap-3 text-sm text-gray-600">
+                             <FaCoins className="w-4 h-4 text-yellow-600" />
+                             <span>{booking.credits} credits</span>
+                           </div>
+                         )}
+                         {booking.location && booking.location !== "Location TBD" && (
+                           <div className="flex items-center gap-3 text-sm text-gray-600">
+                             <FaMapMarkerAlt className="w-4 h-4 text-red-600" />
+                             <span>{booking.location}</span>
+                           </div>
+                         )}
+                         {booking.notes && (
+                           <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                             <div className="flex items-start gap-2">
+                               <FaEnvelope className="w-3 h-3 text-blue-600 mt-0.5 flex-shrink-0" />
+                               <div>
+                                 <span className="text-xs font-medium text-blue-800">Client Notes:</span>
+                                 <p className="text-sm text-blue-700 mt-1">{booking.notes}</p>
+                               </div>
+                             </div>
+                           </div>
+                         )}
+                       </div>
+                     </div>
+
+                    {/* Actions */}
+                    <div className="p-6">
+                      {booking.status === 'pending' && (
+                        <button
+                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                          onClick={() => handleConfirm(booking.id)}
+                          disabled={confirmingId === booking.id}
+                        >
+                          {confirmingId === booking.id ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              Confirming...
+                            </>
+                          ) : (
+                            <>
+                              <FaCheck className="w-4 h-4" />
+                              Confirm Booking
+                            </>
+                          )}
+                        </button>
+                      )}
+
+                      {booking.status === 'confirmed' && (
+                        <button
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                          onClick={() => handleComplete(booking.id)}
+                          disabled={completingId === booking.id}
+                        >
+                          {completingId === booking.id ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              Completing...
+                            </>
+                          ) : (
+                            <>
+                              <FaPlay className="w-4 h-4" />
+                              Mark as Completed
+                            </>
+                          )}
+                        </button>
+                      )}
+
+                      {booking.status === 'completed' && (
+                        <div className="text-center">
+                          <div className="flex items-center justify-center gap-2 text-green-600 font-medium">
+                            <FaCheckCircle className="w-5 h-5" />
+                            Service Completed
+                          </div>
+                          <p className="text-sm text-gray-500 mt-1">Great job! Client has been notified.</p>
+                        </div>
+                      )}
+
+                      {booking.status === 'cancelled' && (
+                        <div className="text-center">
+                          <div className="flex items-center justify-center gap-2 text-red-600 font-medium">
+                            <FaTimesCircle className="w-5 h-5" />
+                            Booking Cancelled
+                          </div>
+                          <p className="text-sm text-gray-500 mt-1">This booking has been cancelled.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Dialog for completion feedback */}
         {dialog.open && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-            <div className={`bg-white rounded-xl shadow-lg p-8 min-w-[320px] text-center border ${dialog.isError ? 'border-red-400' : 'border-green-400'}`}>
-              <div className={`mb-2 text-lg font-semibold ${dialog.isError ? 'text-red-600' : 'text-green-600'}`}>{dialog.isError ? 'Error' : 'Success'}</div>
-              <div className="mb-4 text-gray-700">{dialog.message}</div>
-              <button onClick={() => setDialog({ open: false, message: '', isError: false })} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Close</button>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className={`bg-white rounded-xl shadow-xl p-8 max-w-md w-full mx-4 border-2 ${dialog.isError ? 'border-red-200' : 'border-green-200'}`}>
+              <div className="text-center">
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                  dialog.isError ? 'bg-red-100' : 'bg-green-100'
+                }`}>
+                  {dialog.isError ? (
+                    <FaExclamationTriangle className="w-8 h-8 text-red-600" />
+                  ) : (
+                    <FaCheckCircle className="w-8 h-8 text-green-600" />
+                  )}
+                </div>
+                <h3 className={`text-lg font-semibold mb-2 ${
+                  dialog.isError ? 'text-red-900' : 'text-green-900'
+                }`}>
+                  {dialog.isError ? 'Error' : 'Success'}
+                </h3>
+                <p className="text-gray-700 mb-6">{dialog.message}</p>
+                <button 
+                  onClick={() => setDialog({ open: false, message: '', isError: false })} 
+                  className={`w-full py-3 px-6 rounded-lg font-medium transition-colors ${
+                    dialog.isError 
+                      ? 'bg-red-600 hover:bg-red-700 text-white' 
+                      : 'bg-green-600 hover:bg-green-700 text-white'
+                  }`}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -109,6 +109,7 @@ interface CreditStats {
   topEarningCategories: { category: string; amount: number; percentage: number }[];
   recentActivity: { date: string; earned: number; spent: number }[];
   achievements: { title: string; description: string; icon: string; unlocked: boolean }[];
+  showBuyCredits: boolean;
 }
 
 interface CreditGoal {
@@ -172,9 +173,10 @@ export default function CreditsPage() {
           headers: { Authorization: `Bearer ${token}` },
         });
         
-        let bookingsAsBooker = [];
+        let bookingsAsBooker: any[] = [];
         if (bookingsAsBookerRes.ok) {
-          bookingsAsBooker = await bookingsAsBookerRes.json();
+          const response = await bookingsAsBookerRes.json();
+          bookingsAsBooker = Array.isArray(response) ? response : [];
         }
 
         // Fetch bookings as owner (earned credits)
@@ -182,49 +184,56 @@ export default function CreditsPage() {
           headers: { Authorization: `Bearer ${token}` },
         });
         
-        let bookingsAsOwner = [];
+        let bookingsAsOwner: any[] = [];
         if (bookingsAsOwnerRes.ok) {
-          bookingsAsOwner = await bookingsAsOwnerRes.json();
+          const response = await bookingsAsOwnerRes.json();
+          bookingsAsOwner = Array.isArray(response) ? response : [];
         }
 
         // Transform booking data to credit transactions
         const transformedTransactions: CreditTransaction[] = [];
         
         // Add bookings as booker (spent credits)
-        bookingsAsBooker.forEach((booking: any) => {
-          transformedTransactions.push({
-            id: booking._id || booking.id,
-            type: 'spent',
-            amount: -(booking.credits || 0),
-            description: booking.taskTitle || 'Service Booking',
-            category: 'Service',
-            date: booking.bookedAt ? new Date(booking.bookedAt * 1000).getTime() : Date.now(),
-            status: booking.status || 'completed',
-            reference: `BOOK-${booking._id || booking.id}`,
-            serviceId: booking.taskId,
-            clientName: 'You',
-            tags: ['booking', 'service', booking.status || 'completed']
+        if (Array.isArray(bookingsAsBooker)) {
+          bookingsAsBooker.forEach((booking: any) => {
+            if (booking && typeof booking === 'object') {
+              transformedTransactions.push({
+                id: booking._id || booking.id || `book-${Date.now()}`,
+                type: 'spent',
+                amount: -(booking.credits || 0),
+                description: booking.taskTitle || 'Service Booking',
+                category: 'Service',
+                date: booking.bookedAt ? new Date(booking.bookedAt * 1000).getTime() : Date.now(),
+                status: booking.status || 'completed',
+                reference: `BOOK-${booking._id || booking.id || 'unknown'}`,
+                serviceId: booking.taskId,
+                clientName: 'You',
+                tags: ['booking', 'service', booking.status || 'completed']
+              });
+            }
           });
-        });
+        }
 
         // Add bookings as owner (earned credits) - only completed ones
-        bookingsAsOwner.forEach((booking: any) => {
-          if (booking.status === 'completed') {
-            transformedTransactions.push({
-              id: booking._id || booking.id,
-              type: 'earned',
-              amount: booking.credits || 0,
-              description: booking.taskTitle || 'Service Provided',
-              category: 'Service',
-              date: booking.completedAt ? new Date(booking.completedAt * 1000).getTime() : Date.now(),
-              status: 'completed',
-              reference: `EARN-${booking._id || booking.id}`,
-              serviceId: booking.taskId,
-              clientName: 'Client',
-              tags: ['service', 'completed', 'earned']
-            });
-          }
-        });
+        if (Array.isArray(bookingsAsOwner)) {
+          bookingsAsOwner.forEach((booking: any) => {
+            if (booking && typeof booking === 'object' && booking.status === 'completed') {
+              transformedTransactions.push({
+                id: booking._id || booking.id || `earn-${Date.now()}`,
+                type: 'earned',
+                amount: booking.credits || 0,
+                description: booking.taskTitle || 'Service Provided',
+                category: 'Service',
+                date: booking.completedAt ? new Date(booking.completedAt * 1000).getTime() : Date.now(),
+                status: 'completed',
+                reference: `EARN-${booking._id || booking.id || 'unknown'}`,
+                serviceId: booking.taskId,
+                clientName: 'Client',
+                tags: ['service', 'completed', 'earned']
+              });
+            }
+          });
+        }
 
         // Sort transactions by date (newest first)
         transformedTransactions.sort((a, b) => b.date - a.date);
@@ -295,7 +304,8 @@ export default function CreditsPage() {
             { title: "Top Earner", description: "Earned 1000+ credits", icon: "FaCrown", unlocked: totalEarned >= 1000 },
             { title: "Consistent", description: "7 days of activity", icon: "FaMedal", unlocked: weeklyEarnings > 0 },
             { title: "Diverse Skills", description: "Work in 3+ categories", icon: "FaGem", unlocked: Object.keys(categoryBreakdown).length >= 3 }
-          ]
+          ],
+          showBuyCredits: currentCredits < 50 // Show buy credits option when balance is low
         };
 
         // Create mock goals and tiers since they don't exist in backend
@@ -427,7 +437,8 @@ export default function CreditsPage() {
             { title: "Top Earner", description: "Earned 1000+ credits", icon: "FaCrown", unlocked: false },
             { title: "Consistent", description: "7 days of activity", icon: "FaMedal", unlocked: true },
             { title: "Diverse Skills", description: "Work in 3+ categories", icon: "FaGem", unlocked: false }
-          ]
+          ],
+          showBuyCredits: false
         };
 
         const mockGoals: CreditGoal[] = [
@@ -748,31 +759,95 @@ export default function CreditsPage() {
                 </div>
               </div>
 
-              {/* Achievements */}
-              <div className="bg-white rounded-xl p-6 shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Achievements</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {stats?.achievements.map((achievement, index) => (
-                    <div key={index} className={`p-4 rounded-lg border-2 ${
-                      achievement.unlocked 
-                        ? 'border-emerald-200 bg-emerald-50' 
-                        : 'border-gray-200 bg-gray-50'
-                    }`}>
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          achievement.unlocked ? 'bg-emerald-600' : 'bg-gray-400'
-                        }`}>
-                          <FaStar className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-gray-900">{achievement.title}</h4>
-                          <p className="text-sm text-gray-600">{achievement.description}</p>
+              {/* Buy More Credits */}
+              {stats?.showBuyCredits && (
+                <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 shadow-sm border border-orange-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
+                        <FaExclamationTriangle className="w-6 h-6 text-orange-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-1">Low Credit Balance</h3>
+                        <p className="text-sm text-gray-600 mb-3">
+                          You're running low on credits. Purchase more to continue booking services.
+                        </p>
+                        <div className="flex items-center gap-4">
+                          <div className="text-sm">
+                            <span className="text-gray-600">Current Balance:</span>
+                            <span className="ml-2 font-semibold text-red-600">{formatCurrency(stats.currentBalance)}</span>
+                          </div>
+                          <div className="text-sm">
+                            <span className="text-gray-600">Recommended:</span>
+                            <span className="ml-2 font-semibold text-gray-900">500+ credits</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  ))}
+                    <div className="flex flex-col gap-2">
+                      <button className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                        Buy Credits
+                      </button>
+                      <button className="text-orange-600 hover:text-orange-700 text-sm font-medium">
+                        View Packages
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Credit Packages */}
+              {stats?.showBuyCredits && (
+                <div className="bg-white rounded-xl p-6 shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Credit Packages</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-4 rounded-lg border-2 border-gray-200 hover:border-emerald-300 transition-colors cursor-pointer">
+                      <div className="text-center">
+                        <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
+                          <FaCoins className="w-6 h-6 text-emerald-600" />
+                        </div>
+                        <h4 className="font-semibold text-gray-900 mb-1">Starter Pack</h4>
+                        <p className="text-2xl font-bold text-emerald-600 mb-2">100 Credits</p>
+                        <p className="text-sm text-gray-600 mb-3">Perfect for getting started</p>
+                        <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg text-sm font-medium transition-colors">
+                          $9.99
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-lg border-2 border-emerald-300 bg-emerald-50 relative">
+                      <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                        <span className="bg-emerald-600 text-white px-3 py-1 rounded-full text-xs font-medium">Most Popular</span>
+                      </div>
+                      <div className="text-center">
+                        <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
+                          <FaGem className="w-6 h-6 text-emerald-600" />
+                        </div>
+                        <h4 className="font-semibold text-gray-900 mb-1">Professional Pack</h4>
+                        <p className="text-2xl font-bold text-emerald-600 mb-2">500 Credits</p>
+                        <p className="text-sm text-gray-600 mb-3">Best value for regular users</p>
+                        <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg text-sm font-medium transition-colors">
+                          $39.99
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-lg border-2 border-gray-200 hover:border-emerald-300 transition-colors cursor-pointer">
+                      <div className="text-center">
+                        <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
+                          <FaCrown className="w-6 h-6 text-emerald-600" />
+                        </div>
+                        <h4 className="font-semibold text-gray-900 mb-1">Premium Pack</h4>
+                        <p className="text-2xl font-bold text-emerald-600 mb-2">1000 Credits</p>
+                        <p className="text-sm text-gray-600 mb-3">For power users</p>
+                        <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg text-sm font-medium transition-colors">
+                          $69.99
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
