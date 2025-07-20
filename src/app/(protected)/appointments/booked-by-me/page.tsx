@@ -360,7 +360,7 @@ export default function BookedByMePage() {
 
   return (
     <ProtectedLayout headerName="Booked by Me">
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-white p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
@@ -370,57 +370,57 @@ export default function BookedByMePage() {
 
           {/* Statistics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <div className="bg-amber-50 p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Bookings</p>
                   <p className="text-2xl font-bold text-gray-900">{bookings.length}</p>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-full">
-                  <FaCalendarAlt className="w-6 h-6 text-blue-600" />
+                <div>
+                  <FaCalendarAlt className="w-6 h-6 text-emerald-700" />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <div className="bg-amber-50 p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Completed</p>
-                  <p className="text-2xl font-bold text-green-600">{completedBookings.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">{completedBookings.length}</p>
                 </div>
-                <div className="p-3 bg-green-100 rounded-full">
-                  <FaCheckDoubleIcon className="w-6 h-6 text-green-600" />
+                <div>
+                  <FaCheckDoubleIcon className="w-6 h-6 text-emerald-700" />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <div className="bg-amber-50 p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Confirmed</p>
-                  <p className="text-2xl font-bold text-blue-600">{confirmedBookings.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">{confirmedBookings.length}</p>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-full">
-                  <FaCheck className="w-6 h-6 text-blue-600" />
+                <div>
+                  <FaCheck className="w-6 h-6 text-emerald-700" />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <div className="bg-amber-50 p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Pending</p>
-                  <p className="text-2xl font-bold text-yellow-600">{pendingBookings.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">{pendingBookings.length}</p>
                 </div>
-                <div className="p-3 bg-yellow-100 rounded-full">
-                  <FaHourglassHalf className="w-6 h-6 text-yellow-600" />
+                <div>
+                  <FaHourglassHalf className="w-6 h-6 text-emerald-700" />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Filter Tabs */}
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 mb-8">
+          <div className="bg-amber-50 p-4 mb-8">
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setSelectedStatus('all')}
