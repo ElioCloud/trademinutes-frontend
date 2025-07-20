@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   FaUser, 
   FaEnvelope, 
@@ -85,6 +86,10 @@ export default function UserProfilePage() {
   const params = useParams();
   const userId = params.id as string;
   const router = useRouter();
+  const { user: currentUser } = useAuth();
+  
+  // Check if current user is viewing their own profile
+  const isOwnProfile = currentUser && (currentUser.ID === userId || currentUser.id === userId);
   
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -625,45 +630,47 @@ export default function UserProfilePage() {
               </div>
             </div>
 
-            {/* Today's Schedule */}
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden p-6">
-              <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">
-                <FiCalendar className="w-5 h-5 text-gray-600" />
-                Today's Tasks
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-sm text-green-800">10:00 AM - 11:00 AM</span>
-                    <span className="text-xs text-green-600">John Doe</span>
+            {/* Today's Schedule - Only show for own profile */}
+            {isOwnProfile && (
+              <div className="bg-white rounded-xl shadow-sm overflow-hidden p-6">
+                <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">
+                  <FiCalendar className="w-5 h-5 text-gray-600" />
+                  Today's Tasks
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-sm text-green-800">10:00 AM - 11:00 AM</span>
+                      <span className="text-xs text-green-600">John Doe</span>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-xs text-green-800">Dog Walking</span>
+                      <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-200 text-green-800">Completed</span>
+                    </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-xs text-green-800">Dog Walking</span>
-                    <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-200 text-green-800">Completed</span>
+                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200">
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-sm text-orange-800">11:30 AM - 12:30 PM</span>
+                      <span className="text-xs text-orange-600">Jane Smith</span>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-xs text-orange-800">Math Tutoring</span>
+                      <span className="text-xs font-medium px-2 py-1 rounded-full bg-orange-200 text-orange-800">Pending</span>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200">
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-sm text-orange-800">11:30 AM - 12:30 PM</span>
-                    <span className="text-xs text-orange-600">Jane Smith</span>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-xs text-orange-800">Math Tutoring</span>
-                    <span className="text-xs font-medium px-2 py-1 rounded-full bg-orange-200 text-orange-800">Pending</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-sm text-blue-800">2:00 PM - 3:00 PM</span>
-                    <span className="text-xs text-blue-600">Alex Lee</span>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-xs text-blue-800">PC Setup</span>
-                    <span className="text-xs font-medium px-2 py-1 rounded-full bg-blue-200 text-blue-800">Ongoing</span>
+                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-sm text-blue-800">2:00 PM - 3:00 PM</span>
+                      <span className="text-xs text-blue-600">Alex Lee</span>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-xs text-blue-800">PC Setup</span>
+                      <span className="text-xs font-medium px-2 py-1 rounded-full bg-blue-200 text-blue-800">Ongoing</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Right: Reviews/Feedback */}
