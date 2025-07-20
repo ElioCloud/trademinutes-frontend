@@ -525,8 +525,8 @@ export default function UsersNearby() {
                     <div className="border-t border-gray-200 my-3"></div>
                     
                     {/* Author Information */}
-                    <div className="mb-2 p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-2 mb-1">
+                    <div className="mb-2 pb-1 bg-gray-100 rounded-lg">
+                      <div className="flex items-center justify-center gap-1 mb-1">
                         <Image
                           src={task.author.avatar}
                           alt={task.author.name}
@@ -534,13 +534,13 @@ export default function UsersNearby() {
                           height={24}
                           className="rounded-full object-cover border border-blue-200"
                         />
-                        <div>
-                          <div className="flex items-center gap-1">
+                        <div className="text-center">
+                          <div className="flex items-center justify-center gap-1 mb-[-10px]">
                             <p className="font-medium text-gray-900 text-xs">{task.author.name}</p>
                           </div>
                           
                           {/* Rating Display */}
-                          <div className="flex items-center gap-1 mt-0.5">
+                          <div className="flex items-center justify-center gap-1 mt-0.5">
                             <div className="flex items-center">
                               {[...Array(5)].map((_, i) => {
                                 const starValue = i + 1;
