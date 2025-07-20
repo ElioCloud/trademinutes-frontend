@@ -46,6 +46,8 @@ interface Task {
   };
   category?: string;
   createdAt?: number;
+  rating?: number;
+  reviewCount?: number;
 }
 
 // User-focused filter options
@@ -131,6 +133,35 @@ export default function UsersNearby() {
     }
   }, [isClient]);
 
+  // Helper function to fetch user ratings
+  const fetchUserRating = async (userId: string) => {
+    try {
+      const REVIEW_API_BASE = process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086';
+      const response = await fetch(`${REVIEW_API_BASE}/api/reviews?revieweeId=${userId}`);
+      
+      if (response.ok) {
+        const reviews = await response.json();
+        const reviewsArray = Array.isArray(reviews) ? reviews : (reviews.data || []);
+        
+        if (reviewsArray.length > 0) {
+          const totalRating = reviewsArray.reduce((sum: number, review: any) => {
+            const rating = review.rating || review.Rating || 0;
+            return sum + rating;
+          }, 0);
+          
+          return {
+            rating: Math.round((totalRating / reviewsArray.length) * 10) / 10, // Round to 1 decimal
+            reviewCount: reviewsArray.length
+          };
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching user rating:', error);
+    }
+    
+    return { rating: 0, reviewCount: 0 };
+  };
+
   useEffect(() => {
     const fetchTasks = async () => {
       try {
@@ -179,8 +210,20 @@ export default function UsersNearby() {
             }
           }));
         
-        setTasks(tasksWithLocation);
-        setFilteredTasks(tasksWithLocation);
+        // Fetch ratings for each task's author
+        const tasksWithRatings = await Promise.all(
+          tasksWithLocation.map(async (task: any) => {
+            const { rating, reviewCount } = await fetchUserRating(task.author.id);
+            return {
+              ...task,
+              rating,
+              reviewCount
+            };
+          })
+        );
+        
+        setTasks(tasksWithRatings);
+        setFilteredTasks(tasksWithRatings);
         
       } catch (err) {
         console.error('Error fetching tasks:', err);
@@ -463,8 +506,31 @@ export default function UsersNearby() {
                           className="rounded-full object-cover border border-blue-200"
                         />
                         <div>
-                          <p className="font-medium text-gray-900 text-xs">{task.author.name}</p>
-                          <p className="text-xs text-gray-500">{task.author.email}</p>
+                          <div className="flex items-center gap-1">
+                            <p className="font-medium text-gray-900 text-xs">{task.author.name}</p>
+                            <span className="text-xs text-gray-400">•</span>
+                            <p className="text-xs text-gray-500">{task.author.email}</p>
+                          </div>
+                          
+                          {/* Rating Display */}
+                          {task.rating && task.rating > 0 && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <div className="flex items-center">
+                                {[...Array(5)].map((_, i) => (
+                                  <svg
+                                    key={i}
+                                    className={`w-3 h-3 ${i < Math.floor(task.rating!) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                  </svg>
+                                ))}
+                              </div>
+                              <span className="text-xs text-gray-600">
+                                {task.rating} ({task.reviewCount} reviews)
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -494,12 +560,6 @@ export default function UsersNearby() {
                           </div>
                         </div>
                       )}
-                    </div>
-
-                    {/* Task Stats */}
-                    <div className="flex justify-between items-center mb-2 text-xs">
-                      <span className="text-blue-600 font-medium">{task.credits} Credits</span>
-                      <span className="text-green-600 font-medium">✓ Available</span>
                     </div>
 
                     {/* Action Buttons */}
