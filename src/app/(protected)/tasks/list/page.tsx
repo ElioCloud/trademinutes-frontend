@@ -25,6 +25,16 @@ interface Author {
   Avatar?: string;
 }
 
+interface Tier {
+  name: string;
+  title: string;
+  description: string;
+  credits: number;
+  features: string[];
+  availableTimeSlot: string;
+  maxDays: number;
+}
+
 interface Task {
   id: string;
   Title: string;
@@ -40,6 +50,7 @@ interface Task {
   Status?: string;
   Author?: Author;
   Images?: string[]; // Add Images field for uploaded images
+  Tiers?: Tier[]; // Add Tiers field for pricing tiers
 }
 
 export default function TaskListPage() {

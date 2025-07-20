@@ -10,6 +10,16 @@ interface Availability {
   TimeTo: string;
 }
 
+interface Tier {
+  name: string;
+  title: string;
+  description: string;
+  credits: number;
+  features: string[];
+  availableTimeSlot: string;
+  maxDays: number;
+}
+
 interface Task {
   id: string;
   Title: string;
@@ -24,6 +34,7 @@ interface Task {
   Category?: string;
   Status?: string;
   Images?: string[];
+  Tiers?: Tier[];
 }
 
 interface EditTaskModalProps {
@@ -51,6 +62,35 @@ export default function EditTaskModal({
     type: "",
     availability: [{ date: "", timeFrom: "", timeTo: "" }],
   });
+  const [tiers, setTiers] = useState<Tier[]>([
+    {
+      name: "Basic",
+      title: "",
+      description: "",
+      credits: 0,
+      features: [],
+      availableTimeSlot: "9:00 AM - 5:00 PM",
+      maxDays: 7
+    },
+    {
+      name: "Standard",
+      title: "",
+      description: "",
+      credits: 0,
+      features: [],
+      availableTimeSlot: "8:00 AM - 6:00 PM",
+      maxDays: 14
+    },
+    {
+      name: "Premium",
+      title: "",
+      description: "",
+      credits: 0,
+      features: [],
+      availableTimeSlot: "24/7 Available",
+      maxDays: 30
+    }
+  ]);
   const [images, setImages] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -73,6 +113,11 @@ export default function EditTaskModal({
         })) || [{ date: "", timeFrom: "", timeTo: "" }],
       });
       setExistingImages(task.Images || []);
+      
+      // Set tiers from task if available
+      if (task.Tiers && task.Tiers.length > 0) {
+        setTiers(task.Tiers);
+      }
     }
   }, [task, isOpen]);
 
@@ -105,6 +150,33 @@ export default function EditTaskModal({
       ...prev,
       availability: prev.availability.filter((_, i) => i !== index),
     }));
+  };
+
+  const handleTierChange = (index: number, field: keyof Tier, value: any) => {
+    setTiers(prev => prev.map((tier, i) => 
+      i === index ? { ...tier, [field]: value } : tier
+    ));
+  };
+
+  const addTierFeature = (tierIndex: number) => {
+    setTiers(prev => prev.map((tier, i) => 
+      i === tierIndex ? { ...tier, features: [...tier.features, ""] } : tier
+    ));
+  };
+
+  const removeTierFeature = (tierIndex: number, featureIndex: number) => {
+    setTiers(prev => prev.map((tier, i) => 
+      i === tierIndex ? { ...tier, features: tier.features.filter((_, fi) => fi !== featureIndex) } : tier
+    ));
+  };
+
+  const updateTierFeature = (tierIndex: number, featureIndex: number, value: string) => {
+    setTiers(prev => prev.map((tier, i) => 
+      i === tierIndex ? { 
+        ...tier, 
+        features: tier.features.map((feature, fi) => fi === featureIndex ? value : feature)
+      } : tier
+    ));
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,6 +221,9 @@ export default function EditTaskModal({
 
       // Add availability
       formDataToSend.append("availability", JSON.stringify(formData.availability));
+
+      // Add tiers
+      formDataToSend.append("tiers", JSON.stringify(tiers));
 
       // Add new images
       images.forEach((image) => {
@@ -357,6 +432,110 @@ export default function EditTaskModal({
                         <FaTrash className="w-4 h-4" />
                       </button>
                     )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Tiers */}
+            <div className="space-y-4">
+              <label className="block text-sm font-medium text-gray-700">Service Tiers</label>
+              <p className="text-sm text-gray-600">Configure your pricing tiers and what's included in each package</p>
+              
+              {tiers.map((tier, index) => (
+                <div key={index} className="border border-gray-200 rounded-xl p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-lg font-semibold text-gray-900">{tier.name} Tier</h4>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-gray-500">Credits:</span>
+                      <input
+                        type="number"
+                        value={tier.credits}
+                        onChange={(e) => handleTierChange(index, 'credits', parseInt(e.target.value) || 0)}
+                        className="w-20 border border-gray-300 px-2 py-1 rounded text-sm"
+                        min="0"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                    <input
+                      type="text"
+                      value={tier.title}
+                      onChange={(e) => handleTierChange(index, 'title', e.target.value)}
+                      className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      placeholder={`${tier.name} package title`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea
+                      value={tier.description}
+                      onChange={(e) => handleTierChange(index, 'description', e.target.value)}
+                      className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
+                      rows={2}
+                      placeholder={`Describe what's included in the ${tier.name} package`}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Available Time Slot</label>
+                      <input
+                        type="text"
+                        value={tier.availableTimeSlot}
+                        onChange={(e) => handleTierChange(index, 'availableTimeSlot', e.target.value)}
+                        className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        placeholder="e.g., 9:00 AM - 5:00 PM"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Max Days</label>
+                      <input
+                        type="number"
+                        value={tier.maxDays}
+                        onChange={(e) => handleTierChange(index, 'maxDays', parseInt(e.target.value) || 0)}
+                        className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        min="1"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Features */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-medium text-gray-700">Features</label>
+                      <button
+                        type="button"
+                        onClick={() => addTierFeature(index)}
+                        className="text-green-600 hover:text-green-700 text-sm font-medium"
+                      >
+                        + Add Feature
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      {tier.features.map((feature, featureIndex) => (
+                        <div key={featureIndex} className="flex gap-2">
+                          <input
+                            type="text"
+                            value={feature}
+                            onChange={(e) => updateTierFeature(index, featureIndex, e.target.value)}
+                            className="flex-1 border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            placeholder="Enter feature description"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeTierFeature(index, featureIndex)}
+                            className="text-red-500 hover:text-red-700 p-2"
+                          >
+                            <FaTrash className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               ))}
