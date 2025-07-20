@@ -16,7 +16,6 @@ interface Tier {
   title: string;
   description: string;
   credits: number;
-  deliveryTime: string;
   features: string[];
   weeklyHours: number;
   dailyHours: number;
@@ -46,7 +45,6 @@ export default function CreateTaskModal({
       title: "",
       description: "",
       credits: 0,
-      deliveryTime: "2 days",
       features: [],
       weeklyHours: 20,
       dailyHours: 4,
@@ -57,7 +55,6 @@ export default function CreateTaskModal({
       title: "",
       description: "",
       credits: 0,
-      deliveryTime: "3 days",
       features: [],
       weeklyHours: 30,
       dailyHours: 6,
@@ -68,7 +65,6 @@ export default function CreateTaskModal({
       title: "",
       description: "",
       credits: 0,
-      deliveryTime: "4 days",
       features: [],
       weeklyHours: 40,
       dailyHours: 8,
@@ -579,27 +575,15 @@ export default function CreateTaskModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-              <input
-                type="text"
-                value={tier.title}
-                onChange={(e) => handleTierChange(index, 'title', e.target.value)}
-                className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                placeholder={`${tier.name} package title`}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Time</label>
-              <input
-                type="text"
-                value={tier.deliveryTime}
-                onChange={(e) => handleTierChange(index, 'deliveryTime', e.target.value)}
-                className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                placeholder="e.g., 2 days"
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+            <input
+              type="text"
+              value={tier.title}
+              onChange={(e) => handleTierChange(index, 'title', e.target.value)}
+              className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              placeholder={`${tier.name} package title`}
+            />
           </div>
 
           <div>
