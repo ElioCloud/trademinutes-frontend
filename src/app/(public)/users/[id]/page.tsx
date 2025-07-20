@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import Navbar from "@/components/Navbar";
 import { 
   FaUser, 
   FaEnvelope, 
@@ -448,8 +449,10 @@ export default function UserProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col gap-6 p-6">
-      <div className="w-full max-w-[1400px] mx-auto">
+    <div className="min-h-screen bg-white text-black">
+      <Navbar />
+      <div className="flex flex-col gap-6 p-6">
+        <div className="w-full max-w-[1400px] mx-auto">
         {/* Cover Image Section */}
         <div className="relative w-full h-48 md:h-64 rounded-xl overflow-hidden mb-6">
           <Image 
@@ -838,6 +841,7 @@ export default function UserProfilePage() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

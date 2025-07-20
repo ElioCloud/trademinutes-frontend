@@ -534,7 +534,7 @@ export default function UsersNearby() {
                           height={24}
                           className="rounded-full object-cover border border-blue-200"
                         />
-                        <div className="text-center -ml-2">
+                        <div className="text-center -ml-4">
                           <div className="flex items-center justify-center gap-1 mb-[-10px]">
                             <p className="font-medium text-gray-900 text-xs">{task.author.name}</p>
                           </div>
