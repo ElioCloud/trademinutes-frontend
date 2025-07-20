@@ -48,12 +48,15 @@ type Service = {
   Tiers?: Tier[];
   tiers?: Tier[];
   Author?: {
+    ID?: string;
+    id?: string;
     Name?: string;
     name?: string;
     Avatar?: string;
     avatar?: string;
   };
   author?: {
+    id?: string;
     name?: string;
     avatar?: string;
   };
@@ -87,6 +90,7 @@ type Review = {
 export default function ServiceViewPage() {
   const params = useParams();
   const router = useRouter();
+  const { user, token } = useAuth();
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -95,7 +99,17 @@ export default function ServiceViewPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const { token } = useAuth();
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+  const [messageText, setMessageText] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
+
+  // Helper function to check if service belongs to current user
+  const isOwnService = () => {
+    if (!user || !service) return false;
+    const serviceAuthorId = service.Author?.ID || service.Author?.id || service.author?.id;
+    const currentUserId = user.ID || user.id;
+    return serviceAuthorId === currentUserId;
+  };
 
   // Debug logging function
   const logToFile = async (message: string, data?: any) => {
@@ -356,7 +370,7 @@ export default function ServiceViewPage() {
   const category = service.Category || service.category;
   const rating = service.rating || 4.9;
   const reviewCount = service.reviewCount || 554;
-  const user = service.Author?.Name || service.Author?.name || service.author?.name || 'Provider';
+  const serviceProvider = service.Author?.Name || service.Author?.name || service.author?.name || 'Provider';
   const avatar = service.Author?.Avatar || service.author?.avatar;
   const price = service.Credits || service.credits || 0;
   const location = service.Location || service.location || 'Online';
@@ -493,30 +507,7 @@ export default function ServiceViewPage() {
                 </div>
               </div>
               
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="relative">
-                  <Image
-                    src={avatar || '/api/placeholder/60/60'}
-                    alt={user}
-                    width={60}
-                    height={60}
-                    className="rounded-full"
-                  />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">{user}</h3>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <FaStar key={i} className={`w-4 h-4 ${i < Math.floor(service?.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`} />
-                      ))}
-                    </div>
-                    <span className="text-sm text-gray-600">
-                      {service?.rating || 0} ({service?.reviewCount || 0} reviews)
-                    </span>
-                  </div>
-                </div>
-              </div>
+
             </div>
 
             {/* About the Service */}
@@ -668,52 +659,80 @@ export default function ServiceViewPage() {
 
                 {/* Action Buttons */}
                 <div className="space-y-3 mt-6">
-                  <button
-                    onClick={handleOrder}
-                    className="w-full bg-black text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 transition-colors"
-                  >
-                    {(() => {
-                      const currentTier = service?.Tiers?.find(tier => tier.name === selectedTier);
-                      if (currentTier) {
-                        return (
-                          <div className="flex flex-col items-center">
-                            <span>Book {currentTier.name} Package</span>
-                            <span className="text-sm opacity-90">{currentTier.credits} Credits</span>
-                          </div>
-                        );
-                      }
-                      return 'Book this service';
-                    })()}
-                  </button>
-                  <button
-                    onClick={handleContact}
-                    className="w-full border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-                  >
-                    Contact me
-                  </button>
+                  {isOwnService() ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">You are the service provider. You cannot book or contact yourself.</p>
+                    </div>
+                  ) : (
+                    <>
+                      <button
+                        onClick={handleOrder}
+                        className="w-full bg-black text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 transition-colors"
+                      >
+                        {(() => {
+                          const currentTier = service?.Tiers?.find(tier => tier.name === selectedTier);
+                          if (currentTier) {
+                            return (
+                              <div className="flex flex-col items-center">
+                                <span>Book {currentTier.name} Package</span>
+                                <span className="text-sm opacity-90">{currentTier.credits} Credits</span>
+                              </div>
+                            );
+                          }
+                          return 'Book this service';
+                        })()}
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (token) {
+                            // Show message dialog
+                            setIsMessageModalOpen(true);
+                          } else {
+                            // Show login modal
+                            setIsAuthModalOpen(true);
+                          }
+                        }}
+                        className="w-full border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                      >
+                        Contact me
+                      </button>
+                    </>
+                  )}
                 </div>
 
-                {/* Hourly Offer */}
-                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <Image
-                      src={avatar || '/api/placeholder/40/40'}
-                      alt={user}
-                      width={40}
-                      height={40}
-                      className="rounded-full"
-                    />
-                    <div>
-                      <h4 className="font-medium text-gray-900">Need flexibility when hiring?</h4>
-                      <button className="text-green-600 hover:text-green-700 text-sm underline">
-                        Request an hourly offer
-                      </button>
+                {/* Service Provider Info */}
+                {!isOwnService() && (
+                  <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <Image
+                        src={avatar || '/api/placeholder/40/40'}
+                        alt={serviceProvider}
+                        width={40}
+                        height={40}
+                        className="rounded-full"
+                      />
+                      <div>
+                        <h4 className="font-medium text-gray-900">About {serviceProvider}</h4>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <div className="flex items-center">
+                            {[...Array(5)].map((_, i) => (
+                              <FaStar key={i} className={`w-3 h-3 ${i < Math.floor(service?.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`} />
+                            ))}
+                          </div>
+                          <span className="text-xs text-gray-600">
+                            {service?.rating || 0} ({service?.reviewCount || 0} reviews)
+                          </span>
+                        </div>
+                      </div>
                     </div>
+                    <p className="text-sm text-gray-600">
+                      {serviceProvider} is a trusted provider with a proven track record of delivering quality services. 
+                      They specialize in {service?.Category || service?.category || 'their field'} and are committed to 
+                      ensuring customer satisfaction with every project.
+                    </p>
                   </div>
-                  <p className="text-sm text-gray-600">
-                    Hiring on an hourly basis is perfect for long-term projects, with easy automatic weekly payments.
-                  </p>
-                </div>
+                )}
+
               </div>
             </div>
           </div>
@@ -721,23 +740,38 @@ export default function ServiceViewPage() {
       </div>
 
       {/* Chat Widget */}
-      <div className="fixed bottom-6 left-6">
-        <div className="bg-white rounded-full shadow-lg p-4 cursor-pointer hover:shadow-xl transition-shadow">
-          <div className="flex items-center space-x-3">
-            <Image
-              src={avatar || '/api/placeholder/40/40'}
-              alt={user}
-              width={40}
-              height={40}
-              className="rounded-full"
-            />
-            <div className="text-sm">
-              <p className="font-medium text-gray-900">Message {user}</p>
-              <p className="text-gray-500">Away • Avg. response time: 1 Hour</p>
+      {!isOwnService() && (
+        <div className="fixed bottom-6 right-6">
+          <div 
+            className="bg-white rounded-full shadow-lg p-4 cursor-pointer hover:shadow-xl transition-shadow"
+            onClick={() => {
+              if (token) {
+                // Open chat box - you can implement this functionality
+                console.log('Opening chat with', serviceProvider);
+                // For now, just show an alert
+                alert('Chat functionality coming soon!');
+              } else {
+                // Show login modal
+                setIsAuthModalOpen(true);
+              }
+            }}
+          >
+            <div className="flex items-center space-x-3">
+              <Image
+                src={avatar || '/api/placeholder/40/40'}
+                alt={serviceProvider}
+                width={40}
+                height={40}
+                className="rounded-full"
+              />
+              <div className="text-sm">
+                <p className="font-medium text-gray-900">Message {serviceProvider}</p>
+                <p className="text-gray-500">Click to chat</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <Footer />
 
@@ -763,6 +797,65 @@ export default function ServiceViewPage() {
         }}
         defaultMode="login"
       />
+
+      {/* Message Modal */}
+      {isMessageModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-white rounded-xl shadow-lg p-8 min-w-[400px] max-w-[500px] w-full mx-4">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Send a message to {serviceProvider}</h3>
+              <p className="text-sm text-gray-600 mt-1">Ask questions or discuss project details</p>
+            </div>
+            
+            <textarea
+              className="w-full border border-gray-300 rounded-lg p-3 mb-4 min-h-[120px] resize-none"
+              placeholder="Type your message here..."
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+              disabled={sendingMessage}
+            />
+            
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setIsMessageModalOpen(false);
+                  setMessageText('');
+                }}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                disabled={sendingMessage}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (!messageText.trim()) return;
+                  
+                  setSendingMessage(true);
+                  try {
+                    // Here you would implement the actual message sending logic
+                    console.log('Sending message:', messageText);
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    // Show success message
+                    alert('Message sent successfully!');
+                    setIsMessageModalOpen(false);
+                    setMessageText('');
+                  } catch (error) {
+                    alert('Failed to send message. Please try again.');
+                  } finally {
+                    setSendingMessage(false);
+                  }
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                disabled={sendingMessage || !messageText.trim()}
+              >
+                {sendingMessage ? 'Sending...' : 'Send Message'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 } 

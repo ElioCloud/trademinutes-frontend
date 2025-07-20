@@ -7,8 +7,9 @@ import Image from "next/image";
 import ProtectedLayout from "@/components/Layout/ProtectedLayout";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaArrowLeft, FaMapMarkerAlt, FaClock, FaCoins, FaStar, FaHeart, FaCalendar, FaUser, FaChevronDown, FaChevronUp, FaEnvelope, FaTimes, FaChevronLeft, FaChevronRight, FaExpand } from "react-icons/fa";
+import { FaArrowLeft, FaMapMarkerAlt, FaClock, FaCoins, FaStar, FaHeart, FaCalendar, FaUser, FaChevronDown, FaChevronUp, FaEnvelope, FaTimes, FaChevronLeft, FaChevronRight, FaExpand, FaCheck } from "react-icons/fa";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Availability {
   date: string;
@@ -37,7 +38,33 @@ interface Task {
   status?: string;
   type?: string;
   acceptedBy?: string;
-  Images?: string[]; // Add Images field for uploaded images
+  Images?: string[];
+  Tiers?: Tier[];
+}
+
+interface Tier {
+  name: string;
+  title: string;
+  description: string;
+  credits: number;
+  features: string[];
+  availableTimeSlot: string;
+  maxDays: number;
+}
+
+interface Review {
+  id?: string;
+  _id?: string;
+  reviewer?: {
+    id?: string;
+    name?: string;
+    avatar?: string;
+    location?: string;
+  };
+  rating?: number;
+  comment?: string;
+  text?: string;
+  createdAt?: number;
 }
 
 // Normalize raw API data with uppercase keys
@@ -67,7 +94,8 @@ function normalizeTask(raw: any): Task {
     status: raw.Status,
     type: raw.Type,
     acceptedBy: raw.AcceptedBy,
-    Images: raw.Images || [], // Add Images field normalization
+    Images: raw.Images || [],
+    Tiers: raw.Tiers || [],
   };
 }
 
@@ -77,144 +105,106 @@ function isValidObjectId(id: string | undefined): boolean {
 }
 
 export default function ViewTaskPage() {
-  const { id } = useParams();
+  const params = useParams();
+  const router = useRouter();
+  const { user, token } = useAuth();
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
-  const [alreadyBooked, setAlreadyBooked] = useState(false);
-  const API_BASE_URL =
-    process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084";
-  const router = useRouter();
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedTier, setSelectedTier] = useState<string>('Basic');
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [messageModal, setMessageModal] = useState(false);
   const [firstMessage, setFirstMessage] = useState("");
   const [sendingFirstMessage, setSendingFirstMessage] = useState(false);
-  const [dialog, setDialog] = useState<{ open: boolean; message: string; isError?: boolean }>({ open: false, message: "", isError: false });
-  const [cancelling, setCancelling] = useState(false);
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [reviewRating, setReviewRating] = useState(0);
-  const [reviewComment, setReviewComment] = useState("");
-  const [reviewSubmitted, setReviewSubmitted] = useState(false);
-  const [hasReviewed, setHasReviewed] = useState(false);
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [showDebugDialog, setShowDebugDialog] = useState(false);
-  const [bookingDebug, setBookingDebug] = useState<{ open: boolean; message: string }>({ open: false, message: "" });
-  const [expandedReviews, setExpandedReviews] = useState<Set<string>>(new Set());
-  const [showAllReviews, setShowAllReviews] = useState(false);
-  const [imageModal, setImageModal] = useState<{ open: boolean; currentIndex: number; images: string[] }>({
-    open: false,
-    currentIndex: 0,
-    images: []
-  });
+  const [dialog, setDialog] = useState({ open: false, message: "", isError: false });
+  const [imageModal, setImageModal] = useState({ open: false, currentIndex: 0, images: [] as string[] });
+  
+  const API_BASE_URL = process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084";
 
   useEffect(() => {
     const fetchTask = async () => {
-      const token = localStorage.getItem("token");
-      if (!token || !id) return;
-
       try {
-        const res = await fetch(`${API_BASE_URL}/api/tasks/get/${id}`, {
+        setLoading(true);
+        const taskId = params.id as string;
+        
+        console.log("=== TASK VIEW DEBUG START ===");
+        console.log("Task ID:", taskId);
+        console.log("Params:", params);
+        console.log("Token:", token ? "Present" : "Missing");
+        
+        if (!isValidObjectId(taskId)) {
+          setError('Invalid task ID');
+          setLoading(false);
+          return;
+        }
+
+        const API_BASE_URL = process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084";
+        const url = `${API_BASE_URL}/api/tasks/get/${taskId}`;
+        
+        console.log("API Base URL:", API_BASE_URL);
+        console.log("Full URL:", url);
+        
+        console.log("Making fetch request...");
+        const response = await fetch(url, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
           },
         });
+        
+        console.log("Response received:");
+        console.log("Status:", response.status);
+        console.log("Status Text:", response.statusText);
+        console.log("OK:", response.ok);
 
-        const json = await res.json();
+        if (!response.ok) {
+          console.error("Response not OK - Status:", response.status);
+          const errorText = await response.text();
+          console.error("Error response body:", errorText);
+          throw new Error(`Task not found (Status: ${response.status})`);
+        }
+        
+        console.log("Response is OK, parsing JSON...");
+        const data = await response.json();
         console.log("=== TASK VIEW DEBUG ===");
-        console.log("Raw API response:", json);
-        console.log("Task data:", json.data || json);
-        console.log("Images field:", (json.data || json).Images);
-        console.log("Images type:", typeof (json.data || json).Images);
-        console.log("Images length:", (json.data || json).Images?.length);
+        console.log("Raw API response:", data);
         
-        const normalizedTask = normalizeTask(json.data || json);
+        const normalizedTask = normalizeTask(data);
         console.log("Normalized task:", normalizedTask);
-        console.log("Normalized Images:", normalizedTask.Images);
-        console.log("Normalized Images length:", normalizedTask.Images?.length);
-        
         setTask(normalizedTask);
+        
+        // Set initial selected tier if tiers are available
+        if (normalizedTask.Tiers && normalizedTask.Tiers.length > 0) {
+          setSelectedTier(normalizedTask.Tiers[0].name);
+          console.log("Set initial selected tier:", normalizedTask.Tiers[0].name);
+        }
+        
+        // Fetch reviews for this task
+        if (normalizedTask.author?.id) {
+          fetchReviews(normalizedTask.id, setReviews);
+        }
+        console.log("=== TASK VIEW DEBUG END ===");
       } catch (err) {
-        console.error("Error fetching task:", err);
+        console.error("=== TASK VIEW ERROR ===");
+        console.error("Error type:", typeof err);
+        console.error("Error name:", err instanceof Error ? err.name : 'N/A');
+        console.error("Error message:", err instanceof Error ? err.message : err);
+        console.error("Full error:", err);
+        console.error("=== END ERROR ===");
+        setError(err instanceof Error ? err.message : 'Failed to load task');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTask();
-  }, [id]);
-
-  // Prevent double booking: check if user already booked this task
-  useEffect(() => {
-    const checkExistingBooking = async () => {
-      const token = localStorage.getItem("token");
-      if (!token || !id) return;
-      // Get user ID from profile
-      let userId;
-      try {
-        const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8080'}/api/auth/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!profileRes.ok) throw new Error("Failed to fetch user profile");
-        const profileData = await profileRes.json();
-        userId = profileData.ID || profileData.id;
-        if (!userId) throw new Error("User ID not found in profile");
-      } catch (error) {
-        console.error("Error fetching user profile for booking check:", error);
-        return;
-      }
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/bookings?role=booker&id=${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) return;
-        const json = await res.json();
-        let bookings: any[] = [];
-        if (json && Array.isArray(json.data)) {
-          bookings = json.data;
-        } else if (Array.isArray(json)) {
-          bookings = json;
-        }
-        const hasBooking = bookings.some(
-          (b: any) => (b.TaskID === id || b.taskId === id) && b.status !== "cancelled" && b.status !== "rejected"
-        );
-        setAlreadyBooked(hasBooking);
-      } catch (err) {
-        console.error("Error checking existing booking:", err);
-      }
-    };
-    checkExistingBooking();
-  }, [id]);
-
-  // Check if user has already reviewed this task
-  useEffect(() => {
-    const checkReviewed = async () => {
-      if (!task || !task.id) return;
-      const token = localStorage.getItem("token");
-      let userId = null;
-      if (token) {
-        const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084'}/api/auth/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (profileRes.ok) {
-          const profileData = await profileRes.json();
-          userId = profileData.ID || profileData.id;
-        }
-      }
-      if (!userId || !isValidObjectId(userId)) return;
-      const API_BASE_URL = process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086';
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/reviews?userId=${userId}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        setHasReviewed(Array.isArray(data) ? data.some((r: any) => r.taskId === task.id && r.reviewerId === userId) : false);
-      } catch (err) {
-        console.error("Error fetching or parsing reviews:", err);
-      }
-    };
-    checkReviewed();
-  }, [task]);
+    if (token) {
+      fetchTask();
+    }
+  }, [params.id, token]);
 
   // Fetch reviews for this task
-  const fetchReviews = async (taskId: string, setReviews: (reviews: any[]) => void) => {
+  const fetchReviews = async (taskId: string, setReviews: (reviews: Review[]) => void) => {
     try {
       const API_BASE_URL = process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086';
       const res = await fetch(`${API_BASE_URL}/api/reviews?taskId=${taskId}`);
@@ -232,97 +222,21 @@ export default function ViewTaskPage() {
     fetchReviews(task.id, setReviews);
   }, [task]);
 
-  // Review submit handler
-  const handleSubmitReview = async () => {
+  async function handleSendFirstMessage() {
     const token = localStorage.getItem("token");
-    let userId = null;
-    if (token) {
-      const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084'}/api/auth/profile`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (profileRes.ok) {
-        const profileData = await profileRes.json();
-        userId = profileData.ID || profileData.id;
-      }
+    if (!token || !task || !task.author?.id) {
+      setDialog({ open: true, message: "Authentication required", isError: true });
+      return;
     }
-    if (!userId || !task || !task.author?.id) return;
-    const API_BASE_URL = process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086';
-    const res = await fetch(`${API_BASE_URL}/api/reviews`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        reviewerId: userId,
-        revieweeId: task.author.id,
-        taskId: task.id,
-        rating: reviewRating,
-        comment: reviewComment,
-      }),
-    });
-    if (res.ok) {
-      setReviewSubmitted(true);
-      setShowReviewModal(false);
-      toast.success("Review submitted!");
-    } else {
-      toast.error("Failed to submit review");
+
+    if (!firstMessage.trim()) {
+      setDialog({ open: true, message: "Please enter a message", isError: true });
+      return;
     }
-  };
 
-  if (loading || !task) {
-    return (
-      <ProtectedLayout headerName="Task Details">
-        <div className="min-h-screen bg-white flex justify-center items-center">
-          <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 w-full max-w-3xl border border-gray-200 flex items-center justify-center" style={{ minHeight: 320 }}>
-            <span className="text-lg text-gray-600 font-medium">
-              {loading ? "Loading task..." : "Task not found."}
-            </span>
-          </div>
-        </div>
-      </ProtectedLayout>
-    );
-  }
-
-  function getCurrentUserEmail() {
-    const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
-    if (!token) return null;
+    setSendingFirstMessage(true);
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.email;
-    } catch {
-      return null;
-    }
-  }
-
-  const handleBooking = async () => {
-    if (alreadyBooked) {
-      toast.error("You already have an active booking for this task.");
-      return;
-    }
-    const token = localStorage.getItem("token");
-    
-    if (!token || !task) {
-      alert("Missing data for booking.");
-      return;
-    }
-
-    // Extract user email from JWT token and fetch user ID from profile
-    let userEmail;
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      userEmail = payload.email;
-    } catch (error) {
-      console.error("Error decoding token:", error);
-      alert("Error getting user information from token.");
-      return;
-    }
-
-    if (!userEmail) {
-      alert("User email not found in token.");
-      return;
-    }
-
-    // Fetch user profile to get the user ID
-    let loggedInUserID;
-    try {
+      // Get current user profile
       const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8080'}/api/auth/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -332,219 +246,59 @@ export default function ViewTaskPage() {
       }
       
       const profileData = await profileRes.json();
-      loggedInUserID = profileData._id || profileData.ID || profileData.id;
+      const currentUserId = profileData.ID || profileData.id;
       
-      if (!loggedInUserID) {
-        throw new Error("User ID not found in profile");
+      if (!currentUserId) {
+        throw new Error("User ID not found");
       }
-      // Ensure it's a valid MongoDB ObjectId (24 hex chars)
-      if (typeof loggedInUserID !== 'string' || !/^[a-fA-F0-9]{24}$/.test(loggedInUserID)) {
-        throw new Error("Invalid user ID format. Please re-login or contact support.");
-      }
-    } catch (error) {
-      console.error("Error fetching user profile:", error);
-      alert("Failed to get user information. Please try again.\n" + (error instanceof Error ? error.message : error));
-      return;
-    }
 
-    const requestBody = {
-      taskId: task.id,
-      bookerId: loggedInUserID,
-      taskOwnerId: task.author?.id,
-      credits: task.credits,
-      timeslot: {
-        date: task.availability?.[0]?.date,
-        timeFrom: task.availability?.[0]?.timeFrom,
-        timeTo: task.availability?.[0]?.timeTo,
-      },
-      status: "pending",
-    };
-
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/bookings/book`, {
-        method: "POST",
+      // Send message via messaging service
+      const messagingRes = await fetch(`${process.env.NEXT_PUBLIC_MESSAGING_API_URL || 'http://localhost:8085'}/api/messages`, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (!res.ok) {
-        let errorText = "";
-        try {
-          errorText = await res.text();
-        } catch {}
-        setBookingDebug({
-          open: true,
-          message: `Booking failed!\n\nRequest Body:\n${JSON.stringify(requestBody, null, 2)}\n\nServer Response:\n${errorText}`,
-        });
-        return;
-      }
-
-      toast.success("Appointment booked successfully!");
-      setAlreadyBooked(true);
-      // router.push("/appointments");
-    } catch (err: any) {
-      setBookingDebug({
-        open: true,
-        message: `Booking error!\n\nRequest Body:\n${JSON.stringify(requestBody, null, 2)}\n\nError:\n${err instanceof Error ? err.message : String(err)}`,
-      });
-    }
-  };
-
-  async function handleSendFirstMessage() {
-    if (!task?.author?.email) {
-      setDialog({ open: true, message: "No task owner email found.", isError: true });
-      return;
-    }
-    const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
-    const currentUserEmail = getCurrentUserEmail();
-    if (!token || !currentUserEmail) {
-      setDialog({
-        open: true,
-        message: `You must be logged in to message.\n\n[DEBUG]\ntoken: ${token}\ncurrentUserEmail: ${currentUserEmail}`,
-        isError: true
-      });
-      return;
-    }
-    if (!firstMessage.trim()) {
-      setDialog({ open: true, message: "Please enter a message.", isError: true });
-      return;
-    }
-    setSendingFirstMessage(true);
-    try {
-      // 1. Create/find conversation
-      const res = await fetch(`${process.env.NEXT_PUBLIC_MESSAGING_API_URL || 'http://localhost:8085'}/api/conversations`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
         body: JSON.stringify({
-          type: "direct",
-          name: `Task: ${task.title}`,
-          avatar: task.author.avatar,
-          participants: [currentUserEmail, task.author.email].sort(),
-          taskId: task.id
-        })
-      });
-      if (!res.ok) {
-        const errorText = await res.text();
-        setDialog({ open: true, message: `Failed to start conversation: ${errorText}`, isError: true });
-        setSendingFirstMessage(false);
-        return;
-      }
-      const data = await res.json();
-      const conversationId = data.$oid || data || "";
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem("autoSelectConversationId", conversationId);
-      }
-      // 2. Send first message
-      const messageRes = await fetch(`${process.env.NEXT_PUBLIC_MESSAGING_API_URL || 'http://localhost:8085'}/api/conversations/${conversationId}/messages`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
+          receiverId: task.author.id,
           content: firstMessage,
-          senderId: currentUserEmail,
-          senderName: (task.author && task.author.name) || "",
-          senderAvatar: (task.author && task.author.avatar) || "",
-          type: "text"
-        })
+          taskId: task.id,
+        }),
       });
-      if (!messageRes.ok) {
-        const errorText = await messageRes.text();
-        setDialog({ open: true, message: `Failed to send message: ${errorText}`, isError: true });
-        setSendingFirstMessage(false);
-        return;
+
+      if (!messagingRes.ok) {
+        throw new Error("Failed to send message");
       }
-      setDialog({ open: true, message: "Message sent! Redirecting to chat...", isError: false });
+
+      setDialog({ open: true, message: "Message sent successfully! You can now chat with the task provider.", isError: false });
+      setMessageModal(false);
+      setFirstMessage("");
+      
+      // Redirect to messages page after a short delay
       setTimeout(() => {
-        setDialog({ open: false, message: "", isError: false });
-        setMessageModal(false);
-        setFirstMessage("");
-        setSendingFirstMessage(false);
-        router.push("/messages");
-      }, 1200);
-    } catch (err) {
-      setDialog({ open: true, message: `Error: ${err instanceof Error ? err.message : String(err)}` , isError: true });
+        router.push('/messages');
+      }, 2000);
+
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setDialog({ open: true, message: "Failed to send message. Please try again.", isError: true });
+    } finally {
       setSendingFirstMessage(false);
     }
   }
 
-  const handleCancelBooking = async () => {
-    setCancelling(true);
-    try {
-      const token = localStorage.getItem("token");
-      if (!token || !id) throw new Error("Missing token or task id");
-      // Get user ID from profile
-      let userId;
-      const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8080'}/api/auth/profile`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!profileRes.ok) throw new Error("Failed to fetch user profile");
-      const profileData = await profileRes.json();
-      userId = profileData.ID || profileData.id;
-      if (!userId) throw new Error("User ID not found in profile");
-      // Find the booking for this user and task
-      const bookingsRes = await fetch(`${API_BASE_URL}/api/bookings?role=booker&id=${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!bookingsRes.ok) throw new Error("Failed to fetch bookings");
-      const bookingsJson = await bookingsRes.json();
-      let bookings = Array.isArray(bookingsJson.data) ? bookingsJson.data : bookingsJson;
-      const booking = bookings.find((b: any) => (b.TaskID === id || b.taskId === id) && b.status !== "cancelled" && b.status !== "rejected");
-      if (!booking) throw new Error("No active booking found to cancel");
-      // Call cancel endpoint
-      const bookingId = booking.ID || booking.id;
-      if (typeof bookingId !== 'string' || !/^[a-fA-F0-9]{24}$/.test(bookingId)) {
-        throw new Error("Invalid booking ID format. Please contact support.");
-      }
-      const cancelRes = await fetch(`${API_BASE_URL}/api/bookings/cancel`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ bookingId, cancelledBy: "booker" }),
-      });
-      if (!cancelRes.ok) {
-        let err;
-        try { err = JSON.parse(await cancelRes.clone().text()); } catch { err = { message: await cancelRes.clone().text() }; }
-        throw new Error(err.message || "Failed to cancel booking");
-      }
-      toast.success("Booking cancelled successfully!");
-      setAlreadyBooked(false);
-      // Optionally, refresh task or bookings state here
-      // await fetchTask();
-    } catch (err: any) {
-      toast.error("Failed to cancel booking: " + err.message);
-    } finally {
-      setCancelling(false);
-    }
-  };
-
-  // Image zoom functionality
   const openImageModal = (images: string[], index: number) => {
-    setImageModal({
-      open: true,
-      currentIndex: index,
-      images: images
-    });
+    setImageModal({ open: true, currentIndex: index, images });
   };
 
   const closeImageModal = () => {
-    setImageModal({
-      open: false,
-      currentIndex: 0,
-      images: []
-    });
+    setImageModal({ open: false, currentIndex: 0, images: [] });
   };
 
   const nextImage = () => {
     setImageModal(prev => ({
       ...prev,
-      currentIndex: (prev.currentIndex + 1) % prev.images.length
+      currentIndex: prev.currentIndex === prev.images.length - 1 ? 0 : prev.currentIndex + 1
     }));
   };
 
@@ -555,462 +309,488 @@ export default function ViewTaskPage() {
     }));
   };
 
+  if (loading) {
+    return (
+      <ProtectedLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <LoadingSpinner />
+        </div>
+      </ProtectedLayout>
+    );
+  }
+
+  if (!task) {
+    return (
+      <ProtectedLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Task not found</h1>
+            <p className="text-gray-600 mb-6">The task you're looking for doesn't exist or has been removed.</p>
+            <Link href="/tasks/explore" className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+              Browse Tasks
+            </Link>
+          </div>
+        </div>
+      </ProtectedLayout>
+    );
+  }
+
+  const images = task.Images || [];
+  const title = task.title;
+  const description = task.description;
+  const location = task.location;
+  const locationType = task.locationType;
+  const availability = task.availability || [];
+  const taskProvider = task.author?.name || 'Unknown';
+  const avatar = task.author?.avatar || '/api/placeholder/60/60';
+
   return (
     <ProtectedLayout>
       <div className="min-h-screen bg-white">
-
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <LoadingSpinner size="md" text="Loading task details..." />
-            </div>
-          ) : !task ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-gray-500">Task not found</div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Main Content */}
-              <div className="lg:col-span-2">
-                {/* Cover Image and Image Gallery */}
-                <div className="mb-6">
-                  {task.Images && task.Images.length > 0 ? (
-                    <div className="space-y-4">
-                      {/* Main Cover Image */}
-                      <div className="relative h-80 rounded-2xl overflow-hidden group cursor-pointer" onClick={() => openImageModal(task.Images!, 0)}>
-                        <img
-                          src={task.Images[0]}
-                          alt={task.title}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
-                        <div className="absolute bottom-6 left-6 text-white">
-                          <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-2">
-                            {task.type || 'SERVICE'}
-                          </span>
-                          <h1 className="text-3xl font-bold mb-2">{task.title}</h1>
-                        </div>
-                        <div className="absolute top-4 left-4">
-                          <button className="p-2 bg-white/20 hover:bg-white/30 rounded-full transition">
-                            <FaExpand className="w-5 h-5 text-white" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Thumbnail Gallery */}
-                      {task.Images.length > 1 && (
-                        <div className="grid grid-cols-4 gap-3">
-                          {task.Images.slice(1, 5).map((image, index) => (
-                            <div
-                              key={index + 1}
-                              className="relative h-24 rounded-lg overflow-hidden cursor-pointer group"
-                              onClick={() => openImageModal(task.Images!, index + 1)}
-                            >
-                              <img
-                                src={image}
-                                alt={`${task.title} - Image ${index + 2}`}
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                              />
-                              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors"></div>
-                              {index === 3 && task.Images!.length > 5 && (
-                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                  <span className="text-white text-sm font-semibold">+{task.Images!.length - 5}</span>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    /* Fallback gradient when no images */
-                    <div className="bg-gradient-to-br from-blue-400 to-blue-600 h-64 rounded-2xl relative">
-                      <div className="absolute inset-0 bg-black/20 rounded-2xl"></div>
-                      <div className="absolute bottom-6 left-6 text-white">
-                        <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-2">
-                          {task.type || 'SERVICE'}
-                        </span>
-                        <h1 className="text-3xl font-bold mb-2">{task.title}</h1>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Task Details */}
-                <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Description</h2>
-                  <p className="text-gray-700 leading-relaxed">{task.description}</p>
-                </div>
-
-                {/* Details Grid */}
-                <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Details</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <FaMapMarkerAlt className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <div className="font-medium text-gray-900">{task.location}</div>
-                        <div className="text-sm text-gray-500">{task.locationType}</div>
-                      </div>
-                    </div>
-                    
-                    {task.availability?.length > 0 && (
-                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                        <FaClock className="w-5 h-5 text-gray-400" />
-                        <div>
-                          <div className="font-medium text-gray-900">
-                            {task.availability[0].timeFrom} - {task.availability[0].timeTo}
-                          </div>
-                          <div className="text-sm text-gray-500">Time Slot</div>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <FaCoins className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <div className="font-medium text-gray-900">{task.credits} credits</div>
-                        <div className="text-sm text-gray-500">Price</div>
-                      </div>
-                    </div>
-
-                    {task.type && (
-                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                        <FaCalendar className="w-5 h-5 text-gray-400" />
-                        <div>
-                          <div className="font-medium text-gray-900">{task.type}</div>
-                          <div className="text-sm text-gray-500">Category</div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Author Information */}
-                {task.author && (
-                  <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">Service Provider</h2>
-                    <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                      <Image
-                        src={task.author.avatar?.trim() ? task.author.avatar : "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
-                        width={64}
-                        height={64}
-                        className="rounded-full object-cover border-2 border-white shadow-sm"
-                        alt={task.author.name}
-                      />
-                      <div className="flex-1">
-                        <div className="font-semibold text-lg text-gray-900">{task.author.name}</div>
-                        <div className="text-gray-500 text-sm">{task.author.email}</div>
-                        <div className="flex items-center gap-2 mt-2">
-                          <FaStar className="w-4 h-4 text-yellow-400" />
-                          <span className="text-sm text-gray-600">4.8 (24 reviews)</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Actions</h2>
-                  <div className="space-y-3">
-                    {!alreadyBooked ? (
-                      <button
-                        onClick={() => setShowConfirmModal(true)}
-                        disabled={alreadyBooked}
-                        className={`w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-xl text-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition ${alreadyBooked ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      >
-                        <FaCalendar className="w-5 h-5 inline mr-2" />
-                        Book Appointment
-                      </button>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-3">
-                        <button
-                          className="bg-gray-300 text-gray-700 py-4 rounded-xl text-lg font-semibold cursor-not-allowed"
-                          disabled
-                        >
-                          Already Booked
-                        </button>
-                        <button
-                          onClick={handleCancelBooking}
-                          className="bg-red-500 text-white py-4 rounded-xl text-lg font-semibold hover:bg-red-600 transition"
-                          disabled={cancelling}
-                        >
-                          {cancelling ? "Cancelling..." : "Cancel Booking"}
-                        </button>
-                      </div>
-                    )}
-                    
-                    <button
-                      onClick={() => setMessageModal(true)}
-                      className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-4 rounded-xl text-lg font-semibold hover:from-purple-600 hover:to-purple-700 transition"
-                    >
-                      <FaEnvelope className="w-5 h-5 inline mr-2" />
-                      Message Provider
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Sidebar - Reviews */}
-              <div className="lg:col-span-1">
-                <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-8">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold text-gray-900">Reviews</h2>
-                    <div className="flex items-center gap-1 text-sm text-gray-500">
-                      <FaStar className="w-4 h-4 text-yellow-400" />
-                      <span>4.5</span>
-                    </div>
-                  </div>
-                  
-                  {reviews.length === 0 ? (
-                    <div className="text-gray-500 text-center py-8">No reviews yet</div>
-                  ) : (
-                    <div className="space-y-4">
-                      {(showAllReviews ? reviews : reviews.slice(0, 3)).map((review, idx) => (
-                        <div key={review.id || idx} className="border border-gray-100 rounded-lg p-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                                {(review.reviewerName || 'A').charAt(0).toUpperCase()}
-                              </div>
-                              <span className="font-medium text-gray-900 text-sm">
-                                {review.reviewerName || 'Anonymous'}
-                              </span>
-                            </div>
-                            <div className="flex gap-0.5">
-                              {[1,2,3,4,5].map(star => (
-                                <FaStar 
-                                  key={star} 
-                                  className={`w-3 h-3 ${star <= (review.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`} 
-                                />
-                              ))}
-                            </div>
-                          </div>
-                          
-                          <div className="text-gray-700 text-sm">
-                            {review.comment.length > 100 && !expandedReviews.has(review.id || idx.toString()) ? (
-                              <div>
-                                <span>{review.comment.substring(0, 100)}...</span>
-                                <button
-                                  onClick={() => setExpandedReviews(prev => new Set([...prev, review.id || idx.toString()]))}
-                                  className="text-blue-600 hover:text-blue-700 text-sm font-medium ml-1"
-                                >
-                                  Read more
-                                </button>
-                              </div>
-                            ) : review.comment.length > 100 && expandedReviews.has(review.id || idx.toString()) ? (
-                              <div>
-                                <span>{review.comment}</span>
-                                <button
-                                  onClick={() => setExpandedReviews(prev => {
-                                    const newSet = new Set(prev);
-                                    newSet.delete(review.id || idx.toString());
-                                    return newSet;
-                                  })}
-                                  className="text-blue-600 hover:text-blue-700 text-sm font-medium ml-1"
-                                >
-                                  Show less
-                                </button>
-                              </div>
-                            ) : (
-                              <span>{review.comment}</span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                      
-                      {reviews.length > 3 && (
-                        <button
-                          onClick={() => setShowAllReviews(!showAllReviews)}
-                          className="w-full text-center py-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
-                        >
-                          {showAllReviews ? (
-                            <>
-                              <FaChevronUp className="w-4 h-4 inline mr-1" />
-                              Show Less
-                            </>
-                          ) : (
-                            <>
-                              <FaChevronDown className="w-4 h-4 inline mr-1" />
-                              Show All ({reviews.length} reviews)
-                            </>
-                          )}
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-          {/* First Message Modal */}
-          {messageModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-              <div className="bg-white rounded-xl shadow-lg p-8 min-w-[320px] text-center border border-blue-400">
-                <div className="mb-2 text-lg font-semibold text-blue-600">aaaaaaSend a message to the task owner</div>
-                <textarea
-                  className="w-full border border-gray-300 rounded-lg p-2 mb-4 min-h-[80px]"
-                  placeholder="Type your message..."
-                  value={firstMessage}
-                  onChange={e => setFirstMessage(e.target.value)}
-                  disabled={sendingFirstMessage}
-                />
-                <div className="flex gap-2 justify-center">
-                  <button
-                    onClick={() => { setMessageModal(false); setFirstMessage(""); }}
-                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-                    disabled={sendingFirstMessage}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSendFirstMessage}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    disabled={sendingFirstMessage}
-                  >
-                    {sendingFirstMessage ? "Sending..." : "Send & Start Chat"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-          {dialog.open && (
-            <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black/30`}>
-              <div className={`bg-white rounded-xl shadow-lg p-8 min-w-[320px] text-center border ${dialog.isError ? 'border-red-400' : 'border-green-400'}`}>
-                <div className={`mb-2 text-lg font-semibold ${dialog.isError ? 'text-red-600' : 'text-green-600'}`}>{dialog.isError ? 'Error' : 'Success'}</div>
-                <div className="mb-4 text-gray-700">{dialog.message}</div>
-                {!sendingFirstMessage && dialog.isError && (
-                  <button onClick={() => setDialog({ open: false, message: "", isError: false })} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Close</button>
-                )}
-              </div>
-            </div>
-          )}
-          {showConfirmModal && (
-            <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex justify-center items-center z-50">
-              <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                  Confirm Booking
-                </h2>
-                <p className="text-gray-600 mb-2">
-                  <strong>Date:</strong> {task.availability?.[0]?.date || "N/A"}
-                </p>
-                <p className="text-gray-600 mb-6">
-                  <strong>Time:</strong> {task.availability?.[0]?.timeFrom || "-"} to {task.availability?.[0]?.timeTo || "-"}
-                </p>
-                <p className="text-gray-600 mb-6">
-                  Are you sure you want to book this appointment?
-                </p>
-                <div className="flex justify-end gap-4">
-                  <button
-                    onClick={() => setShowConfirmModal(false)}
-                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm text-gray-700"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowConfirmModal(false);
-                      handleBooking();
-                    }}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm"
-                  >
-                    Yes, Book It
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-          {reviewSubmitted && (
-            <div className="mt-4 text-green-700 font-semibold">Review submitted!</div>
-          )}
-        </div>
-      <ToastContainer position="top-right" autoClose={3000} />
-      
-      {/* Image Zoom Modal */}
-      {imageModal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
-          <div className="relative w-full h-full flex items-center justify-center">
-            {/* Close Button */}
-            <button
-              onClick={closeImageModal}
-              className="absolute top-4 right-4 z-10 p-3 bg-black/50 hover:bg-black/70 rounded-full transition-colors"
-            >
-              <FaTimes className="w-6 h-6 text-white" />
-            </button>
-
-            {/* Navigation Buttons */}
-            {imageModal.images.length > 1 && (
-              <>
-                <button
-                  onClick={prevImage}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 p-3 bg-black/50 hover:bg-black/70 rounded-full transition-colors"
-                >
-                  <FaChevronLeft className="w-6 h-6 text-white" />
-                </button>
-                <button
-                  onClick={nextImage}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-3 bg-black/50 hover:bg-black/70 rounded-full transition-colors"
-                >
-                  <FaChevronRight className="w-6 h-6 text-white" />
-                </button>
-              </>
-            )}
-
-            {/* Image Counter */}
-            {imageModal.images.length > 1 && (
-              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 px-4 py-2 bg-black/50 rounded-full">
-                <span className="text-white text-sm font-medium">
-                  {imageModal.currentIndex + 1} / {imageModal.images.length}
-                </span>
-              </div>
-            )}
-
-            {/* Main Image */}
-            <div className="max-w-4xl max-h-full p-4">
-              <img
-                src={imageModal.images[imageModal.currentIndex]}
-                alt={`Task image ${imageModal.currentIndex + 1}`}
-                className="w-full h-full object-contain max-h-[90vh] rounded-lg"
-              />
-            </div>
-
-            {/* Thumbnail Strip */}
-            {imageModal.images.length > 1 && (
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10 flex gap-2">
-                {imageModal.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setImageModal(prev => ({ ...prev, currentIndex: index }))}
-                    className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                      index === imageModal.currentIndex 
-                        ? 'border-white scale-110' 
-                        : 'border-transparent hover:border-white/50'
-                    }`}
-                  >
-                    <img
-                      src={image}
-                      alt={`Thumbnail ${index + 1}`}
-                      className="w-full h-full object-cover"
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Cover Image */}
+              <div className="bg-white rounded-xl overflow-hidden border border-gray-200">
+                <div className="relative h-96">
+                  {images.length > 0 ? (
+                    <Image
+                      src={images[currentImageIndex] || images[0]}
+                      alt={title || 'Task'}
+                      fill
+                      className="object-cover"
                     />
-                  </button>
-                ))}
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                      <span className="text-white text-lg">Task Image</span>
+                    </div>
+                  )}
+                  
+                  {/* Navigation arrows */}
+                  {images.length > 1 && (
+                    <>
+                      <button
+                        onClick={() => setCurrentImageIndex(prev => prev === 0 ? images.length - 1 : prev - 1)}
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full"
+                      >
+                        ←
+                      </button>
+                      <button
+                        onClick={() => setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1)}
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full"
+                      >
+                        →
+                      </button>
+                    </>
+                  )}
+                </div>
+                
+                {/* Thumbnails */}
+                {images.length > 1 && (
+                  <div className="p-4 flex space-x-2 overflow-x-auto">
+                    {images.map((image, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentImageIndex(index)}
+                        className={`flex-shrink-0 w-16 h-16 rounded overflow-hidden ${
+                          index === currentImageIndex ? 'ring-2 ring-green-500' : ''
+                        }`}
+                      >
+                        <Image
+                          src={image}
+                          alt={`${title} ${index + 1}`}
+                          width={64}
+                          height={64}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
-      )}
 
-      {bookingDebug.open && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.4)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: 'white', padding: 24, borderRadius: 8, maxWidth: 600, width: '90vw', maxHeight: '80vh', overflow: 'auto', boxShadow: '0 2px 16px rgba(0,0,0,0.2)' }}>
-            <h2 style={{ color: 'red', marginBottom: 12 }}>Booking Debug Info</h2>
-            <pre style={{ fontSize: 13, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{bookingDebug.message}</pre>
-            <button style={{ marginTop: 16, background: '#16a34a', color: 'white', border: 'none', borderRadius: 4, padding: '8px 20px', cursor: 'pointer' }} onClick={() => setBookingDebug({ open: false, message: "" })}>Close</button>
+              {/* Task Title and Provider Info */}
+              <div className="bg-white rounded-xl p-6 border border-gray-200">
+                <h1 className="text-2xl font-bold text-gray-900 mb-4">
+                  {title || 'Task Title'}
+                </h1>
+                
+                {/* Task Details */}
+                <div className="mb-6">
+                  {/* Task Details Grid */}
+                  <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                    {/* Location */}
+                    <div className="flex items-center space-x-2">
+                      <FaMapMarkerAlt className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{location}</p>
+                        <p className="text-xs text-gray-500">{locationType}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Availability */}
+                    {availability.length > 0 && (
+                      <div className="flex items-center space-x-2">
+                        <FaClock className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            {availability[0].timeFrom} - {availability[0].timeTo}
+                          </p>
+                          <p className="text-xs text-gray-500">Available time</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-4 mb-6">
+                  <div className="relative">
+                                      <Image
+                    src={avatar || '/api/placeholder/60/60'}
+                    alt={taskProvider}
+                    width={60}
+                    height={60}
+                    className="rounded-full"
+                  />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900">{taskProvider}</h3>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <div className="flex items-center">
+                        {[...Array(5)].map((_, i) => (
+                          <FaStar key={i} className={`w-4 h-4 ${i < 4 ? 'text-yellow-400' : 'text-gray-300'}`} />
+                        ))}
+                      </div>
+                      <span className="text-sm text-gray-600">
+                        4.0 (24 reviews)
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* About the Task */}
+              {description && (
+                <div className="bg-white rounded-xl p-6 border border-gray-200">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">About the task</h2>
+                  <div className="prose max-w-none text-gray-700">
+                    <p className="leading-relaxed">
+                      {description}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Reviews Section */}
+              <div className="bg-white rounded-xl p-6 border border-gray-200">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900">What people loved</h2>
+                  <div className="flex items-center space-x-4">
+                    <span className="text-sm text-gray-600 cursor-pointer hover:text-green-600">See all reviews</span>
+                    <div className="flex space-x-2">
+                      <button className="p-1 hover:bg-gray-100 rounded">←</button>
+                      <button className="p-1 hover:bg-gray-100 rounded">→</button>
+                    </div>
+                  </div>
+                </div>
+                
+                {reviews.length > 0 ? (
+                  reviews.map((review) => (
+                    <div key={review.id || review._id} className="border-b border-gray-100 pb-6 mb-6 last:border-b-0">
+                      <div className="flex items-start space-x-4">
+                        <Image
+                          src={review.reviewer?.avatar || '/api/placeholder/40/40'}
+                          alt={review.reviewer?.name || 'Reviewer'}
+                          width={40}
+                          height={40}
+                          className="rounded-full"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <span className="font-semibold text-gray-900">{review.reviewer?.name || 'Anonymous'}</span>
+                            <span className="text-sm text-gray-500">{review.reviewer?.location || 'Unknown location'}</span>
+                          </div>
+                          <div className="flex items-center space-x-2 mb-2">
+                            {[...Array(5)].map((_, i) => (
+                              <FaStar key={i} className={`w-4 h-4 ${i < (review.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`} />
+                            ))}
+                            <span className="text-sm text-gray-500">
+                              {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'Recently'}
+                            </span>
+                          </div>
+                          <p className="text-gray-700 mb-2">{review.comment || review.text || 'No comment provided'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No reviews yet</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Sidebar */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-8">
+                {/* Task Details with Tiers */}
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  {task?.Tiers && task.Tiers.length > 0 ? (
+                    <>
+                      <div className="flex space-x-1 mb-6">
+                        {task.Tiers.map((tier) => (
+                          <button
+                            key={tier.name}
+                            onClick={() => setSelectedTier(tier.name)}
+                            className={`flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors ${
+                              selectedTier === tier.name
+                                ? 'bg-green-500 text-white'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                          >
+                            {tier.name}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Selected Tier Details */}
+                      {(() => {
+                        const currentTier = task.Tiers.find(tier => tier.name === selectedTier);
+                        if (!currentTier) return null;
+                        
+                        return (
+                          <div className="space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {currentTier.title || `${currentTier.name} Package`}
+                            </h3>
+                            
+                            <div className="flex items-center justify-between">
+                              <span className="text-2xl font-bold text-gray-900">
+                                {currentTier.credits} Credits
+                              </span>
+                              <div className="flex items-center text-sm text-gray-500">
+                                <span>No tax</span>
+                              </div>
+                            </div>
+                            
+                            <p className="text-gray-600">
+                              {currentTier.description}
+                            </p>
+
+                            {/* Tier Features */}
+                            {currentTier.features && currentTier.features.length > 0 && (
+                              <div className="space-y-2">
+                                <h4 className="font-medium text-gray-900">What's included:</h4>
+                                <ul className="space-y-1">
+                                  {currentTier.features.map((feature, index) => (
+                                    <li key={index} className="flex items-center text-sm text-gray-600">
+                                      <FaCheck className="w-3 h-3 text-green-500 mr-2 flex-shrink-0" />
+                                      {feature}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+
+                            {/* Time Slot and Max Days */}
+                            <div className="space-y-2 pt-2 border-t border-gray-100">
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-gray-600">Available Time:</span>
+                                <span className="font-medium text-gray-900">{currentTier.availableTimeSlot}</span>
+                              </div>
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-gray-600">Max Duration:</span>
+                                <span className="font-medium text-gray-900">{currentTier.maxDays} days</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl font-bold text-gray-900">
+                          {task?.credits} Credits
+                        </span>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <span>No tax</span>
+                        </div>
+                      </div>
+                      
+                      <p className="text-gray-600">
+                        {description}
+                      </p>
+
+                      {/* Task Features */}
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-gray-900">What's included:</h4>
+                        <ul className="space-y-1">
+                          <li className="flex items-center text-sm text-gray-600">
+                            <FaCheck className="w-3 h-3 text-green-500 mr-2 flex-shrink-0" />
+                            Professional service delivery
+                          </li>
+                          <li className="flex items-center text-sm text-gray-600">
+                            <FaCheck className="w-3 h-3 text-green-500 mr-2 flex-shrink-0" />
+                            Quality assurance
+                          </li>
+                          <li className="flex items-center text-sm text-gray-600">
+                            <FaCheck className="w-3 h-3 text-green-500 mr-2 flex-shrink-0" />
+                            On-time completion
+                          </li>
+                        </ul>
+                      </div>
+
+                      {/* Time Slot and Location */}
+                      <div className="space-y-2 pt-2 border-t border-gray-100">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Available Time:</span>
+                          <span className="font-medium text-gray-900">
+                            {availability.length > 0 ? `${availability[0].timeFrom} - ${availability[0].timeTo}` : 'Flexible'}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Location:</span>
+                          <span className="font-medium text-gray-900">{locationType}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+
+
+
+              </div>
+            </div>
           </div>
         </div>
-      )}
+
+
+
+        {/* Message Modal */}
+        {messageModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+            <div className="bg-white rounded-xl shadow-lg p-8 min-w-[320px] text-center border border-blue-400">
+              <div className="mb-2 text-lg font-semibold text-blue-600">Send a message to the task provider</div>
+              <textarea
+                className="w-full border border-gray-300 rounded-lg p-2 mb-4 min-h-[80px]"
+                placeholder="Type your message..."
+                value={firstMessage}
+                onChange={e => setFirstMessage(e.target.value)}
+                disabled={sendingFirstMessage}
+              />
+              <div className="flex gap-2 justify-center">
+                <button
+                  onClick={() => { setMessageModal(false); setFirstMessage(""); }}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                  disabled={sendingFirstMessage}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSendFirstMessage}
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  disabled={sendingFirstMessage}
+                >
+                  {sendingFirstMessage ? "Sending..." : "Send & Start Chat"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Dialog Modal */}
+        {dialog.open && (
+          <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black/30`}>
+            <div className={`bg-white rounded-xl shadow-lg p-8 min-w-[320px] text-center border ${dialog.isError ? 'border-red-400' : 'border-green-400'}`}>
+              <div className={`mb-2 text-lg font-semibold ${dialog.isError ? 'text-red-600' : 'text-green-600'}`}>{dialog.isError ? 'Error' : 'Success'}</div>
+              <div className="mb-4 text-gray-700">{dialog.message}</div>
+              {!sendingFirstMessage && dialog.isError && (
+                <button onClick={() => setDialog({ open: false, message: "", isError: false })} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Close</button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Image Zoom Modal */}
+        {imageModal.open && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
+            <div className="relative w-full h-full flex items-center justify-center">
+              {/* Close Button */}
+              <button
+                onClick={closeImageModal}
+                className="absolute top-4 right-4 z-10 p-3 bg-black/50 hover:bg-black/70 rounded-full transition-colors"
+              >
+                <FaTimes className="w-6 h-6 text-white" />
+              </button>
+
+              {/* Navigation Buttons */}
+              {imageModal.images.length > 1 && (
+                <>
+                  <button
+                    onClick={prevImage}
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 p-3 bg-black/50 hover:bg-black/70 rounded-full transition-colors"
+                  >
+                    <FaChevronLeft className="w-6 h-6 text-white" />
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-3 bg-black/50 hover:bg-black/70 rounded-full transition-colors"
+                  >
+                    <FaChevronRight className="w-6 h-6 text-white" />
+                  </button>
+                </>
+              )}
+
+              {/* Image Counter */}
+              {imageModal.images.length > 1 && (
+                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 px-4 py-2 bg-black/50 rounded-full">
+                  <span className="text-white text-sm font-medium">
+                    {imageModal.currentIndex + 1} / {imageModal.images.length}
+                  </span>
+                </div>
+              )}
+
+              {/* Main Image */}
+              <div className="max-w-4xl max-h-full p-4">
+                <img
+                  src={imageModal.images[imageModal.currentIndex]}
+                  alt={`Task image ${imageModal.currentIndex + 1}`}
+                  className="w-full h-full object-contain max-h-[90vh] rounded-lg"
+                />
+              </div>
+
+              {/* Thumbnail Strip */}
+              {imageModal.images.length > 1 && (
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10 flex gap-2">
+                  {imageModal.images.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setImageModal(prev => ({ ...prev, currentIndex: index }))}
+                      className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                        index === imageModal.currentIndex 
+                          ? 'border-white scale-110' 
+                          : 'border-transparent hover:border-white/50'
+                      }`}
+                    >
+                      <img
+                        src={image}
+                        alt={`Thumbnail ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </ProtectedLayout>
   );
 }

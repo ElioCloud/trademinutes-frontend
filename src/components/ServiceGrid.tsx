@@ -6,6 +6,7 @@ import { FiStar } from 'react-icons/fi';
 import { FaStar, FaArrowLeft, FaArrowRight, FaMapMarkerAlt, FaClock, FaCoins } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { useAuth } from '@/contexts/AuthContext';
 
 const services = [
   
@@ -257,12 +258,15 @@ interface Service {
   Availability?: Availability[];
   availability?: Availability[];
   Author?: {
+    ID?: string;
+    id?: string;
     Name?: string;
     name?: string;
     Avatar?: string;
     avatar?: string;
   };
   author?: {
+    id?: string;
     name?: string;
     avatar?: string;
   };
@@ -279,6 +283,22 @@ export default function ServiceGrid({ items = services }: { items?: (Service | t
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const router = useRouter();
+  const { user } = useAuth();
+
+  // Helper function to check if service belongs to current user
+  const isOwnService = (service: Service | typeof services[0]) => {
+    if (!user) return false;
+    
+    // Handle mock service type (has 'user' property)
+    if ('user' in service) {
+      return false; // Mock services don't have real user IDs
+    }
+    
+    // Handle real service type
+    const serviceAuthorId = service.Author?.ID || service.Author?.id || service.author?.id;
+    const currentUserId = user.ID || user.id;
+    return serviceAuthorId === currentUserId;
+  };
 
   // Fetch real services from backend
   useEffect(() => {

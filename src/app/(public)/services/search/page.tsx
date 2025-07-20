@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 import Image from 'next/image';
 import SearchBanner from '@/components/SearchBanner';
 import AuthModal from '@/components/AuthModal';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Real service type based on API response
 type Availability = {
@@ -34,12 +35,15 @@ type Service = {
   Availability?: Availability[];
   availability?: Availability[];
   Author?: {
+    ID?: string;
+    id?: string;
     Name?: string;
     name?: string;
     Avatar?: string;
     avatar?: string;
   };
   author?: {
+    id?: string;
     name?: string;
     avatar?: string;
   };
@@ -61,13 +65,22 @@ export default function SearchResultsPageWrapper() {
 function SearchResultsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { user } = useAuth();
   const query = searchParams.get('q') || '';
   const category = searchParams.get('category') || '';
   const [results, setResults] = useState<Service[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+
+  // Helper function to check if service belongs to current user
+  const isOwnService = (service: Service) => {
+    if (!user) return false;
+    const serviceAuthorId = service.Author?.ID || service.Author?.id || service.author?.id;
+    const currentUserId = user.ID || user.id;
+    return serviceAuthorId === currentUserId;
+  };
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -558,8 +571,8 @@ function SearchResultsPage() {
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        mode={authMode}
-        onSuccess={() => {
+        defaultMode={authMode}
+        onAuthSuccess={() => {
           // After successful login, redirect to the service details
           // The user can now book appointments
           console.log('User authenticated successfully');
