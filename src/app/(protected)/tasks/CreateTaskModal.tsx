@@ -645,7 +645,7 @@ export default function CreateTaskModal({
                 className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg ${
                   uploading 
                     ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 hover:shadow-xl'
+                    : 'bg-black hover:bg-gray-800 hover:shadow-xl'
                 } text-white flex items-center space-x-2`}
               >
                 {uploading ? (
