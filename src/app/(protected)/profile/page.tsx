@@ -372,11 +372,13 @@ export default function UserProfileSummaryPage() {
       
       // First, get user's tasks
       const res = await fetch(`${TASK_API_BASE}/api/tasks/get/user`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(10000) // 10 second timeout
       });
       
       if (!res.ok) {
         console.error("Failed to fetch tasks:", res.status, res.statusText);
+        setReviewsLoading(false);
         return;
       }
       
@@ -394,7 +396,9 @@ export default function UserProfileSummaryPage() {
         if (!taskId) continue;
         
         try {
-          const reviewRes = await fetch(`${REVIEW_API_BASE}/api/reviews?taskId=${taskId}`);
+          const reviewRes = await fetch(`${REVIEW_API_BASE}/api/reviews?taskId=${taskId}`, {
+            signal: AbortSignal.timeout(5000) // 5 second timeout
+          });
           console.log(`Review response for task ${taskId}:`, reviewRes.status);
           
           if (reviewRes.ok) {
@@ -418,14 +422,35 @@ export default function UserProfileSummaryPage() {
       if (allReviews.length === 0) {
         console.log("No reviews found via tasks, trying direct user reviews...");
         try {
-          const userReviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`);
-          if (userReviewsRes.ok) {
-            const userReviews = await userReviewsRes.json();
-            console.log("User reviews:", userReviews);
-            if (Array.isArray(userReviews)) {
-              setReviews(userReviews);
-            } else if (userReviews.data && Array.isArray(userReviews.data)) {
-              setReviews(userReviews.data);
+          // Try different possible endpoints for user reviews
+          const possibleEndpoints = [
+            `${REVIEW_API_BASE}/api/reviews/user/${userId}`,
+            `${REVIEW_API_BASE}/api/reviews?userId=${userId}`,
+            `${REVIEW_API_BASE}/api/reviews?reviewerId=${userId}`,
+            `${REVIEW_API_BASE}/api/reviews?revieweeId=${userId}`
+          ];
+          
+          for (const endpoint of possibleEndpoints) {
+            try {
+              console.log(`Trying endpoint: ${endpoint}`);
+              const userReviewsRes = await fetch(endpoint, {
+                signal: AbortSignal.timeout(5000) // 5 second timeout
+              });
+              if (userReviewsRes.ok) {
+                const userReviews = await userReviewsRes.json();
+                console.log("User reviews:", userReviews);
+                if (Array.isArray(userReviews)) {
+                  setReviews(userReviews);
+                  break; // Found reviews, exit loop
+                } else if (userReviews.data && Array.isArray(userReviews.data)) {
+                  setReviews(userReviews.data);
+                  break; // Found reviews, exit loop
+                }
+              } else {
+                console.log(`Endpoint ${endpoint} returned:`, userReviewsRes.status, userReviewsRes.statusText);
+              }
+            } catch (endpointErr) {
+              console.log(`Error with endpoint ${endpoint}:`, endpointErr);
             }
           }
         } catch (userErr) {
