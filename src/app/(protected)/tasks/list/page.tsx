@@ -3,12 +3,13 @@ export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
 import CreateListingModal from "../CreateTaskModal";
+import EditTaskModal from "@/components/EditTaskModal";
 import ProtectedLayout from "@/components/Layout/ProtectedLayout";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
-import { FaHeart, FaStar, FaTrash, FaCalendar, FaMapMarkerAlt, FaClock, FaCoins, FaPlus } from "react-icons/fa";
+import { FaHeart, FaStar, FaTrash, FaCalendar, FaMapMarkerAlt, FaClock, FaCoins, FaPlus, FaEdit } from "react-icons/fa";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 interface Availability {
@@ -48,6 +49,8 @@ export default function TaskListPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
   const router = useRouter();
 
 
@@ -268,17 +271,30 @@ export default function TaskListPage() {
                     ) : (
                       <div className={`w-full h-full bg-gradient-to-br ${gradients[idx % gradients.length]}`}></div>
                     )}
-                  <button
-                    onClick={e => {
-                      e.stopPropagation();
-                      setTaskToDelete(task.id);
-                      setShowConfirmModal(true);
-                    }}
-                      className="absolute top-3 right-3 text-white hover:text-red-400 transition-colors bg-black/20 rounded-full p-2 hover:bg-black/40"
-                    title="Delete"
-                  >
+                  <div className="absolute top-3 right-3 flex gap-2">
+                    <button
+                      onClick={e => {
+                        e.stopPropagation();
+                        setTaskToEdit(task);
+                        setIsEditModalOpen(true);
+                      }}
+                      className="text-white hover:text-blue-400 transition-colors bg-black/20 rounded-full p-2 hover:bg-black/40"
+                      title="Edit"
+                    >
+                      <FaEdit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={e => {
+                        e.stopPropagation();
+                        setTaskToDelete(task.id);
+                        setShowConfirmModal(true);
+                      }}
+                      className="text-white hover:text-red-400 transition-colors bg-black/20 rounded-full p-2 hover:bg-black/40"
+                      title="Delete"
+                    >
                       <FaTrash className="w-4 h-4" />
-                  </button>
+                    </button>
+                  </div>
                   </div>
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-2">
@@ -383,6 +399,19 @@ export default function TaskListPage() {
             type === "success" ? toast.success(msg) : toast.error(msg)
           }
           onCreated={fetchTasks}
+        />
+
+        <EditTaskModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setTaskToEdit(null);
+          }}
+          task={taskToEdit}
+          showToast={(msg, type) =>
+            type === "success" ? toast.success(msg) : toast.error(msg)
+          }
+          onUpdated={fetchTasks}
         />
 
         <ToastContainer position="top-right" autoClose={3000} />
