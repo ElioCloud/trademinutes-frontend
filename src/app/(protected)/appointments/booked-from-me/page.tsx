@@ -21,6 +21,7 @@ import {
   FaCoins
 } from "react-icons/fa";
 import { FaCheckDouble } from "react-icons/fa6";
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Booking {
   id: string;
@@ -42,6 +43,7 @@ interface Booking {
 }
 
 export default function BookedFromMePage() {
+  const { refreshUser } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,8 +91,14 @@ export default function BookedFromMePage() {
         body: JSON.stringify({ bookingId }),
       });
       if (!res.ok) throw new Error("Failed to mark as completed");
+      
+      // Update local booking status
       setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: "completed" } : b));
-      setDialog({ open: true, message: "Booking and task marked as completed. Client will be notified.", isError: false });
+      
+      // Refresh user data to update credits in real-time
+      await refreshUser();
+      
+      setDialog({ open: true, message: "Booking and task marked as completed. Client will be notified. Credits have been transferred to your account.", isError: false });
     } catch (err) {
       setDialog({ open: true, message: "Failed to mark as completed. Please try again.", isError: true });
     } finally {
