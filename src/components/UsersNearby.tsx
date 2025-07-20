@@ -458,7 +458,7 @@ export default function UsersNearby() {
                 }}
               >
                 <Popup className="custom-popup">
-                  <div className="p-3 w-64 bg-white rounded-lg shadow-xl border border-gray-200">
+                  <div className="p-3 w-64 bg-white rounded-lg border border-gray-200">
                     {/* Task Image */}
                     {task.images && task.images.length > 0 && (
                       <div className="mb-2">
@@ -502,7 +502,7 @@ export default function UsersNearby() {
 
                     {/* Author Information */}
                     <div className="mb-2">
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-2 mb-1">
                         <Image
                           src={task.author.avatar}
                           alt={task.author.name}
@@ -518,7 +518,7 @@ export default function UsersNearby() {
                           </div>
                           
                           {/* Rating Display */}
-                          <div className="flex items-center gap-1 mt-1">
+                          <div className="flex items-center gap-1 mt-0.5">
                             <div className="flex items-center">
                               {[...Array(5)].map((_, i) => {
                                 const starValue = i + 1;
@@ -578,7 +578,7 @@ export default function UsersNearby() {
                         className="flex-1 inline-flex items-center justify-center px-2 py-1.5 bg-black text-white rounded font-medium hover:bg-gray-800 transition-all duration-200 text-xs"
                       >
                         <span className="text-white">View Task</span>
-                        <svg className="w-2.5 h-2.5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-2.5 h-2.5 ml-1 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
                       </Link>
