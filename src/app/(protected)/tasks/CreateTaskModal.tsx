@@ -36,7 +36,6 @@ export default function CreateTaskModal({
     latitude: "",
     longitude: "",
     locationType: "in-person",
-    availability: [{ date: new Date().toISOString().split('T')[0], timeFrom: "", timeTo: "" }],
   });
 
   const [tiers, setTiers] = useState<Tier[]>([
@@ -113,26 +112,7 @@ export default function CreateTaskModal({
     }
   }, [isOpen, showToast]);
 
-  const generateTimeOptions = () => {
-    const options = [];
-    for (let hour = 6; hour <= 23; hour++) {
-      for (let min = 0; min < 60; min += 30) {
-        const time = `${hour.toString().padStart(2, "0")}:${min
-          .toString()
-          .padStart(2, "0")}`;
-        const label = new Date(`1970-01-01T${time}`).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-        options.push(
-          <option key={time} value={time}>
-            {label}
-          </option>
-        );
-      }
-    }
-    return options;
-  };
+
 
   if (!isOpen) return null;
 
@@ -181,16 +161,7 @@ export default function CreateTaskModal({
     setLocationSuggestions([]);
   };
 
-  const handleAvailabilityChange = (field: string, value: string) => {
-    setFormData((prev) => {
-      const availability = [...prev.availability];
-      availability[0] = {
-        ...availability[0],
-        [field]: value,
-      };
-      return { ...prev, availability };
-    });
-  };
+
 
   const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -267,19 +238,7 @@ export default function CreateTaskModal({
     e.preventDefault();
     setUploading(true);
 
-    const { timeFrom, timeTo } = formData.availability[0];
 
-    if (!timeFrom || !timeTo) {
-      showToast("❌ Please select both start and end times.", "error");
-      setUploading(false);
-      return;
-    }
-
-    if (timeFrom >= timeTo) {
-      showToast("⏰ 'Time From' must be earlier than 'Time To'", "error");
-      setUploading(false);
-      return;
-    }
 
     // Validate tiers
     const hasValidTiers = tiers.some(tier => tier.credits > 0 && tier.title && tier.description);
@@ -317,7 +276,7 @@ export default function CreateTaskModal({
       formDataToSend.append('longitude', longitude.toString());
       formDataToSend.append('locationType', formData.locationType);
       formDataToSend.append('category', selectedCategory);
-      formDataToSend.append('availability', JSON.stringify(formData.availability));
+
       formDataToSend.append('tiers', JSON.stringify(tiers));
 
       // Add cover image
@@ -523,31 +482,7 @@ export default function CreateTaskModal({
         </div>
       </div>
 
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Availability Time *</label>
-        <div className="flex gap-2">
-          <select
-            name="timeFrom"
-            className="border border-gray-300 px-3 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-            value={formData.availability[0].timeFrom}
-            onChange={(e) => handleAvailabilityChange("timeFrom", e.target.value)}
-            required
-          >
-            <option value="">From</option>
-            {generateTimeOptions()}
-          </select>
-          <select
-            name="timeTo"
-            className="border border-gray-300 px-3 py-3 rounded-xl w-full focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-            value={formData.availability[0].timeTo}
-            onChange={(e) => handleAvailabilityChange("timeTo", e.target.value)}
-            required
-          >
-            <option value="">To</option>
-            {generateTimeOptions()}
-          </select>
-        </div>
-      </div>
+
     </div>
   );
 
