@@ -9,7 +9,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
-import { FaHeart, FaStar, FaTrash, FaCalendar, FaMapMarkerAlt, FaClock, FaCoins, FaPlus, FaEdit } from "react-icons/fa";
+import { FaHeart, FaStar, FaTrash, FaCalendar, FaMapMarkerAlt, FaClock, FaCoins, FaPlus, FaEdit, FaClipboardList } from "react-icons/fa";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 interface Availability {
@@ -225,7 +225,9 @@ export default function TaskListPage() {
         ) : tasks.length === 0 ? (
           <div className="text-center py-12">
             <div className="bg-white rounded-2xl p-8 shadow-sm max-w-md mx-auto">
-              <div className="text-6xl mb-4">📝</div>
+              <div className="flex justify-center mb-4">
+                <FaClipboardList className="w-16 h-16 text-gray-400" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">No listings yet</h3>
               <p className="text-gray-600">You haven't created any service listings yet.</p>
             </div>
