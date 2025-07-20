@@ -26,18 +26,26 @@ const Popup = dynamic(
   { ssr: false }
 );
 
-interface User {
+interface Task {
   id: string;
-  name: string;
-  email: string;
+  title: string;
+  description: string;
   location: string;
   latitude: number;
   longitude: number;
-  avatar: string;
   credits: number;
-  college?: string;
-  program?: string;
-  skills?: string[];
+  images?: string[];
+  author: {
+    id: string;
+    name: string;
+    email: string;
+    avatar: string;
+    college?: string;
+    program?: string;
+    skills?: string[];
+  };
+  category?: string;
+  createdAt?: number;
 }
 
 // User-focused filter options
@@ -49,36 +57,55 @@ const filterOptions = [
   { key: 'experience', label: 'Experience', options: ['New', 'Experienced', 'Expert'] }
 ];
 
-// 👤 Helper: avatar icon for marker with enhanced styling
-const createAvatarIcon = (url: string) => {
+// 🎯 Helper: task icon for marker with enhanced styling
+const createTaskIcon = (images: string[] = []) => {
   if (typeof window === 'undefined') return null;
   
   const L = require('leaflet');
+  const imageUrl = images.length > 0 ? images[0] : 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+  
   return L.divIcon({
     html: `<div style="
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      background: url('${url}') center/cover no-repeat;
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      background: url('${imageUrl}') center/cover no-repeat;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 3px white;
       border: 2px solid #3b82f6;
       transition: all 0.3s ease;
       cursor: pointer;
-    "></div>`,
-    className: "custom-marker",
-    iconSize: [52, 52],
-    iconAnchor: [26, 26],
+      position: relative;
+    ">
+      <div style="
+        position: absolute;
+        bottom: -5px;
+        right: -5px;
+        background: #3b82f6;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: bold;
+      ">📋</div>
+    </div>`,
+    className: "custom-task-marker",
+    iconSize: [60, 60],
+    iconAnchor: [30, 30],
   });
 };
 
 export default function UsersNearby() {
   const [center, setCenter] = useState<[number, number]>([43.6532, -79.3832]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [filters, setFilters] = useState({
     rating: 'Any',
     credits: 'Any',
@@ -105,106 +132,114 @@ export default function UsersNearby() {
   }, [isClient]);
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchTasks = async () => {
       try {
         setLoading(true);
-        const AUTH_API_BASE_URL = process.env.NEXT_PUBLIC_AUTH_API_URL || "http://localhost:8081";
+        const API_BASE_URL = process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084";
         
-        // Fetch actual users from the auth service
-        const response = await fetch(`${AUTH_API_BASE_URL}/api/auth/users`);
+        // Fetch tasks from the task service
+        const response = await fetch(`${API_BASE_URL}/api/tasks/public`);
         
         if (!response.ok) {
-          throw new Error('Failed to fetch users');
+          throw new Error('Failed to fetch tasks');
         }
         
         const data = await response.json();
-        const allUsers = data.data || data || [];
+        const allTasks = data.data || data || [];
         
-        // Filter users with valid coordinates and add default avatar
-        const usersWithLocation = allUsers
-          .filter((user: any) => 
-            user.Latitude && 
-            user.Longitude && 
-            !isNaN(user.Latitude) && 
-            !isNaN(user.Longitude) &&
-            user.Latitude !== 0 &&
-            user.Longitude !== 0
+        // Filter tasks with valid coordinates and transform to Task interface
+        const tasksWithLocation = allTasks
+          .filter((task: any) => 
+            task.Latitude && 
+            task.Longitude && 
+            !isNaN(task.Latitude) && 
+            !isNaN(task.Longitude) &&
+            task.Latitude !== 0 &&
+            task.Longitude !== 0
           )
-          .map((user: any) => ({
-            id: user.ID || user.id || user._id,
-            name: user.Name || user.name || 'Unknown User',
-            email: user.Email || user.email || '',
-            location: user.Location || user.location || 'Unknown Location',
-            latitude: user.Latitude || user.latitude,
-            longitude: user.Longitude || user.longitude,
-            avatar: user.ProfilePictureURL || user.profilePictureURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-            credits: user.Credits || user.credits || 0,
-            college: user.College || user.college,
-            program: user.Program || user.program,
-            skills: user.Skills || user.skills || []
+          .map((task: any) => ({
+            id: task.ID || task.id || task._id,
+            title: task.Title || task.title || 'Untitled Task',
+            description: task.Description || task.description || '',
+            location: task.Location || task.location || 'Unknown Location',
+            latitude: task.Latitude || task.latitude,
+            longitude: task.Longitude || task.longitude,
+            credits: task.Credits || task.credits || 0,
+            images: task.Images || task.images || [],
+            category: task.Category || task.category,
+            createdAt: task.CreatedAt || task.createdAt,
+            author: {
+              id: task.Author?.ID || task.Author?.id || 'unknown',
+              name: task.Author?.Name || task.Author?.name || 'Unknown User',
+              email: task.Author?.Email || task.Author?.email || '',
+              avatar: task.Author?.Avatar || task.Author?.avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+              college: task.Author?.College || task.Author?.college,
+              program: task.Author?.Program || task.Author?.program,
+              skills: task.Author?.Skills || task.Author?.skills || []
+            }
           }));
         
-        setUsers(usersWithLocation);
-        setFilteredUsers(usersWithLocation);
+        setTasks(tasksWithLocation);
+        setFilteredTasks(tasksWithLocation);
         
       } catch (err) {
-        console.error('Error fetching users:', err);
-        setError('Failed to load users');
+        console.error('Error fetching tasks:', err);
+        setError('Failed to load tasks');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUsers();
+    fetchTasks();
   }, []);
 
-  // Apply filters when filters or users change
+  // Apply filters when filters or tasks change
   useEffect(() => {
-    let filtered = [...users];
+    let filtered = [...tasks];
 
     // Apply rating filter (simulated - would need real rating data)
     if (filters.rating !== 'Any') {
       const minRating = parseFloat(filters.rating.replace('+', ''));
       // For now, we'll simulate ratings based on credits
-      filtered = filtered.filter(user => user.credits >= minRating * 20);
+      filtered = filtered.filter(task => task.credits >= minRating * 20);
     }
 
     // Apply credits filter
     if (filters.credits !== 'Any') {
       const [min, max] = filters.credits.split('-').map(Number);
       if (filters.credits === '200+') {
-        filtered = filtered.filter(user => user.credits >= 200);
+        filtered = filtered.filter(task => task.credits >= 200);
       } else {
-        filtered = filtered.filter(user => user.credits >= min && user.credits <= max);
+        filtered = filtered.filter(task => task.credits >= min && task.credits <= max);
       }
     }
 
     // Apply distance filter (simulated - would need real distance calculation)
     if (filters.distance !== 'Any') {
       const maxDistance = parseInt(filters.distance.match(/\d+/)?.[0] || '20');
-      // For now, we'll show all users since we don't have real distance calculation
+      // For now, we'll show all tasks since we don't have real distance calculation
       // In a real implementation, you'd calculate distance from user's location
     }
 
     // Apply availability filter (simulated - would need real availability data)
     if (filters.availability !== 'Any') {
-      // For now, we'll show all users since we don't have real availability data
+      // For now, we'll show all tasks since we don't have real availability data
     }
 
     // Apply experience filter (simulated - would need real experience data)
     if (filters.experience !== 'Any') {
       // For now, we'll simulate experience based on credits
       if (filters.experience === 'New') {
-        filtered = filtered.filter(user => user.credits < 50);
+        filtered = filtered.filter(task => task.credits < 50);
       } else if (filters.experience === 'Experienced') {
-        filtered = filtered.filter(user => user.credits >= 50 && user.credits < 150);
+        filtered = filtered.filter(task => task.credits >= 50 && task.credits < 150);
       } else if (filters.experience === 'Expert') {
-        filtered = filtered.filter(user => user.credits >= 150);
+        filtered = filtered.filter(task => task.credits >= 150);
       }
     }
 
-    setFilteredUsers(filtered);
-  }, [filters, users]);
+    setFilteredTasks(filtered);
+  }, [filters, tasks]);
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -271,7 +306,7 @@ export default function UsersNearby() {
     );
   }
 
-  if (users.length === 0) {
+  if (tasks.length === 0) {
     return (
       <div className="w-full h-[70vh] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-blue-50 border border-gray-200">
         <div className="flex items-center justify-center h-full">
@@ -300,7 +335,7 @@ export default function UsersNearby() {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold text-gray-900">Nearby Services</h3>
-            <p className="text-sm text-gray-600">{filteredUsers.length} of {users.length} users found</p>
+            <p className="text-sm text-gray-600">{filteredTasks.length} of {tasks.length} services found</p>
           </div>
           <div className="flex items-center space-x-3">
             <button
@@ -367,97 +402,130 @@ export default function UsersNearby() {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          {filteredUsers.map((user) => {
-            const avatarIcon = createAvatarIcon(user.avatar);
-            if (!avatarIcon) return null;
+          {filteredTasks.map((task) => {
+            const taskIcon = createTaskIcon(task.images);
+            if (!taskIcon) return null;
 
             return (
               <Marker
-                key={user.id}
-                position={[user.latitude, user.longitude]}
-                icon={avatarIcon}
+                key={task.id}
+                position={[task.latitude, task.longitude]}
+                icon={taskIcon}
                 eventHandlers={{
-                  click: () => setSelectedUser(user),
+                  click: () => setSelectedTask(task),
                 }}
               >
                 <Popup className="custom-popup">
-                  <div className="p-4 w-72 bg-white rounded-xl shadow-xl border border-gray-200">
-                    <div className="flex items-start gap-4 mb-4">
-                      <div className="relative">
+                  <div className="p-4 w-80 bg-white rounded-xl shadow-xl border border-gray-200">
+                    {/* Task Image */}
+                    {task.images && task.images.length > 0 && (
+                      <div className="mb-4">
                         <Image
-                          src={user.avatar}
-                          alt={user.name}
-                          width={56}
-                          height={56}
-                          className="rounded-full object-cover border-2 border-blue-200"
+                          src={task.images[0]}
+                          alt={task.title}
+                          width={320}
+                          height={180}
+                          className="w-full h-32 object-cover rounded-lg"
                         />
-                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 text-base">{user.name}</h4>
-                        <p className="text-sm text-gray-600 flex items-center gap-1">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                          {user.location}
-                        </p>
-                      </div>
-                    </div>
-
-                    {(user.college || user.program) && (
-                      <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                        <p className="text-sm text-blue-800 font-medium flex items-center gap-2">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                          </svg>
-                          Education
-                        </p>
-                        <p className="text-sm text-blue-700 mt-1">
-                          {user.college && user.program ? `${user.program} at ${user.college}` : user.college || user.program}
-                        </p>
                       </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="text-center p-3 bg-gray-50 rounded-lg">
-                        <p className="text-2xl font-bold text-blue-600">{user.credits}</p>
+                    {/* Task Details */}
+                    <div className="mb-4">
+                      <h4 className="font-semibold text-gray-900 text-lg mb-2">{task.title}</h4>
+                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{task.description}</p>
+                      
+                      <div className="flex items-center gap-2 mb-3">
+                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span className="text-sm text-gray-600">{task.location}</span>
+                      </div>
+
+                      {task.category && (
+                        <div className="mb-3">
+                          <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                            {task.category}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Author Information */}
+                    <div className="border-t pt-4 mb-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Image
+                          src={task.author.avatar}
+                          alt={task.author.name}
+                          width={40}
+                          height={40}
+                          className="rounded-full object-cover border-2 border-blue-200"
+                        />
+                        <div>
+                          <p className="font-medium text-gray-900 text-sm">{task.author.name}</p>
+                          <p className="text-xs text-gray-500">{task.author.email}</p>
+                        </div>
+                      </div>
+
+                      {(task.author.college || task.author.program) && (
+                        <div className="mb-3 p-2 bg-blue-50 rounded-lg">
+                          <p className="text-xs text-blue-800 font-medium">Education</p>
+                          <p className="text-xs text-blue-700">
+                            {task.author.college && task.author.program ? `${task.author.program} at ${task.author.college}` : task.author.college || task.author.program}
+                          </p>
+                        </div>
+                      )}
+
+                      {task.author.skills && task.author.skills.length > 0 && (
+                        <div className="mb-3">
+                          <p className="text-xs text-gray-700 font-medium mb-1">Skills</p>
+                          <div className="flex flex-wrap gap-1">
+                            {task.author.skills.slice(0, 2).map((skill: string, index: number) => (
+                              <span key={index} className="px-1 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">
+                                {skill}
+                              </span>
+                            ))}
+                            {task.author.skills.length > 2 && (
+                              <span className="px-1 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
+                                +{task.author.skills.length - 2} more
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Task Stats */}
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="text-center p-2 bg-gray-50 rounded-lg">
+                        <p className="text-lg font-bold text-blue-600">{task.credits}</p>
                         <p className="text-xs text-gray-600">Credits</p>
                       </div>
-                      <div className="text-center p-3 bg-gray-50 rounded-lg">
-                        <p className="text-2xl font-bold text-green-600">✓</p>
+                      <div className="text-center p-2 bg-gray-50 rounded-lg">
+                        <p className="text-lg font-bold text-green-600">✓</p>
                         <p className="text-xs text-gray-600">Available</p>
                       </div>
                     </div>
 
-                    {user.skills && user.skills.length > 0 && (
-                      <div className="mb-4">
-                        <p className="text-sm text-gray-700 font-medium mb-2">Skills</p>
-                        <div className="flex flex-wrap gap-1">
-                          {user.skills.slice(0, 3).map((skill, index) => (
-                            <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                              {skill}
-                            </span>
-                          ))}
-                          {user.skills.length > 3 && (
-                            <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                              +{user.skills.length - 3} more
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    <Link
-                      href={`/users/${user.id}`}
-                      className="w-full inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                    >
-                      <span>View Profile</span>
-                      <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </Link>
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/services/view/${task.id}`}
+                        className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 text-sm"
+                      >
+                        <span>View Task</span>
+                        <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </Link>
+                      <Link
+                        href={`/users/${task.author.id}`}
+                        className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-all duration-200 text-sm"
+                      >
+                        Profile
+                      </Link>
+                    </div>
                   </div>
                 </Popup>
               </Marker>
@@ -495,7 +563,7 @@ export default function UsersNearby() {
         <div className="bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg border border-gray-200">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-sm font-medium text-gray-700">{filteredUsers.length} nearby</span>
+            <span className="text-sm font-medium text-gray-700">{filteredTasks.length} nearby</span>
           </div>
         </div>
       </div>
