@@ -219,7 +219,7 @@ export default function TaskListPage() {
         <div className="py-8">
 
         {loading ? (
-          <div className="flex items-center justify-center py-12">
+          <div className="flex items-center justify-center min-h-[60vh]">
             <LoadingSpinner size="lg" text="Loading your listings..." />
           </div>
         ) : tasks.length === 0 ? (
