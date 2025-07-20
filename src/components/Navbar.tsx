@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { FaBars } from "react-icons/fa";
 import { Menu } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { useAuth } from "../contexts/AuthContext";
 
 function Dropdown({ label, items }: { label: string; items: { name: string; href: string }[] }) {
   return (
@@ -39,28 +40,11 @@ function Dropdown({ label, items }: { label: string; items: { name: string; href
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const [credits, setCredits] = useState<number | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const { user, token, loading } = useAuth();
   const pathname = usePathname();
 
-  useEffect(() => {
-    const t = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
-    setToken(t);
-    const fetchCredits = async () => {
-      if (!t) return;
-      try {
-        const API_BASE_URL = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084';
-        const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
-          headers: { Authorization: `Bearer ${t}` },
-        });
-        if (res.ok) {
-          const profile = await res.json();
-          setCredits(profile.Credits ?? profile.credits ?? null);
-        }
-      } catch {}
-    };
-    fetchCredits();
-  }, [pathname]);
+  const credits = user?.Credits ?? user?.credits ?? null;
+  const userName = user?.Name ?? user?.name ?? null;
 
   return (
     <header className="bg-white shadow-md text-black w-full z-50">
@@ -89,12 +73,33 @@ export default function Navbar() {
           {/* Credits badge removed */}
           {/* Right buttons */}
           <Link href="/seller" className="hover:text-green-600 text-sm">Become a Seller</Link>
-          <Link href="/login" className="hover:text-green-600 text-sm">Sign in</Link>
-          <Link href="/register">
-            <button className="bg-green-500 text-white text-sm px-4 py-2 rounded hover:bg-green-600">
-              Join
-            </button>
-          </Link>
+          
+          {user ? (
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600">Credits:</span>
+                <span className="text-sm font-medium text-green-600">{credits || 0}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600">Hi,</span>
+                <span className="text-sm font-medium text-gray-900">{userName}</span>
+              </div>
+              <Link href="/dashboard">
+                <button className="bg-black text-white text-sm px-4 py-2 rounded hover:bg-gray-800">
+                  Dashboard
+                </button>
+              </Link>
+            </div>
+          ) : (
+            <>
+              <Link href="/login" className="hover:text-green-600 text-sm">Sign in</Link>
+              <Link href="/register">
+                <button className="bg-green-500 text-white text-sm px-4 py-2 rounded hover:bg-green-600">
+                  Join
+                </button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile toggle */}
@@ -106,15 +111,33 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {open && (
         <div className="md:hidden bg-white px-4 py-4 space-y-3 shadow-md text-sm">
-        
           <Link href="/services/all">Browse Services</Link>
           <Link href="/users">Users</Link>
           <Link href="/about">Pages</Link>
           <Link href="/contact">Contact</Link>
-          <Link href="/login">Sign in</Link>
-          <Link href="/register">
-            <button className="w-full bg-green-500 text-white py-2 rounded">Join</button>
-          </Link>
+          
+          {user ? (
+            <>
+              <div className="flex items-center justify-between py-2 border-t border-gray-100">
+                <span className="text-gray-600">Credits:</span>
+                <span className="font-medium text-green-600">{credits || 0}</span>
+              </div>
+              <div className="flex items-center justify-between py-2">
+                <span className="text-gray-600">Hi,</span>
+                <span className="font-medium text-gray-900">{userName}</span>
+              </div>
+              <Link href="/dashboard">
+                <button className="w-full bg-black text-white py-2 rounded">Dashboard</button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/login">Sign in</Link>
+              <Link href="/register">
+                <button className="w-full bg-green-500 text-white py-2 rounded">Join</button>
+              </Link>
+            </>
+          )}
         </div>
       )}
     </header>

@@ -1,282 +1,301 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
-import { FiMail, FiLock, FiEye, FiEyeOff, FiX } from 'react-icons/fi';
-import { FaGithub, FaCheckCircle } from 'react-icons/fa';
-import { ImSpinner2 } from 'react-icons/im';
-import LoadingSpinner from "@/components/common/LoadingSpinner";
+import { useState } from "react";
+import { FaTimes, FaEye, FaEyeSlash, FaGithub } from "react-icons/fa";
+import LoadingSpinner from "./common/LoadingSpinner";
+import { useAuth } from "../contexts/AuthContext";
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  mode?: 'login' | 'signup';
-  onSuccess?: () => void;
+  onAuthSuccess?: () => void;
+  defaultMode?: "login" | "register";
 }
 
-export default function AuthModal({ isOpen, onClose, mode = 'login', onSuccess }: AuthModalProps) {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [error, setError] = useState("");
-  const [loginSuccess, setLoginSuccess] = useState(false);
-  const [loading, setLoading] = useState(false);
+export default function AuthModal({
+  isOpen,
+  onClose,
+  onAuthSuccess,
+  defaultMode = "login",
+}: AuthModalProps) {
+  const { login } = useAuth();
+  const [mode, setMode] = useState<"login" | "register">(defaultMode);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    name: "",
+    confirmPassword: "",
+  });
   const [showPassword, setShowPassword] = useState(false);
-  const [currentMode, setCurrentMode] = useState(mode);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    setCurrentMode(mode);
-  }, [mode]);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
-  useEffect(() => {
-    if (isOpen) {
-      setError("");
-      setLoginSuccess(false);
-      setLoading(false);
+  const validateForm = () => {
+    if (!formData.email || !formData.password) {
+      setError("Please fill in all required fields");
+      return false;
     }
-  }, [isOpen]);
+    if (mode === "register") {
+      if (!formData.name) {
+        setError("Please enter your name");
+        return false;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        setError("Passwords do not match");
+        return false;
+      }
+      if (formData.password.length < 6) {
+        setError("Password must be at least 6 characters long");
+        return false;
+      }
+    }
+    return true;
+  };
 
-  const handleAuth = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setLoginSuccess(false);
+    setError(null);
+
+    if (!validateForm()) return;
+
     setLoading(true);
-    
+
     try {
-      const authUrl = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8080';
-      const endpoint = currentMode === 'login' ? '/api/auth/login' : '/api/auth/register';
+      const API_BASE_URL = process.env.NEXT_PUBLIC_AUTH_API_URL || "http://localhost:8084";
+      const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
       
-      console.log(`🔗 Attempting ${currentMode} to:`, `${authUrl}${endpoint}`);
-      
-      const body = currentMode === 'login' 
-        ? { email, password }
-        : { name, email, password };
-      
-      const res = await fetch(`${authUrl}${endpoint}`, {
+      const requestData = mode === "login" 
+        ? { email: formData.email, password: formData.password }
+        : { email: formData.email, password: formData.password, name: formData.name };
+
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
       });
-      
-      console.log('📡 Response status:', res.status);
-      
-      const contentType = res.headers.get("content-type") || "";
-      
+
       if (!res.ok) {
-        const errorText = contentType.includes("application/json")
-          ? (await res.json()).error || `${currentMode} failed`
-          : await res.text();
-        console.error(`❌ ${currentMode} failed:`, errorText);
-        throw new Error(errorText);
+        const errorData = await res.text();
+        throw new Error(errorData || `${mode === "login" ? "Login" : "Registration"} failed`);
       }
+
+      const result = await res.json();
       
-      if (!contentType.includes("application/json")) {
-        const text = await res.text();
-        console.error('❌ Unexpected response format:', text);
-        throw new Error("Unexpected response format from server");
-      }
+      // Use the global login function to update navbar
+      login(result.token);
       
-      const data = await res.json();
-      console.log(`✅ ${currentMode} successful, token received:`, !!data.token);
+      // Show success message in a modal instead of alert
+      setSuccessMessage(`${mode === "login" ? "Login" : "Registration"} successful!`);
       
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        setLoginSuccess(true);
-        setTimeout(() => {
-          onSuccess?.();
-          onClose();
-          router.push("/dashboard");
-        }, 1500);
-      } else {
-        throw new Error("No token received from server");
-      }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Something went wrong";
-      console.error(`❌ ${currentMode} error:`, err);
-      setError(message);
+      // Close after a short delay to show success message
+      setTimeout(() => {
+        if (onAuthSuccess) {
+          onAuthSuccess();
+        }
+        onClose();
+      }, 1500);
+    } catch (err) {
+      console.error("Auth error:", err);
+      setError(err instanceof Error ? err.message : `${mode === "login" ? "Login" : "Registration"} failed`);
     } finally {
-      if (!loginSuccess) setLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleGithubAuth = () => {
-    signIn('github', { callbackUrl: '/dashboard' });
+  const handleSocialAuth = (provider: "google" | "github") => {
+    // Redirect to social auth endpoints
+    const API_BASE_URL = process.env.NEXT_PUBLIC_AUTH_API_URL || "http://localhost:8084";
+    window.location.href = `${API_BASE_URL}/api/auth/${provider}`;
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+      <div className="bg-white max-w-md w-full rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h2 className="text-2xl font-bold text-[#1a1446]">
-            {currentMode === 'login' ? 'Login to TradeMinutes' : 'Sign up for TradeMinutes'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <FiX className="text-2xl" />
-          </button>
+        <div className="bg-white border-b border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {mode === "login" ? "Sign In" : "Create Account"}
+              </h2>
+              <p className="text-gray-600 mt-1">
+                {mode === "login" 
+                  ? "Welcome back! Please sign in to your account." 
+                  : "Join TradeMinutes and start booking services!"
+                }
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+            >
+              <FaTimes className="w-6 h-6" />
+            </button>
+          </div>
         </div>
 
-        {/* Loading Overlay */}
-        {(loading || loginSuccess) && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/90 rounded-2xl">
-            <div className="flex flex-col items-center gap-4">
-              {!loginSuccess ? (
-                <LoadingSpinner size="lg" text={`${currentMode === 'login' ? 'Logging in' : 'Signing up'}...`} />
-              ) : (
-                <>
-                  <FaCheckCircle className="text-5xl text-[#22c55e] animate-pop" />
-                  <span className="text-lg font-semibold text-[#22c55e]">
-                    {currentMode === 'login' ? 'Login' : 'Sign up'} successful!
-                  </span>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Content */}
-        <div className={`p-6 ${loading || loginSuccess ? 'blur-sm pointer-events-none' : ''}`}>
-          <p className="text-gray-500 mb-6">
-            {currentMode === 'login' 
-              ? 'Connect with your community and exchange skills for time credits!'
-              : 'Join the community and start exchanging skills for time credits!'
-            }
-          </p>
-          
-          {/* Error Message */}
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-              {error}
+        <div className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Social Auth Buttons */}
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={() => handleSocialAuth("github")}
+                className="w-full flex items-center justify-center space-x-3 bg-gray-900 text-white py-3 px-4 rounded-xl font-medium hover:bg-gray-800 transition-colors"
+              >
+                <FaGithub className="w-5 h-5" />
+                <span>Continue with GitHub</span>
+              </button>
             </div>
-          )}
-          
-          {/* GitHub Auth */}
-          <button
-            onClick={handleGithubAuth}
-            className="w-full flex items-center justify-center gap-2 border border-gray-200 rounded-full py-3 bg-white hover:bg-gray-50 transition-colors text-[#1a1446] font-medium text-lg mb-4"
-          >
-            <FaGithub className="text-2xl" /> 
-            {currentMode === 'login' ? 'Sign in' : 'Sign up'} with GitHub
-          </button>
-          
-          <div className="flex items-center my-4">
-            <div className="flex-grow h-px bg-gray-200" />
-            <span className="px-3 text-gray-400 text-sm">
-              or {currentMode === 'login' ? 'Sign in' : 'Sign up'} with Email
-            </span>
-            <div className="flex-grow h-px bg-gray-200" />
-          </div>
 
-          {/* Form */}
-          <form onSubmit={handleAuth} className="space-y-4">
-            {currentMode === 'signup' && (
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium mb-1 text-[#1a1446]">
-                  Full Name<span className="text-[#22c55e]">*</span>
-                </label>
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or continue with email</span>
+              </div>
+            </div>
+
+            {/* Name field for register */}
+            {mode === "register" && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Full Name *</label>
                 <input
-                  id="name"
                   type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
                   placeholder="Enter your full name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-white rounded-full border border-gray-200 px-5 py-3 focus:border-[#22c55e] outline-none text-[#1a1446] placeholder-gray-400"
+                  className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                   required
-                  disabled={loading}
                 />
               </div>
             )}
-            
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-1 text-[#1a1446]">
-                Email Address<span className="text-[#22c55e]">*</span>
-              </label>
-              <div className="flex items-center bg-white rounded-full border border-gray-200 px-5 py-3 focus-within:border-[#22c55e]">
-                <FiMail className="text-xl text-[#22c55e] mr-3" />
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 bg-transparent outline-none text-[#1a1446] placeholder-gray-400"
-                  required
-                  disabled={loading}
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium mb-1 text-[#1a1446]">
-                Password<span className="text-[#22c55e]">*</span>
-              </label>
-              <div className="flex items-center bg-white rounded-full border border-gray-200 px-5 py-3 focus-within:border-[#22c55e]">
-                <FiLock className="text-xl text-[#22c55e] mr-3" />
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="flex-1 bg-transparent outline-none text-[#1a1446] placeholder-gray-400"
-                  required
-                  disabled={loading}
-                />
-                <button 
-                  type="button" 
-                  onClick={() => setShowPassword(v => !v)} 
-                  className="ml-2 text-gray-400 hover:text-[#22c55e]"
-                >
-                  {showPassword ? <FiEyeOff /> : <FiEye />}
-                </button>
-              </div>
+
+            {/* Email field */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Email Address *</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter your email"
+                className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                required
+              />
             </div>
 
-            {currentMode === 'login' && (
-              <div className="flex items-center justify-between">
-                <label className="flex items-center text-sm text-[#1a1446]">
-                  <input type="checkbox" className="mr-2 accent-[#22c55e]" /> Remember me
-                </label>
+            {/* Password field */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Password *</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password"
+                  className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors pr-12"
+                  required
+                />
                 <button
                   type="button"
-                  onClick={() => router.push('/forgot-password')}
-                  className="text-sm text-[#22c55e] hover:underline font-medium"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  Forgot password?
+                  {showPassword ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
                 </button>
               </div>
+            </div>
+
+            {/* Confirm Password field for register */}
+            {mode === "register" && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Confirm Password *</label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="Confirm your password"
+                    className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors pr-12"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showConfirmPassword ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
             )}
-            
+
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
+            )}
+
+            {/* Success Message */}
+            {successMessage && (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                <p className="text-green-600 text-sm">{successMessage}</p>
+              </div>
+            )}
+
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#22c55e] hover:bg-[#16a34a] text-white font-semibold rounded-full py-3 transition-colors duration-150 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`w-full py-3 px-4 rounded-xl font-medium transition-colors ${
+                loading
+                  ? 'bg-gray-400 cursor-not-allowed text-white'
+                  : 'bg-black hover:bg-gray-800 text-white'
+              }`}
             >
-              {loading 
-                ? (currentMode === 'login' ? "Logging in..." : "Signing up...") 
-                : (currentMode === 'login' ? "Login to TradeMinutes" : "Sign up for TradeMinutes")
-              }
+              {loading ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                  <span>{mode === "login" ? "Signing In..." : "Creating Account..."}</span>
+                </div>
+              ) : (
+                mode === "login" ? "Sign In" : "Create Account"
+              )}
             </button>
-          </form>
 
-          {/* Mode Switch */}
-          <p className="text-center text-sm mt-6 text-[#1a1446]">
-            {currentMode === 'login' ? "Don't have an account?" : "Already have an account?"}{' '}
-            <button
-              type="button"
-              onClick={() => setCurrentMode(currentMode === 'login' ? 'signup' : 'login')}
-              className="text-[#22c55e] hover:underline font-medium"
-            >
-              {currentMode === 'login' ? 'Sign up for TradeMinutes' : 'Login to TradeMinutes'}
-            </button>
-          </p>
+            {/* Mode Toggle */}
+            <div className="text-center">
+              <p className="text-gray-600">
+                {mode === "login" ? "Don't have an account?" : "Already have an account?"}
+                <button
+                  type="button"
+                  onClick={() => setMode(mode === "login" ? "register" : "login")}
+                  className="ml-1 text-green-600 hover:text-green-700 font-medium"
+                >
+                  {mode === "login" ? "Sign up" : "Sign in"}
+                </button>
+              </p>
+            </div>
+          </form>
         </div>
       </div>
     </div>

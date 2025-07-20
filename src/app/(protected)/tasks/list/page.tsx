@@ -193,7 +193,7 @@ export default function TaskListPage() {
             </div>
           <button
             onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg text-sm font-semibold shadow-md hover:bg-purple-700 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-lg text-sm font-semibold shadow-md hover:bg-gray-800 hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
           >
               <FaPlus className="w-4 h-4 text-white" />
               Create Listing

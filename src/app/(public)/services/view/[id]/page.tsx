@@ -8,6 +8,9 @@ import { FaStar, FaMapMarkerAlt, FaClock, FaCoins, FaHeart, FaShare, FaEllipsisH
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import BookingModal from '@/components/BookingModal';
+import AuthModal from '@/components/AuthModal';
+import { useAuth } from '@/contexts/AuthContext';
 
 type Availability = {
   Date: string;
@@ -90,20 +93,36 @@ export default function ServiceViewPage() {
   const [selectedTier, setSelectedTier] = useState<string>('Basic');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { token } = useAuth();
 
   // Debug logging function
-  const logToFile = (message: string, data?: any) => {
+  const logToFile = async (message: string, data?: any) => {
     const timestamp = new Date().toISOString();
     const logEntry = `[${timestamp}] ${message}${data ? '\nData: ' + JSON.stringify(data, null, 2) : ''}\n\n`;
     
     // Log to console
-    console.log(logEntry);
-    
-    // In a real app, you'd send this to a logging service
-    // For now, we'll just use console.log
     console.log('=== DEBUG LOG ENTRY ===');
     console.log(logEntry);
     console.log('=== END DEBUG LOG ===');
+    
+    // Write to debug log file
+    try {
+      const response = await fetch('/api/debug-log', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ logEntry }),
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to write to debug log file');
+      }
+    } catch (error) {
+      console.error('Error writing to debug log:', error);
+    }
   };
 
   // Mock reviews data
@@ -137,6 +156,8 @@ export default function ServiceViewPage() {
       hasFiles: false
     }
   ];
+
+
 
   useEffect(() => {
     const fetchService = async () => {
@@ -270,8 +291,11 @@ export default function ServiceViewPage() {
   }, [params.id]);
 
   const handleOrder = () => {
-    // Navigate to booking page
-    router.push(`/book-appointment?service=${service?.ID}&tier=${selectedTier}`);
+    if (!token) {
+      setIsAuthModalOpen(true);
+    } else {
+      setIsBookingModalOpen(true);
+    }
   };
 
   const handleContact = () => {
@@ -705,6 +729,29 @@ export default function ServiceViewPage() {
       </div>
 
       <Footer />
+
+      {/* Booking Modal */}
+      <BookingModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+        service={service}
+        selectedTier={selectedTier}
+        onBookingSuccess={() => {
+          // Refresh the page or show success message
+          window.location.reload();
+        }}
+      />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={() => {
+          setIsAuthModalOpen(false);
+          setIsBookingModalOpen(true);
+        }}
+        defaultMode="login"
+      />
     </main>
   );
 } 

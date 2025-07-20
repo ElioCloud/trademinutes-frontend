@@ -3,6 +3,7 @@ import { Urbanist } from "next/font/google";
 import "./globals.css";
 import SessionWrapper from "./../components/session-wrapper";
 import { ThemeProvider } from "next-themes";
+import { AuthProvider } from "../contexts/AuthContext";
 import 'leaflet/dist/leaflet.css';
 
 
@@ -26,9 +27,11 @@ export default function RootLayout({
         className={`${urbanist.variable} font-urbanist antialiased`}
       >
         <SessionWrapper>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            {children}
-          </ThemeProvider>
+          <AuthProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+              {children}
+            </ThemeProvider>
+          </AuthProvider>
         </SessionWrapper>
       </body>
     </html>
