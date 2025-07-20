@@ -76,6 +76,7 @@ export default function EditTaskModal({
   const [coverImagePreview, setCoverImagePreview] = useState<string>("");
   const [contentImages, setContentImages] = useState<File[]>([]);
   const [contentImagePreviews, setContentImagePreviews] = useState<string[]>([]);
+  const [existingContentImages, setExistingContentImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const API_BASE_URL = process.env.NEXT_PUBLIC_TASK_API_URL || "http://localhost:8084";
   const MAPBOX_TOKEN = "pk.eyJ1IjoibmVlbGFtZ2F1Y2hhbiIsImEiOiJjbWMwbzg0dXgwNGlnMmxwcmlncWVycnBnIn0.ARZnElbDY2SOiInY94w6aA";
@@ -119,9 +120,17 @@ export default function EditTaskModal({
       });
       setSelectedCategory(task.Category || "");
       
-      // Set cover image preview if task has images
+      // Set cover image preview and content images if task has images
       if (task.Images && task.Images.length > 0) {
+        // First image is cover image
         setCoverImagePreview(task.Images[0]);
+        
+        // Rest are content images (skip first one)
+        if (task.Images.length > 1) {
+          const contentImages = task.Images.slice(1);
+          setContentImagePreviews(contentImages);
+          setExistingContentImages(contentImages);
+        }
       }
       
       // Set tiers from task if available
@@ -202,7 +211,7 @@ export default function EditTaskModal({
       return true;
     });
 
-    if (contentImages.length + validFiles.length > 5) {
+    if (contentImagePreviews.length + validFiles.length > 5) {
       showToast("❌ Maximum 5 content images allowed", "error");
       return;
     }
@@ -226,6 +235,11 @@ export default function EditTaskModal({
   const removeContentImage = (index: number) => {
     setContentImages(prev => prev.filter((_, i) => i !== index));
     setContentImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingContentImage = (index: number) => {
+    setContentImagePreviews(prev => prev.filter((_, i) => i !== index));
+    setExistingContentImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const nextStep = () => {
@@ -271,6 +285,9 @@ export default function EditTaskModal({
       contentImages.forEach((image) => {
         formDataToSend.append("contentImages", image);
       });
+
+      // Add existing content images that weren't removed
+      formDataToSend.append("existingContentImages", JSON.stringify(existingContentImages));
 
       const response = await fetch(`${API_BASE_URL}/api/tasks/update/${task.id}`, {
         method: "PUT",
@@ -336,22 +353,27 @@ export default function EditTaskModal({
           Content Images (Max 5)
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {contentImagePreviews.map((preview, index) => (
-            <div key={index} className="relative">
-              <img
-                src={preview}
-                alt={`Content ${index + 1}`}
-                className="w-full h-20 object-cover rounded-lg border"
-              />
-              <button
-                type="button"
-                onClick={() => removeContentImage(index)}
-                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-              >
-                <FaTimes className="w-2 h-2" />
-              </button>
-            </div>
-          ))}
+          {contentImagePreviews.map((preview, index) => {
+            // Check if this is an existing image (starts with http/https) or a new one (data URL)
+            const isExistingImage = preview.startsWith('http');
+            
+            return (
+              <div key={index} className="relative">
+                <img
+                  src={preview}
+                  alt={`Content ${index + 1}`}
+                  className="w-full h-20 object-cover rounded-lg border"
+                />
+                <button
+                  type="button"
+                  onClick={() => isExistingImage ? removeExistingContentImage(index) : removeContentImage(index)}
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                >
+                  <FaTimes className="w-2 h-2" />
+                </button>
+              </div>
+            );
+          })}
           {contentImagePreviews.length < 5 && (
             <label className="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition">
               <FaImage className="w-4 h-4 text-gray-400 mb-1" />
