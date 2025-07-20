@@ -17,8 +17,7 @@ interface Tier {
   description: string;
   credits: number;
   features: string[];
-  weeklyHours: number;
-  dailyHours: number;
+  availableTimeSlot: string;
   maxDays: number;
 }
 
@@ -45,8 +44,7 @@ export default function CreateTaskModal({
       description: "",
       credits: 0,
       features: [],
-      weeklyHours: 20,
-      dailyHours: 4,
+      availableTimeSlot: "9:00 AM - 5:00 PM",
       maxDays: 7
     },
     {
@@ -55,8 +53,7 @@ export default function CreateTaskModal({
       description: "",
       credits: 0,
       features: [],
-      weeklyHours: 30,
-      dailyHours: 6,
+      availableTimeSlot: "8:00 AM - 6:00 PM",
       maxDays: 14
     },
     {
@@ -65,8 +62,7 @@ export default function CreateTaskModal({
       description: "",
       credits: 0,
       features: [],
-      weeklyHours: 40,
-      dailyHours: 8,
+      availableTimeSlot: "24/7 Available",
       maxDays: 30
     }
   ]);
@@ -532,27 +528,15 @@ export default function CreateTaskModal({
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Weekly Hours</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Available Time Slot</label>
               <input
-                type="number"
-                value={tier.weeklyHours}
-                onChange={(e) => handleTierChange(index, 'weeklyHours', parseInt(e.target.value) || 0)}
+                type="text"
+                value={tier.availableTimeSlot}
+                onChange={(e) => handleTierChange(index, 'availableTimeSlot', e.target.value)}
                 className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                min="0"
-                max="168"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Daily Hours</label>
-              <input
-                type="number"
-                value={tier.dailyHours}
-                onChange={(e) => handleTierChange(index, 'dailyHours', parseInt(e.target.value) || 0)}
-                className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                min="0"
-                max="24"
+                placeholder="e.g., 9:00 AM - 5:00 PM"
               />
             </div>
             <div>
