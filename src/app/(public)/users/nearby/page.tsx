@@ -8,7 +8,6 @@ import TradeMinutesActionSteps from "@/components/ActionSteps";
 import UsersBanner from "@/components/UsersBanner";
 import UserGrid from "@/components/UserGrid";
 import MapUsers from "@/components/UsersNearby";
-import ServiceFilters from "@/components/ServiceFilters";
 import UsersNearbyBanner from "@/components/UsersNearbyBanner";
 
 export default function UsersNearby() {
@@ -20,8 +19,6 @@ export default function UsersNearby() {
       <UsersNearbyBanner />
 
       <div className="max-w-7xl mx-auto px-0 py-8">
-        <br />
-        <ServiceFilters />
         <br />
         <MapUsers />
       </div>
