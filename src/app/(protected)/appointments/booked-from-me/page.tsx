@@ -141,7 +141,7 @@ export default function BookedFromMePage() {
           let bookerPhone = b.BookerPhone || b.bookerPhone || "";
           let bookerProfilePicture = "";
           
-          // Fetch task details to get images
+          // Fetch task details to get images and author info
           if (taskId) {
             try {
               const taskRes = await fetch(`${API_BASE_URL}/api/tasks/get/${taskId}`, {
@@ -152,14 +152,27 @@ export default function BookedFromMePage() {
                 const task = taskData.data || taskData;
                 taskImages = task.Images || task.images || [];
                 console.log(`Fetched task ${taskId} images:`, taskImages);
+                
+                // Get booker details from the task's Author field (which contains the profile picture)
+                if (task.Author) {
+                  bookerName = task.Author.Name || task.Author.name || bookerName;
+                  bookerEmail = task.Author.Email || task.Author.email || bookerEmail;
+                  bookerProfilePicture = task.Author.Avatar || task.Author.avatar || "";
+                  console.log(`✅ Using booker details from task Author:`, { 
+                    name: bookerName, 
+                    email: bookerEmail, 
+                    profilePicture: bookerProfilePicture,
+                    taskAuthor: task.Author
+                  });
+                }
               }
             } catch (err) {
               console.log(`Failed to fetch task ${taskId} details:`, err);
             }
           }
           
-          // Fetch booker details to get real name
-          if (bookerId) {
+          // If we still don't have the profile picture, try fetching from auth service as fallback
+          if (!bookerProfilePicture && bookerId) {
             try {
               const bookerRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084'}/api/auth/user/${bookerId}`, {
                 headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -171,13 +184,31 @@ export default function BookedFromMePage() {
                 bookerEmail = booker.Email || booker.email || bookerEmail;
                 bookerPhone = booker.Phone || booker.phone || bookerPhone;
                 bookerProfilePicture = booker.ProfilePictureURL || booker.profilePictureURL || booker.Avatar || booker.avatar || booker.ProfilePicture || booker.profilePicture || "";
-                console.log(`✅ Fetched booker ${bookerId} details:`, { 
+                console.log(`✅ Fetched booker ${bookerId} details from auth service:`, { 
                   name: bookerName, 
                   email: bookerEmail, 
                   phone: bookerPhone, 
                   profilePicture: bookerProfilePicture,
                   rawBookerData: booker
                 });
+                
+                // If no profile picture from auth service, try profile service for this specific user
+                if (!bookerProfilePicture) {
+                  try {
+                    const profileRes = await fetch(`${process.env.NEXT_PUBLIC_PROFILE_API_URL || 'http://localhost:8081'}/api/profile/${bookerId}`, {
+                      headers: token ? { Authorization: `Bearer ${token}` } : {},
+                    });
+                    if (profileRes.ok) {
+                      const profileData = await profileRes.json();
+                      bookerProfilePicture = profileData.ProfilePictureURL || profileData.profilePictureURL || "";
+                      console.log(`✅ Fetched profile picture from profile service for user ${bookerId}:`, bookerProfilePicture);
+                    } else {
+                      console.log(`❌ Profile service returned:`, profileRes.status, profileRes.statusText);
+                    }
+                  } catch (profileErr) {
+                    console.log(`❌ Error fetching profile picture from profile service:`, profileErr);
+                  }
+                }
               } else {
                 console.log(`❌ Failed to fetch booker ${bookerId} details:`, bookerRes.status, bookerRes.statusText);
                 const errorText = await bookerRes.text();
@@ -186,7 +217,7 @@ export default function BookedFromMePage() {
             } catch (err) {
               console.log(`❌ Error fetching booker ${bookerId} details:`, err);
             }
-          } else {
+          } else if (!bookerId) {
             console.log(`⚠️ No booker ID found for booking ${b.ID || b.id}`);
           }
           
