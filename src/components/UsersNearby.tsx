@@ -534,39 +534,7 @@ export default function UsersNearby() {
         </MapContainer>
       </div>
 
-      {/* Map Controls Overlay */}
-      <div className="absolute bottom-4 right-4 z-10">
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-2">
-          <button 
-            onClick={() => {
-              if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                  (pos) => setCenter([pos.coords.latitude, pos.coords.longitude]),
-                  () => null,
-                  { enableHighAccuracy: true, timeout: 5000 }
-                );
-              }
-            }}
-            className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-            title="Center on my location"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </button>
-        </div>
-      </div>
 
-      {/* User Count Badge */}
-      <div className="absolute top-30 left-4 z-10">
-        <div className="bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg border border-gray-200">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-sm font-medium text-gray-700">{filteredTasks.length} nearby</span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
