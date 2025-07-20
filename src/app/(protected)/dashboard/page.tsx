@@ -429,7 +429,7 @@ export default function ProfileDashboardPage() {
 
         if (res.ok) {
           const data = await res.json();
-          const services = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
+          const services = data && Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
           
           // Update service stats with real data
           setServiceStats({
@@ -476,7 +476,7 @@ export default function ProfileDashboardPage() {
           let tasks: Task[] = [];
           if (json && Array.isArray(json.data)) {
             tasks = json.data;
-          } else if (Array.isArray(json)) {
+          } else if (json && Array.isArray(json)) {
             tasks = json;
           }
           setTaskStats({

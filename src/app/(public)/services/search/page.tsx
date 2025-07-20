@@ -112,7 +112,7 @@ function SearchResultsPage() {
           const data = await response.json();
           console.log('Search API response:', data);
           
-          const services = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
+          const services = data && Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
           console.log('Services array:', services);
 
           // Use all tasks for search (including own tasks)
@@ -180,7 +180,7 @@ function SearchResultsPage() {
             const data = await response.json();
             console.log('Public search API response:', data);
             
-            const services = Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
+            const services = data && Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [];
             console.log('Public services array:', services);
             console.log('Total services from API:', services.length);
             console.log('Search query:', query);
