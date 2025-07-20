@@ -114,23 +114,16 @@ interface CreditStats {
 
 
 
-interface CreditTier {
-  name: string;
-  minCredits: number;
-  currentTier: boolean;
-  benefits: string[];
-  icon: string;
-  color: string;
-}
+
 
 export default function CreditsPage() {
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [stats, setStats] = useState<CreditStats | null>(null);
 
-  const [tiers, setTiers] = useState<CreditTier[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedView, setSelectedView] = useState<'overview' | 'transactions' | 'tiers'>('overview');
+  const [selectedView, setSelectedView] = useState<'overview' | 'transactions'>('overview');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -345,44 +338,10 @@ export default function CreditsPage() {
 
 
 
-        const mockTiers: CreditTier[] = [
-          {
-            name: "Bronze",
-            minCredits: 0,
-            currentTier: currentCredits < 1000,
-            benefits: ["Basic features", "Standard support"],
-            icon: "FaMedal",
-            color: "text-amber-600"
-          },
-          {
-            name: "Silver",
-            minCredits: 1000,
-            currentTier: currentCredits >= 1000 && currentCredits < 5000,
-            benefits: ["Priority support", "Advanced analytics", "Custom branding"],
-            icon: "FaGem",
-            color: "text-gray-400"
-          },
-          {
-            name: "Gold",
-            minCredits: 5000,
-            currentTier: currentCredits >= 5000 && currentCredits < 10000,
-            benefits: ["VIP support", "Premium features", "Exclusive tools", "Priority listing"],
-            icon: "FaCrown",
-            color: "text-yellow-500"
-          },
-          {
-            name: "Platinum",
-            minCredits: 10000,
-            currentTier: currentCredits >= 10000,
-            benefits: ["Dedicated manager", "Custom solutions", "Exclusive events", "Highest priority"],
-            icon: "FaDiamond",
-            color: "text-purple-500"
-          }
-        ];
+
 
         setTransactions(transformedTransactions);
         setStats(transformedStats);
-        setTiers(mockTiers);
         setError(null);
       } catch (err: any) {
         console.error("Error fetching credits data:", err);
@@ -457,44 +416,10 @@ export default function CreditsPage() {
 
 
 
-        const mockTiers: CreditTier[] = [
-          {
-            name: "Bronze",
-            minCredits: 0,
-            currentTier: false,
-            benefits: ["Basic features", "Standard support"],
-            icon: "FaMedal",
-            color: "text-amber-600"
-          },
-          {
-            name: "Silver",
-            minCredits: 1000,
-            currentTier: true,
-            benefits: ["Priority support", "Advanced analytics", "Custom branding"],
-            icon: "FaGem",
-            color: "text-gray-400"
-          },
-          {
-            name: "Gold",
-            minCredits: 5000,
-            currentTier: false,
-            benefits: ["VIP support", "Premium features", "Exclusive tools", "Priority listing"],
-            icon: "FaCrown",
-            color: "text-yellow-500"
-          },
-          {
-            name: "Platinum",
-            minCredits: 10000,
-            currentTier: false,
-            benefits: ["Dedicated manager", "Custom solutions", "Exclusive events", "Highest priority"],
-            icon: "FaDiamond",
-            color: "text-purple-500"
-          }
-        ];
+
 
         setTransactions(mockTransactions);
         setStats(mockStats);
-        setTiers(mockTiers);
       } finally {
         setLoading(false);
       }
@@ -689,17 +614,7 @@ export default function CreditsPage() {
               Transactions
             </button>
 
-            <button
-              onClick={() => setSelectedView("tiers")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedView === "tiers"
-                  ? "bg-emerald-700 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              <FaCrown className="w-4 h-4 inline mr-2" />
-              Tiers
-            </button>
+
           </div>
 
           {/* Content */}
@@ -973,46 +888,7 @@ export default function CreditsPage() {
 
 
 
-          {selectedView === "tiers" && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {tiers.map((tier, index) => (
-                  <div key={index} className={`bg-white rounded-xl p-6 shadow-sm border-2 ${
-                    tier.currentTier ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200'
-                  }`}>
-                    <div className="text-center mb-4">
-                      <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-3 ${
-                        tier.currentTier ? 'bg-emerald-600' : 'bg-gray-300'
-                      }`}>
-                        <FaCrown className="w-8 h-8 text-white" />
-                      </div>
-                      <h3 className={`text-xl font-bold ${tier.color}`}>{tier.name}</h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {tier.minCredits === 0 ? 'Starting tier' : `${tier.minCredits.toLocaleString()}+ credits`}
-                      </p>
-                    </div>
 
-                    <div className="space-y-2">
-                      {tier.benefits.map((benefit, benefitIndex) => (
-                        <div key={benefitIndex} className="flex items-center gap-2 text-sm">
-                          <FaCheckCircle className={`w-4 h-4 ${
-                            tier.currentTier ? 'text-emerald-600' : 'text-gray-400'
-                          }`} />
-                          <span className={tier.currentTier ? 'text-gray-900' : 'text-gray-600'}>{benefit}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {tier.currentTier && (
-                      <div className="mt-4 pt-4 border-t border-emerald-200">
-                        <span className="text-sm font-semibold text-emerald-700">Current Tier</span>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </ProtectedLayout>
