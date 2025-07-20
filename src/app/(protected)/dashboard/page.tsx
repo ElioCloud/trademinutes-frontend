@@ -893,8 +893,9 @@ export default function ProfileDashboardPage() {
                       <p className="text-gray-600 mb-4">You haven't created any service listings yet.</p>
                       <button
                         onClick={() => router.push('/tasks/explore')}
-                        className="bg-black text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-800 hover:shadow-lg transition-all"
+                        className="bg-black text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-800 hover:shadow-lg transition-all flex items-center gap-2"
                       >
+                        <FaPlus className="text-lg" />
                         Create Your First Service
                       </button>
                     </div>
