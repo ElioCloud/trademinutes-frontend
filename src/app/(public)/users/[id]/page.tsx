@@ -91,6 +91,24 @@ export default function UserProfilePage() {
   // Check if current user is viewing their own profile
   const isOwnProfile = currentUser && (currentUser.ID === userId || currentUser.id === userId);
   
+  // Helper function for safe fetching with timeout
+  const safeFetch = async (url: string, timeout: number = 5000) => {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+      
+      const response = await fetch(url, {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      return response;
+    } catch (error) {
+      console.error(`Safe fetch error for ${url}:`, error);
+      return null;
+    }
+  };
+  
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
@@ -342,46 +360,30 @@ export default function UserProfilePage() {
       let allReviews: Review[] = [];
       
       // Fetch reviews for this user with error handling
-      try {
-        // Add timeout to prevent hanging
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      const reviewsRes = await safeFetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`);
+      
+      if (reviewsRes && reviewsRes.ok) {
+        const reviewsData = await reviewsRes.json();
+        const reviews = Array.isArray(reviewsData) ? reviewsData : (reviewsData.data || []);
         
-        const reviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`, {
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (reviewsRes.ok) {
-          const reviewsData = await reviewsRes.json();
-          const reviews = Array.isArray(reviewsData) ? reviewsData : (reviewsData.data || []);
-          
-          // Fetch reviewer names and profile pictures
-          for (const review of reviews) {
-            try {
-              const reviewerController = new AbortController();
-              const reviewerTimeoutId = setTimeout(() => reviewerController.abort(), 3000); // 3 second timeout
-              
-              const reviewerRes = await fetch(`${AUTH_API_BASE}/api/auth/user/${review.reviewerId}`, {
-                signal: reviewerController.signal
-              });
-              
-              clearTimeout(reviewerTimeoutId);
-              
-              if (reviewerRes.ok) {
-                const reviewerData = await reviewerRes.json();
-                review.reviewerName = reviewerData.Name || reviewerData.name || 'Unknown User';
-              }
-            } catch (err) {
+        // Fetch reviewer names and profile pictures
+        for (const review of reviews) {
+          try {
+            const reviewerRes = await safeFetch(`${AUTH_API_BASE}/api/auth/user/${review.reviewerId}`, 3000);
+            
+            if (reviewerRes && reviewerRes.ok) {
+              const reviewerData = await reviewerRes.json();
+              review.reviewerName = reviewerData.Name || reviewerData.name || 'Unknown User';
+            } else {
               review.reviewerName = 'Unknown User';
             }
+          } catch (err) {
+            review.reviewerName = 'Unknown User';
           }
-          
-          allReviews = reviews;
         }
-      } catch (reviewErr) {
-        console.error("Error fetching reviews:", reviewErr);
+        
+        allReviews = reviews;
+      } else {
         // Set empty reviews array if API fails
         allReviews = [];
       }
@@ -403,20 +405,44 @@ export default function UserProfilePage() {
       const AUTH_API_BASE = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084';
       const PROFILE_API_BASE = process.env.NEXT_PUBLIC_PROFILE_API_URL || 'http://localhost:8083';
       
-      // Fetch from auth service
-      const authRes = await fetch(`${AUTH_API_BASE}/api/auth/user/${reviewerId}`);
       let reviewerData: any = {};
       
-      if (authRes.ok) {
-        const authData = await authRes.json();
-        reviewerData = { ...reviewerData, ...authData };
+      // Fetch from auth service with timeout
+      try {
+        const authController = new AbortController();
+        const authTimeoutId = setTimeout(() => authController.abort(), 5000);
+        
+        const authRes = await fetch(`${AUTH_API_BASE}/api/auth/user/${reviewerId}`, {
+          signal: authController.signal
+        });
+        
+        clearTimeout(authTimeoutId);
+        
+        if (authRes.ok) {
+          const authData = await authRes.json();
+          reviewerData = { ...reviewerData, ...authData };
+        }
+      } catch (authErr) {
+        console.error("Error fetching auth data for reviewer:", authErr);
       }
       
-      // Fetch from profile service
-      const profileRes = await fetch(`${PROFILE_API_BASE}/api/profile/${reviewerId}`);
-      if (profileRes.ok) {
-        const profileData = await profileRes.json();
-        reviewerData = { ...reviewerData, ...profileData };
+      // Fetch from profile service with timeout
+      try {
+        const profileController = new AbortController();
+        const profileTimeoutId = setTimeout(() => profileController.abort(), 5000);
+        
+        const profileRes = await fetch(`${PROFILE_API_BASE}/api/profile/${reviewerId}`, {
+          signal: profileController.signal
+        });
+        
+        clearTimeout(profileTimeoutId);
+        
+        if (profileRes.ok) {
+          const profileData = await profileRes.json();
+          reviewerData = { ...reviewerData, ...profileData };
+        }
+      } catch (profileErr) {
+        console.error("Error fetching profile data for reviewer:", profileErr);
       }
       
       setReviewerProfiles(prev => ({
@@ -446,19 +472,43 @@ export default function UserProfilePage() {
         const PROFILE_API_BASE = process.env.NEXT_PUBLIC_PROFILE_API_URL || 'http://localhost:8083';
         const AUTH_API_BASE = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084';
         
-        // Try to get profile from profile service
-        const profileRes = await fetch(`${PROFILE_API_BASE}/api/profile/${userId}`);
         let profileData: any = {};
         
-        if (profileRes.ok) {
-          profileData = await profileRes.json();
+        // Try to get profile from profile service with timeout
+        try {
+          const profileController = new AbortController();
+          const profileTimeoutId = setTimeout(() => profileController.abort(), 5000);
+          
+          const profileRes = await fetch(`${PROFILE_API_BASE}/api/profile/${userId}`, {
+            signal: profileController.signal
+          });
+          
+          clearTimeout(profileTimeoutId);
+          
+          if (profileRes.ok) {
+            profileData = await profileRes.json();
+          }
+        } catch (profileErr) {
+          console.error("Error fetching profile data:", profileErr);
         }
         
-        // Try to get additional user info from auth service
-        const authRes = await fetch(`${AUTH_API_BASE}/api/auth/user/${userId}`);
-        if (authRes.ok) {
-          const authData = await authRes.json();
-          profileData = { ...profileData, ...authData };
+        // Try to get additional user info from auth service with timeout
+        try {
+          const authController = new AbortController();
+          const authTimeoutId = setTimeout(() => authController.abort(), 5000);
+          
+          const authRes = await fetch(`${AUTH_API_BASE}/api/auth/user/${userId}`, {
+            signal: authController.signal
+          });
+          
+          clearTimeout(authTimeoutId);
+          
+          if (authRes.ok) {
+            const authData = await authRes.json();
+            profileData = { ...profileData, ...authData };
+          }
+        } catch (authErr) {
+          console.error("Error fetching auth data:", authErr);
         }
         
         if (!profileData.Name && !profileData.name) {
