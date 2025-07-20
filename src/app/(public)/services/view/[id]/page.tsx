@@ -171,7 +171,45 @@ export default function ServiceViewPage() {
         console.log("Data type:", typeof data);
         console.log("Data keys:", Object.keys(data || {}));
         
+        // Debug tiers data specifically
+        console.log("=== TIERS DEBUG ===");
+        console.log("Tiers property:", data.Tiers);
+        console.log("tiers property:", data.tiers);
+        console.log("Tiers type:", typeof data.Tiers);
+        console.log("tiers type:", typeof data.tiers);
+        console.log("Tiers is array:", Array.isArray(data.Tiers));
+        console.log("tiers is array:", Array.isArray(data.tiers));
+        console.log("Tiers length:", data.Tiers?.length);
+        console.log("tiers length:", data.tiers?.length);
+        if (data.Tiers) {
+          console.log("First tier:", data.Tiers[0]);
+        }
+        if (data.tiers) {
+          console.log("First tier (lowercase):", data.tiers[0]);
+        }
+        console.log("=== END TIERS DEBUG ===");
+        
         setService(data);
+        
+        // Handle tiers data - could be string or array
+        let tiersData = data.Tiers || data.tiers;
+        
+        // If tiers is a string, try to parse it
+        if (typeof tiersData === 'string') {
+          try {
+            tiersData = JSON.parse(tiersData);
+            console.log("Parsed tiers from string:", tiersData);
+          } catch (e) {
+            console.error("Failed to parse tiers string:", e);
+            tiersData = [];
+          }
+        }
+        
+        // Update the data object with parsed tiers
+        if (tiersData && Array.isArray(tiersData)) {
+          data.Tiers = tiersData;
+          console.log("Final tiers data:", data.Tiers);
+        }
         
         // Set initial selected tier if tiers are available
         if (data.Tiers && data.Tiers.length > 0) {
