@@ -537,8 +537,6 @@ export default function UsersNearby() {
                         <div>
                           <div className="flex items-center gap-1">
                             <p className="font-medium text-gray-900 text-xs">{task.author.name}</p>
-                            <span className="text-xs text-gray-400">•</span>
-                            <p className="text-xs text-gray-500">{task.author.email}</p>
                           </div>
                           
                           {/* Rating Display */}
