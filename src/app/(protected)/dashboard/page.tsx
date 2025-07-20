@@ -891,13 +891,15 @@ export default function ProfileDashboardPage() {
                       </div>
                       <h4 className="text-lg font-semibold text-gray-900 mb-2">No services yet</h4>
                       <p className="text-gray-600 mb-4">You haven't created any service listings yet.</p>
-                      <button
-                        onClick={() => router.push('/tasks/explore')}
-                        className="bg-black text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-800 hover:shadow-lg transition-all flex items-center gap-2"
-                      >
-                        <FaPlus className="text-lg" />
-                        Create Your First Service
-                      </button>
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() => router.push('/tasks/explore')}
+                          className="bg-black text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-800 hover:shadow-lg transition-all flex items-center gap-2"
+                        >
+                          <FaPlus className="text-lg" />
+                          Create Your First Service
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
