@@ -512,7 +512,7 @@ export default function UsersNearby() {
                     <div className="border-t border-gray-200 my-3"></div>
                     
                     {/* Author Information */}
-                    <div className="mb-2">
+                    <div className="mb-2 p-3 bg-gray-50 rounded-lg">
                       <div className="flex items-center gap-2 mb-1">
                         <Image
                           src={task.author.avatar}
