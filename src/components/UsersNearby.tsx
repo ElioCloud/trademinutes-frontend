@@ -572,7 +572,7 @@ export default function UsersNearby() {
                     <div className="flex gap-1">
                       <Link
                         href={`/services/view/${task.id}`}
-                        className="flex-1 inline-flex items-center justify-center px-2 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 text-xs"
+                        className="flex-1 inline-flex items-center justify-center px-2 py-1.5 bg-black text-white rounded font-medium hover:bg-gray-800 transition-all duration-200 text-xs"
                       >
                         <span>View Task</span>
                         <svg className="w-2.5 h-2.5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
