@@ -497,15 +497,9 @@ export default function UsersNearby() {
                     </div>
 
                     {/* Task Stats */}
-                    <div className="grid grid-cols-2 gap-2 mb-2">
-                      <div className="text-center p-1 bg-gray-50 rounded">
-                        <p className="text-xs font-bold text-blue-600">{task.credits}</p>
-                        <p className="text-xs text-gray-600">Credits</p>
-                      </div>
-                      <div className="text-center p-1 bg-gray-50 rounded">
-                        <p className="text-xs font-bold text-green-600">✓</p>
-                        <p className="text-xs text-gray-600">Available</p>
-                      </div>
+                    <div className="flex justify-between items-center mb-2 text-xs">
+                      <span className="text-blue-600 font-medium">{task.credits} Credits</span>
+                      <span className="text-green-600 font-medium">✓ Available</span>
                     </div>
 
                     {/* Action Buttons */}
