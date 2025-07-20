@@ -223,8 +223,8 @@ export default function TaskListPage() {
             <LoadingSpinner size="lg" text="Loading your listings..." />
           </div>
         ) : tasks.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="bg-white rounded-2xl p-8 shadow-sm max-w-md mx-auto">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="bg-white rounded-2xl p-8 shadow-sm max-w-md mx-auto text-center">
               <div className="flex items-center justify-center mb-4">
                 <FaClipboardList className="w-16 h-16 text-gray-400" />
               </div>
