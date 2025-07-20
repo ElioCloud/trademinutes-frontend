@@ -227,13 +227,7 @@ export default function TaskListPage() {
             <div className="bg-white rounded-2xl p-8 shadow-sm max-w-md mx-auto">
               <div className="text-6xl mb-4">📝</div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">No listings yet</h3>
-              <p className="text-gray-600 mb-6">Create your first service listing to get started</p>
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
-              >
-                Create Your First Listing
-              </button>
+              <p className="text-gray-600">You haven't created any service listings yet.</p>
             </div>
           </div>
         ) : (
