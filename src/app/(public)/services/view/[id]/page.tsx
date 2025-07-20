@@ -15,6 +15,16 @@ type Availability = {
   TimeTo: string;
 };
 
+type Tier = {
+  name: string;
+  title: string;
+  description: string;
+  credits: number;
+  features: string[];
+  availableTimeSlot: string;
+  maxDays: number;
+};
+
 type Service = {
   ID?: string;
   id?: string;
@@ -32,6 +42,8 @@ type Service = {
   locationType?: string;
   Availability?: Availability[];
   availability?: Availability[];
+  Tiers?: Tier[];
+  tiers?: Tier[];
   Author?: {
     Name?: string;
     name?: string;
@@ -49,15 +61,7 @@ type Service = {
   createdAt?: number;
 };
 
-type Package = {
-  name: string;
-  title: string;
-  price: number;
-  description: string;
-  deliveryTime: string;
-  features: string[];
-  deliveryOptions: string[];
-};
+
 
 type Review = {
   id?: string;
@@ -83,40 +87,9 @@ export default function ServiceViewPage() {
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedPackage, setSelectedPackage] = useState<'Basic' | 'Standard' | 'Premium'>('Basic');
+  const [selectedTier, setSelectedTier] = useState<string>('Basic');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [reviews, setReviews] = useState<Review[]>([]);
-
-  // Mock packages data
-  const packages: Record<string, Package> = {
-    Basic: {
-      name: 'Basic',
-      title: 'One simple floor plan or Elevation',
-      price: 43.25,
-      description: 'Each 2D Floor Plan or elevation with an area up to 110 sqft',
-      deliveryTime: '2-day delivery',
-      features: ['Source file'],
-      deliveryOptions: ['2 days', '1 day']
-    },
-    Standard: {
-      name: 'Standard',
-      title: 'One floor plan or Elevation',
-      price: 57.66,
-      description: 'Each 2D Floor Plan or elevation with an area From 111 sqft to 1800 sqft',
-      deliveryTime: '3-day delivery',
-      features: ['Source file', 'Multiple formats'],
-      deliveryOptions: ['3 days', '2 days']
-    },
-    Premium: {
-      name: 'Premium',
-      title: 'One large floor plan or Elevation',
-      price: 187.41,
-      description: 'Each 2D Floor Plan or elevation with an area: From 1801 sqft to 3000 sqft',
-      deliveryTime: '4-day delivery',
-      features: ['Source file', 'Multiple formats', 'Priority support'],
-      deliveryOptions: ['4 days', '2 days']
-    }
-  };
 
   // Mock reviews data
   const mockReviews: Review[] = [
@@ -200,6 +173,11 @@ export default function ServiceViewPage() {
         
         setService(data);
         
+        // Set initial selected tier if tiers are available
+        if (data.Tiers && data.Tiers.length > 0) {
+          setSelectedTier(data.Tiers[0].name);
+        }
+        
         // Fetch real reviews for this service
         if (data.Author?.ID || data.Author?.id) {
           fetchReviews(data.Author.ID || data.Author.id);
@@ -228,7 +206,7 @@ export default function ServiceViewPage() {
 
   const handleOrder = () => {
     // Navigate to booking page
-    router.push(`/book-appointment?service=${service?.ID}&package=${selectedPackage}`);
+    router.push(`/book-appointment?service=${service?.ID}&tier=${selectedTier}`);
   };
 
   const handleContact = () => {
@@ -519,43 +497,85 @@ export default function ServiceViewPage() {
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-8">
-              {/* Package Selection */}
+              {/* Tier Selection */}
               <div className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="flex space-x-1 mb-6">
-                  {Object.keys(packages).map((pkg) => (
-                    <button
-                      key={pkg}
-                      onClick={() => setSelectedPackage(pkg as any)}
-                      className={`flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors ${
-                        selectedPackage === pkg
-                          ? 'bg-green-500 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {pkg}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Selected Package Details */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {packages[selectedPackage].title}
-                  </h3>
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-gray-900">
-                      {price} Credits
-                    </span>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <span>No tax</span>
+                {service?.Tiers && service.Tiers.length > 0 ? (
+                  <>
+                    <div className="flex space-x-1 mb-6">
+                      {service.Tiers.map((tier) => (
+                        <button
+                          key={tier.name}
+                          onClick={() => setSelectedTier(tier.name)}
+                          className={`flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors ${
+                            selectedTier === tier.name
+                              ? 'bg-green-500 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {tier.name}
+                        </button>
+                      ))}
                     </div>
+
+                    {/* Selected Tier Details */}
+                    {(() => {
+                      const currentTier = service.Tiers.find(tier => tier.name === selectedTier);
+                      if (!currentTier) return null;
+                      
+                      return (
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {currentTier.title || `${currentTier.name} Package`}
+                          </h3>
+                          
+                          <div className="flex items-center justify-between">
+                            <span className="text-2xl font-bold text-gray-900">
+                              {currentTier.credits} Credits
+                            </span>
+                            <div className="flex items-center text-sm text-gray-500">
+                              <span>No tax</span>
+                            </div>
+                          </div>
+                          
+                          <p className="text-gray-600">
+                            {currentTier.description}
+                          </p>
+
+                          {/* Tier Features */}
+                          {currentTier.features && currentTier.features.length > 0 && (
+                            <div className="space-y-2">
+                              <h4 className="font-medium text-gray-900">What's included:</h4>
+                              <ul className="space-y-1">
+                                {currentTier.features.map((feature, index) => (
+                                  <li key={index} className="flex items-center text-sm text-gray-600">
+                                    <FaCheck className="w-3 h-3 text-green-500 mr-2 flex-shrink-0" />
+                                    {feature}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Time Slot and Max Days */}
+                          <div className="space-y-2 pt-2 border-t border-gray-100">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-600">Available Time:</span>
+                              <span className="font-medium text-gray-900">{currentTier.availableTimeSlot}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-600">Max Duration:</span>
+                              <span className="font-medium text-gray-900">{currentTier.maxDays} days</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No pricing tiers available</p>
                   </div>
-                  
-                  <p className="text-gray-600">
-                    {packages[selectedPackage].description}
-                  </p>
-                </div>
+                )}
 
                 {/* Action Buttons */}
                 <div className="space-y-3 mt-6">
