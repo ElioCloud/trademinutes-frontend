@@ -583,50 +583,6 @@ export default function ProfileDashboardPage() {
       averageRating: 4.5
     });
 
-    // Mock service stats for demo
-    setServiceStats({
-      total: 12,
-      earnings: 2840,
-      recent: [
-        { 
-          Title: "Web Development", 
-          Price: 150, 
-          Category: "Technology",
-          rating: 4.8,
-          reviewCount: 24,
-          Images: [], // Add Images field for mock data
-          Author: {
-            Name: "Sarah Johnson",
-            ProfilePictureURL: undefined
-          }
-        },
-        { 
-          Title: "Logo Design", 
-          Price: 75, 
-          Category: "Design",
-          rating: 4.9,
-          reviewCount: 18,
-          Images: [], // Add Images field for mock data
-          Author: {
-            Name: "Mike Chen",
-            ProfilePictureURL: undefined
-          }
-        },
-        { 
-          Title: "Content Writing", 
-          Price: 50, 
-          Category: "Writing",
-          rating: 4.7,
-          reviewCount: 31,
-          Images: [], // Add Images field for mock data
-          Author: {
-            Name: "Emma Davis",
-            ProfilePictureURL: undefined
-          }
-        }
-      ]
-    });
-
     // Listen for profile picture updates and refresh data
     const handleProfilePictureUpdate = () => {
       console.log("🔄 Profile picture updated - refreshing dashboard data");
