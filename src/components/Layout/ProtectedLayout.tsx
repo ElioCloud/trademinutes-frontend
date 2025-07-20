@@ -65,14 +65,30 @@ export default function ProtectedLayout({ children, headerName }: LayoutProps) {
         
         // Handle different response structures and null values
         if (!json) {
-          throw new Error("Empty response from API");
+          console.warn("Empty response from API, using fallback data");
+          setRealTimeActivities([
+            { user: "Sarah Kim", title: "Dog Walking", category: "Pet Care", avatar: "https://images.pexels.com/photos/277576/pexels-photo-277576.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "1" },
+            { user: "Daniel Ortiz", title: "Math Tutoring", category: "Tutoring", avatar: "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "2" },
+            { user: "Ayesha Patel", title: "Yoga Session", category: "Fitness", avatar: "https://images.pexels.com/photos/721979/pexels-photo-721979.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "3" },
+            { user: "Michael Chen", title: "PC Setup", category: "Tech Help", avatar: "https://images.pexels.com/photos/573570/pexels-photo-573570.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "4" },
+            { user: "Emma Davis", title: "House Cleaning", category: "Household Help", avatar: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "5" },
+          ]);
+          return;
         }
         
         const tasks = json.data || json;
         
-        // Ensure tasks is an array before processing
-        if (!Array.isArray(tasks)) {
-          throw new Error("Invalid response format: tasks is not an array");
+        // Handle empty or invalid tasks array gracefully
+        if (!Array.isArray(tasks) || tasks.length === 0) {
+          console.warn("No tasks available or invalid response format, using fallback data");
+          setRealTimeActivities([
+            { user: "Sarah Kim", title: "Dog Walking", category: "Pet Care", avatar: "https://images.pexels.com/photos/277576/pexels-photo-277576.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "1" },
+            { user: "Daniel Ortiz", title: "Math Tutoring", category: "Tutoring", avatar: "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "2" },
+            { user: "Ayesha Patel", title: "Yoga Session", category: "Fitness", avatar: "https://images.pexels.com/photos/721979/pexels-photo-721979.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "3" },
+            { user: "Michael Chen", title: "PC Setup", category: "Tech Help", avatar: "https://images.pexels.com/photos/573570/pexels-photo-573570.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "4" },
+            { user: "Emma Davis", title: "House Cleaning", category: "Household Help", avatar: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "5" },
+          ]);
+          return;
         }
         
         // Transform tasks to activity format with error handling
@@ -98,15 +114,20 @@ export default function ProtectedLayout({ children, headerName }: LayoutProps) {
         }).filter(Boolean); // Remove any undefined entries
         setRealTimeActivities(activities);
       } catch (err) {
-        console.error("Failed to fetch real-time activities:", err);
-        // Fallback to mock data if API fails
-        setRealTimeActivities([
-          { user: "Sarah Kim", title: "Dog Walking", category: "Pet Care", avatar: "https://images.pexels.com/photos/277576/pexels-photo-277576.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "1" },
-          { user: "Daniel Ortiz", title: "Math Tutoring", category: "Tutoring", avatar: "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "2" },
-          { user: "Ayesha Patel", title: "Yoga Session", category: "Fitness", avatar: "https://images.pexels.com/photos/721979/pexels-photo-721979.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "3" },
-          { user: "Michael Chen", title: "PC Setup", category: "Tech Help", avatar: "https://images.pexels.com/photos/573570/pexels-photo-573570.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "4" },
-          { user: "Emma Davis", title: "House Cleaning", category: "Household Help", avatar: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "5" },
-        ]);
+        console.warn("Failed to fetch real-time activities, using fallback data:", err);
+        // Only set fallback data if not already set
+        setRealTimeActivities(prev => {
+          if (prev.length === 0) {
+            return [
+              { user: "Sarah Kim", title: "Dog Walking", category: "Pet Care", avatar: "https://images.pexels.com/photos/277576/pexels-photo-277576.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "1" },
+              { user: "Daniel Ortiz", title: "Math Tutoring", category: "Tutoring", avatar: "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "2" },
+              { user: "Ayesha Patel", title: "Yoga Session", category: "Fitness", avatar: "https://images.pexels.com/photos/721979/pexels-photo-721979.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "3" },
+              { user: "Michael Chen", title: "PC Setup", category: "Tech Help", avatar: "https://images.pexels.com/photos/573570/pexels-photo-573570.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "4" },
+              { user: "Emma Davis", title: "House Cleaning", category: "Household Help", avatar: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&fit=facearea&w=64&h=64&facepad=2", id: "5" },
+            ];
+          }
+          return prev;
+        });
       } finally {
         setLoadingActivities(false);
       }
