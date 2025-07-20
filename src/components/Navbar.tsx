@@ -77,11 +77,10 @@ export default function Navbar() {
           {user ? (
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">Credits:</span>
-                <span className="text-sm font-medium text-green-600">{credits || 0}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm font-medium text-gray-900">{userName}</span>
+                <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-1">
+                  <span className="text-sm text-gray-600">Credits:</span>
+                  <span className="text-sm font-medium text-green-600 ml-1">{credits || 0}</span>
+                </div>
               </div>
               <Link href="/dashboard">
                 <button className="bg-black text-white text-sm px-4 py-2 rounded hover:bg-gray-800">
@@ -118,11 +117,10 @@ export default function Navbar() {
           {user ? (
             <>
               <div className="flex items-center justify-between py-2 border-t border-gray-100">
-                <span className="text-gray-600">Credits:</span>
-                <span className="font-medium text-green-600">{credits || 0}</span>
-              </div>
-              <div className="flex items-center justify-between py-2">
-                <span className="font-medium text-gray-900">{userName}</span>
+                <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-1">
+                  <span className="text-sm text-gray-600">Credits:</span>
+                  <span className="text-sm font-medium text-green-600 ml-1">{credits || 0}</span>
+                </div>
               </div>
               <Link href="/dashboard">
                 <button className="w-full bg-black text-white py-2 rounded">Dashboard</button>
