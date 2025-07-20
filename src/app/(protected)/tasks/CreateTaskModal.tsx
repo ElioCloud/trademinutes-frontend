@@ -632,7 +632,7 @@ export default function CreateTaskModal({
               <button
                 type="button"
                 onClick={nextStep}
-                className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors shadow-lg font-medium"
+                className="flex items-center space-x-2 px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors shadow-lg font-medium"
               >
                 <span>Next</span>
                 <FaArrowRight className="w-4 h-4" />
