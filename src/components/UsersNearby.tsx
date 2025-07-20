@@ -458,7 +458,7 @@ export default function UsersNearby() {
                 }}
               >
                 <Popup className="custom-popup">
-                  <div className="p-3 w-64 bg-white rounded-lg border border-gray-200">
+                  <div className="p-3 w-64 bg-white rounded-lg">
                     {/* Task Image */}
                     {task.images && task.images.length > 0 && (
                       <div className="mb-2">
