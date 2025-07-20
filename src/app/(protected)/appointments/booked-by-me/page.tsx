@@ -79,7 +79,24 @@ export default function BookedByMePage() {
         });
         if (!res.ok) throw new Error("Failed to fetch bookings");
         const data = await res.json();
-        const bookingsPromises = (data.data || data || []).map(async (b: any) => {
+        console.log("Raw bookings response:", data);
+        
+        // Handle different response structures
+        let bookingsArray = [];
+        if (data && typeof data === 'object') {
+          if (Array.isArray(data)) {
+            bookingsArray = data;
+          } else if (data.data && Array.isArray(data.data)) {
+            bookingsArray = data.data;
+          } else if (data.bookings && Array.isArray(data.bookings)) {
+            bookingsArray = data.bookings;
+          } else {
+            console.warn("Unexpected data structure:", data);
+            bookingsArray = [];
+          }
+        }
+        
+        const bookingsPromises = bookingsArray.map(async (b: any) => {
           // Get task ID from booking
           const taskId = b.TaskID || b.taskID || b.task?.ID || b.task?.id || b.taskId;
           console.log(`Booking ${b.ID || b.id}: Task ID = ${taskId}`);
@@ -102,21 +119,36 @@ export default function BookedByMePage() {
               });
               if (taskRes.ok) {
                 const taskData = await taskRes.json();
-                const task = taskData.data || taskData;
-                taskImages = task.Images || task.images || [];
-                console.log(`Fetched task ${taskId} images:`, taskImages);
+                console.log(`Task ${taskId} response:`, taskData);
                 
-                // Get provider details from the task's Author field (which contains the profile picture)
-                if (task.Author) {
-                  providerName = task.Author.Name || task.Author.name || providerName;
-                  providerEmail = task.Author.Email || task.Author.email || providerEmail;
-                  providerProfilePicture = task.Author.Avatar || task.Author.avatar || "";
-                  console.log(`✅ Using provider details from task Author:`, { 
-                    name: providerName, 
-                    email: providerEmail, 
-                    profilePicture: providerProfilePicture,
-                    taskAuthor: task.Author
-                  });
+                // Handle different task response structures
+                let task = null;
+                if (taskData && typeof taskData === 'object') {
+                  if (taskData.data && typeof taskData.data === 'object') {
+                    task = taskData.data;
+                  } else if (taskData.task && typeof taskData.task === 'object') {
+                    task = taskData.task;
+                  } else {
+                    task = taskData;
+                  }
+                }
+                
+                if (task) {
+                  taskImages = task.Images || task.images || [];
+                  console.log(`Fetched task ${taskId} images:`, taskImages);
+                
+                  // Get provider details from the task's Author field (which contains the profile picture)
+                  if (task.Author) {
+                    providerName = task.Author.Name || task.Author.name || providerName;
+                    providerEmail = task.Author.Email || task.Author.email || providerEmail;
+                    providerProfilePicture = task.Author.Avatar || task.Author.avatar || "";
+                    console.log(`✅ Using provider details from task Author:`, { 
+                      name: providerName, 
+                      email: providerEmail, 
+                      profilePicture: providerProfilePicture,
+                      taskAuthor: task.Author
+                    });
+                  }
                 }
               }
             } catch (err) {
