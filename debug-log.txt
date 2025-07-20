@@ -12770,3 +12770,3175 @@ Data: {
   ]
 }
 
+[2025-07-20T02:36:16.040Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:36:16.041Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 40,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 60,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:36:16.040Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:36:16.041Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:36:16.131Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:36:16.131Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:36:16.132Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 40,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 60,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:36:16.132Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:37:51.810Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 40,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 60,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:37:51.810Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:37:51.873Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:37:51.809Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:37:51.873Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:37:51.809Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:37:51.874Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 40,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 60,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:37:51.874Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:37:55.059Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:37:55.060Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:37:55.060Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:37:55.060Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 40,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 60,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:37:55.118Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:37:55.119Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 40,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 60,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:37:55.119Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:37:55.119Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:37:59.543Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:37:59.543Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:37:59.544Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 40,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 60,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:37:59.544Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:37:59.625Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:37:59.625Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:37:59.625Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 40,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 60,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:37:59.625Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:38:39.299Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:38:39.299Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:38:39.299Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 40,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 60,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:38:39.300Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:38:39.419Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:38:39.419Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 40,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "NextJS Dashboard",
+    "description": "NextJS Dashboard",
+    "credits": 60,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:38:39.419Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "NextJS Dashboard",
+      "description": "NextJS Dashboard",
+      "credits": 60,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:38:39.419Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:40:41.445Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:40:41.508Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:40:41.444Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:40:41.445Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "b",
+    "description": "b",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "c",
+    "description": "c",
+    "credits": 53,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:40:41.445Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:40:41.508Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:40:41.508Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "b",
+    "description": "b",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "c",
+    "description": "c",
+    "credits": 53,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:40:41.508Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:41:46.858Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:41:46.858Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:41:46.858Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:41:46.858Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "b",
+    "description": "b",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "c",
+    "description": "c",
+    "credits": 53,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:44:08.910Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:44:08.966Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:44:08.909Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:44:08.910Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "b",
+    "description": "b",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "c",
+    "description": "c",
+    "credits": 53,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:44:08.910Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:44:08.966Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:44:08.967Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "b",
+    "description": "b",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "c",
+    "description": "c",
+    "credits": 53,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:44:08.967Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:45:45.292Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "b",
+    "description": "b",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "c",
+    "description": "c",
+    "credits": 53,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:45:45.292Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:45:45.291Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:45:45.291Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:45:45.874Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:45:45.874Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:45:45.874Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "b",
+    "description": "b",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "c",
+    "description": "c",
+    "credits": 53,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:45:45.875Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:45:55.299Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:45:55.299Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:45:55.299Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:45:55.299Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "b",
+    "description": "b",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "c",
+    "description": "c",
+    "credits": 53,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:46:18.804Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:46:18.804Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:46:18.804Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "b",
+    "description": "b",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "c",
+    "description": "c",
+    "credits": 53,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:46:18.804Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:46:18.852Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:46:18.853Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:46:18.853Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "b",
+    "description": "b",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "c",
+    "description": "c",
+    "credits": 53,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:46:18.853Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:46:33.383Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:46:33.383Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:46:33.384Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "b",
+    "description": "b",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "c",
+    "description": "c",
+    "credits": 53,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:46:33.384Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:46:41.913Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:46:41.914Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:46:41.914Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:46:41.914Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "b",
+    "description": "b",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "c",
+    "description": "c",
+    "credits": 53,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:47:24.904Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:47:24.905Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "b",
+    "description": "b",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "c",
+    "description": "c",
+    "credits": 53,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:47:24.905Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:47:24.905Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:47:34.077Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:47:34.077Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "b",
+    "description": "b",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "c",
+    "description": "c",
+    "credits": 53,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:47:34.078Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:47:34.077Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:47:37.814Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:47:37.815Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "b",
+    "description": "b",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "c",
+    "description": "c",
+    "credits": 53,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:47:37.815Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T02:47:37.814Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:49:27.997Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T02:49:27.998Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "a",
+      "description": "a",
+      "credits": 10,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "b",
+      "description": "b",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "c",
+      "description": "c",
+      "credits": 53,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T02:49:27.998Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "a",
+    "description": "a",
+    "credits": 10,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "b",
+    "description": "b",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "c",
+    "description": "c",
+    "credits": 53,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T02:49:27.998Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+

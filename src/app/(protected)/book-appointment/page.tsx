@@ -89,7 +89,7 @@ export default function BookAppointmentPage() {
                 className={`py-2 rounded-lg font-medium ${
                   selectedDate?.toDateString() === date.toDateString()
                     ? "bg-blue-600 text-white"
-                    : "hover:bg-blue-50 text-gray-700"
+                    : "hover:bg-blue-50 text-gray-900"
                 }`}
               >
                 {date.getDate()}
@@ -112,7 +112,7 @@ export default function BookAppointmentPage() {
                   className={`border px-4 py-2 rounded-md font-medium ${
                     selectedTime === time
                       ? "bg-gray-700 text-white"
-                      : "text-blue-600 border-blue-200 hover:bg-blue-50"
+                      : "text-gray-900 border-blue-200 hover:bg-blue-50"
                   }`}
                 >
                   {time}

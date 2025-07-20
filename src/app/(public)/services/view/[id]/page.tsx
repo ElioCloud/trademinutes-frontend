@@ -112,13 +112,23 @@ export default function ServiceViewPage() {
   const [newMessage, setNewMessage] = useState('');
   const [sendingChatMessage, setSendingChatMessage] = useState(false);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] = useState<'chat' | 'book' | null>(null);
 
   // Helper function to check if service belongs to current user
   const isOwnService = () => {
     if (!user || !service) return false;
     const serviceAuthorId = service.Author?.ID || service.Author?.id || service.author?.id;
     const currentUserId = user.ID || user.id;
-    return serviceAuthorId === currentUserId;
+    const isOwn = serviceAuthorId === currentUserId;
+    
+    console.log('=== IS OWN SERVICE DEBUG ===');
+    console.log('User:', user);
+    console.log('Service Author ID:', serviceAuthorId);
+    console.log('Current User ID:', currentUserId);
+    console.log('Is Own Service:', isOwn);
+    console.log('=== END DEBUG ===');
+    
+    return isOwn;
   };
 
   // Debug logging function
@@ -316,6 +326,7 @@ export default function ServiceViewPage() {
 
   const handleOrder = () => {
     if (!token) {
+      setPendingAction('book');
       setIsAuthModalOpen(true);
     } else {
       setIsBookingModalOpen(true);
@@ -924,45 +935,43 @@ export default function ServiceViewPage() {
                 </div>
 
                 {/* Service Provider Info */}
-                {!isOwnService() && (
-                  <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-3 mb-3">
-                      {avatar ? (
-                        <Image
-                          src={avatar}
-                          alt={serviceProvider}
-                          width={40}
-                          height={40}
-                          className="rounded-full"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                          <span className="text-gray-600 text-sm font-medium">
-                            {serviceProvider?.charAt(0)?.toUpperCase() || 'U'}
-                          </span>
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-3 mb-3">
+                    {avatar ? (
+                      <Image
+                        src={avatar}
+                        alt={serviceProvider}
+                        width={40}
+                        height={40}
+                        className="rounded-full"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                        <span className="text-gray-600 text-sm font-medium">
+                          {serviceProvider?.charAt(0)?.toUpperCase() || 'U'}
+                        </span>
+                      </div>
+                    )}
+                    <div>
+                      <h4 className="font-medium text-gray-900">About {serviceProvider}</h4>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => (
+                            <FaStar key={i} className={`w-3 h-3 ${i < Math.floor(service?.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`} />
+                          ))}
                         </div>
-                      )}
-                      <div>
-                        <h4 className="font-medium text-gray-900">About {serviceProvider}</h4>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <FaStar key={i} className={`w-3 h-3 ${i < Math.floor(service?.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`} />
-                            ))}
-                          </div>
-                          <span className="text-xs text-gray-600">
-                            {service?.rating || 0} ({service?.reviewCount || 0} reviews)
-                          </span>
-                        </div>
+                        <span className="text-xs text-gray-600">
+                          {service?.rating || 0} ({service?.reviewCount || 0} reviews)
+                        </span>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-600">
-                      {serviceProvider} is a trusted provider with a proven track record of delivering quality services. 
-                      They specialize in {service?.Category || service?.category || 'their field'} and are committed to 
-                      ensuring customer satisfaction with every project.
-                    </p>
                   </div>
-                )}
+                  <p className="text-sm text-gray-600">
+                    {serviceProvider} is a trusted provider with a proven track record of delivering quality services. 
+                    They specialize in {service?.Category || service?.category || 'their field'} and are committed to 
+                    ensuring customer satisfaction with every project.
+                  </p>
+                </div>
 
               </div>
             </div>
@@ -976,12 +985,19 @@ export default function ServiceViewPage() {
           <div 
             className="bg-white rounded-full shadow-lg p-4 cursor-pointer hover:shadow-xl transition-shadow"
             onClick={async () => {
+              // Double-check: don't allow chat if it's own service
+              if (isOwnService()) {
+                console.log('Cannot chat with yourself - service owner');
+                return;
+              }
+              
               if (token) {
                 // Open chat box and fetch conversation history
                 setIsChatBoxOpen(true);
                 await fetchConversationHistory();
               } else {
-                // Show login modal
+                // Show login modal and remember user wants to chat
+                setPendingAction('chat');
                 setIsAuthModalOpen(true);
               }
             }}
@@ -1028,10 +1044,28 @@ export default function ServiceViewPage() {
       {/* Auth Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
+        onClose={() => {
+          setIsAuthModalOpen(false);
+          setPendingAction(null);
+        }}
         onAuthSuccess={() => {
           setIsAuthModalOpen(false);
-          setIsBookingModalOpen(true);
+          
+          // Handle the pending action after successful login
+          if (pendingAction === 'chat') {
+            // Double-check: don't allow chat if it's own service
+            if (isOwnService()) {
+              console.log('Cannot chat with yourself after login - service owner');
+              setPendingAction(null);
+              return;
+            }
+            setIsChatBoxOpen(true);
+            fetchConversationHistory();
+          } else if (pendingAction === 'book') {
+            setIsBookingModalOpen(true);
+          }
+          
+          setPendingAction(null);
         }}
         defaultMode="login"
       />
@@ -1189,7 +1223,7 @@ export default function ServiceViewPage() {
       )}
 
       {/* Chat Box */}
-      {isChatBoxOpen && (
+      {isChatBoxOpen && !isOwnService() && (
         <div className="fixed bottom-6 right-6 z-50">
           <div className="bg-white rounded-xl shadow-2xl border border-gray-200 w-80 h-96 flex flex-col overflow-hidden">
             {/* Chat Header */}

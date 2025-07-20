@@ -237,7 +237,7 @@ export default function BookingModal({
                 value={formData.date}
                 onChange={handleChange}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors text-gray-900"
                 required
               />
             </div>
@@ -254,7 +254,7 @@ export default function BookingModal({
                   name="timeFrom"
                   value={formData.timeFrom}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                  className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors text-gray-900"
                   required
                 />
               </div>
@@ -268,7 +268,7 @@ export default function BookingModal({
                   name="timeTo"
                   value={formData.timeTo}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                  className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors text-gray-900"
                   required
                 />
               </div>
@@ -286,7 +286,7 @@ export default function BookingModal({
                 onChange={handleChange}
                 placeholder="Tell the provider about your specific requirements, preferences, or any questions you have..."
                 rows={4}
-                className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors resize-none"
+                className="w-full border border-gray-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors resize-none text-gray-900"
               />
             </div>
 

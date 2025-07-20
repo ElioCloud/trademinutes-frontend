@@ -408,7 +408,13 @@ export default function ProfileDashboardPage() {
 
         if (res.ok) {
           const data = await res.json();
-          setUpcomingBookings(data.slice(0, 5)); // Get next 5 bookings
+          // Ensure data is an array before calling slice
+          if (Array.isArray(data)) {
+            setUpcomingBookings(data.slice(0, 5)); // Get next 5 bookings
+          } else {
+            console.warn("Bookings data is not an array:", data);
+            setUpcomingBookings([]);
+          }
         } else {
           console.warn("⚠️ Failed to fetch bookings:", res.status);
         }
@@ -523,7 +529,13 @@ export default function ProfileDashboardPage() {
         
         if (!res.ok) return;
         const json = await res.json();
-        const bookings = (json.data || json || []);
+        const bookings = (json && json.data) ? json.data : (json || []);
+        // Ensure bookings is an array
+        if (!Array.isArray(bookings)) {
+          console.warn("Bookings is not an array:", bookings);
+          setUpcomingAppointments([]);
+          return;
+        }
         // For each booking, fetch task details if needed
         const appointmentsWithTasks = await Promise.all(bookings.slice(0, 5).map(async (item: any, idx: number) => {
           let title = "(No title)";
