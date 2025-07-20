@@ -632,18 +632,165 @@ export default function ProfileDashboardPage() {
     const fetchActivities = async () => {
       setActivitiesLoading(true);
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8080'}/api/auth/activity/recent`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const TASK_API_BASE = process.env.NEXT_PUBLIC_TASK_API_URL || 'http://localhost:8084';
+        const REVIEW_API_BASE = process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086';
+        
+        // Get user ID first
+        const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084'}/api/auth/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        if (!profileRes.ok) throw new Error('Failed to fetch user profile');
+        const profileData = await profileRes.json();
+        const userId = profileData.ID || profileData.id;
+        
+        if (!userId) throw new Error('User ID not found');
+
+        const allActivities: any[] = [];
+
+        // 1. Fetch bookings as owner (services provided)
+        try {
+          const ownerBookingsRes = await fetch(`${TASK_API_BASE}/api/bookings?role=owner&id=${userId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          
+          if (ownerBookingsRes.ok) {
+            const ownerBookings = await ownerBookingsRes.json();
+            const bookings = ownerBookings.data || ownerBookings || [];
+            
+            bookings.forEach((booking: any) => {
+              const activity = {
+                id: `booking-${booking.ID || booking.id}`,
+                type: 'service_provided',
+                title: booking.TaskTitle || booking.taskTitle || 'Service Provided',
+                description: `Provided "${booking.TaskTitle || booking.taskTitle}" service`,
+                status: booking.Status || booking.status,
+                timestamp: booking.CreatedAt || booking.createdAt || new Date().toISOString(),
+                credits: booking.Credits || booking.credits || 0,
+                clientName: booking.BookerName || booking.bookerName || 'Client'
+              };
+              allActivities.push(activity);
+            });
           }
-        );
-        if (!res.ok) throw new Error('Failed to fetch activities');
-        const data = await res.json();
-        setActivities(Array.isArray(data) ? data : []);
+        } catch (err) {
+          console.log('Error fetching owner bookings:', err);
+        }
+
+        // 2. Fetch bookings as booker (services booked)
+        try {
+          const bookerBookingsRes = await fetch(`${TASK_API_BASE}/api/bookings?role=booker&id=${userId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          
+          if (bookerBookingsRes.ok) {
+            const bookerBookings = await bookerBookingsRes.json();
+            const bookings = bookerBookings.data || bookerBookings || [];
+            
+            bookings.forEach((booking: any) => {
+              const activity = {
+                id: `booked-${booking.ID || booking.id}`,
+                type: 'service_booked',
+                title: booking.TaskTitle || booking.taskTitle || 'Service Booked',
+                description: `Booked "${booking.TaskTitle || booking.taskTitle}" service`,
+                status: booking.Status || booking.status,
+                timestamp: booking.CreatedAt || booking.createdAt || new Date().toISOString(),
+                credits: booking.Credits || booking.credits || 0,
+                providerName: booking.TaskOwnerName || booking.taskOwnerName || 'Provider'
+              };
+              allActivities.push(activity);
+            });
+          }
+        } catch (err) {
+          console.log('Error fetching booker bookings:', err);
+        }
+
+        // 3. Fetch completed services (tasks)
+        try {
+          const tasksRes = await fetch(`${TASK_API_BASE}/api/tasks/get/user`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          
+          if (tasksRes.ok) {
+            const tasksData = await tasksRes.json();
+            const tasks = tasksData.data || tasksData || [];
+            
+            tasks.forEach((task: any) => {
+              if (task.status === 'completed' || task.Status === 'completed') {
+                const activity = {
+                  id: `task-${task.ID || task.id}`,
+                  type: 'service_completed',
+                  title: task.Title || task.title || 'Service Completed',
+                  description: `Completed "${task.Title || task.title}" service`,
+                  status: 'completed',
+                  timestamp: task.UpdatedAt || task.updatedAt || new Date().toISOString(),
+                  credits: task.Credits || task.credits || 0
+                };
+                allActivities.push(activity);
+              }
+            });
+          }
+        } catch (err) {
+          console.log('Error fetching tasks:', err);
+        }
+
+        // 4. Fetch reviews received
+        try {
+          // Get user's tasks first
+          const tasksRes = await fetch(`${TASK_API_BASE}/api/tasks/get/user`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          
+          if (tasksRes.ok) {
+            const tasksData = await tasksRes.json();
+            const tasks = tasksData.data || tasksData || [];
+            const taskIds = tasks.map((task: any) => task.ID || task.id || task._id);
+            
+            // Fetch reviews for each task
+            for (const taskId of taskIds) {
+              if (!taskId) continue;
+              
+              const reviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews?taskId=${taskId}`, {
+                signal: AbortSignal.timeout(3000)
+              });
+              
+              if (reviewsRes.ok) {
+                const reviews = await reviewsRes.json();
+                const reviewsArray = Array.isArray(reviews) ? reviews : (reviews.data || []);
+                
+                reviewsArray.forEach((review: any) => {
+                  const activity = {
+                    id: `review-${review.id || review._id}`,
+                    type: 'review_received',
+                    title: 'Review Received',
+                    description: `Received ${review.rating || 5}★ review for "${review.taskTitle || 'service'}"`,
+                    status: 'completed',
+                    timestamp: review.createdAt || review.CreatedAt || new Date().toISOString(),
+                    rating: review.rating || 5,
+                    comment: review.comment || review.Comment || ''
+                  };
+                  allActivities.push(activity);
+                });
+              }
+            }
+          }
+        } catch (err) {
+          console.log('Error fetching reviews:', err);
+        }
+
+        // Sort activities by timestamp (most recent first)
+        allActivities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        
+        // Take only the most recent 10 activities
+        const recentActivities = allActivities.slice(0, 10);
+        
+        console.log('Recent activities:', recentActivities);
+        setActivities(recentActivities);
+        
       } catch (err) {
+        console.error('Error fetching activities:', err);
         setActivities([]);
       } finally {
         setActivitiesLoading(false);
@@ -1142,16 +1289,23 @@ export default function ProfileDashboardPage() {
                 <div className="text-gray-400">No recent activity.</div>
               ) : (
                 activities.map((activity, idx) => (
-                  <div key={idx} className="flex items-start gap-3">
+                  <div key={activity.id || idx} className="flex items-start gap-3">
                     <div className={`w-2 h-2 rounded-full mt-2 ${
                       activity.type === 'service_completed' ? 'bg-green-500' :
-                      activity.type === 'booking' ? 'bg-blue-500' :
-                      activity.type === 'review' ? 'bg-purple-500' : 'bg-gray-400'
+                      activity.type === 'service_provided' ? 'bg-blue-500' :
+                      activity.type === 'service_booked' ? 'bg-purple-500' :
+                      activity.type === 'review_received' ? 'bg-yellow-500' :
+                      'bg-gray-400'
                     }`}></div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">{activity.type.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}</p>
+                      <p className="text-sm font-medium text-gray-900">{activity.title}</p>
                       <p className="text-xs text-gray-600">{activity.description}</p>
-                      <p className="text-xs text-gray-500">{new Date(activity.timestamp).toLocaleString()}</p>
+                      {activity.credits && (
+                        <p className="text-xs text-emerald-600 font-medium">{activity.credits} credits</p>
+                      )}
+                      <p className="text-xs text-gray-500">
+                        {new Date(activity.timestamp).toLocaleDateString()} • {new Date(activity.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      </p>
                     </div>
                   </div>
                 ))
