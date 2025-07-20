@@ -883,87 +883,22 @@ export default function ProfileDashboardPage() {
                     );
                   })
                 ) : (
-                  // Fallback services when no real data
-                  <>
-                    <div 
-                      className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1"
-                      onClick={() => router.push('/tasks/explore')}
-                    >
-                      <div className="h-32 relative">
-                        <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600"></div>
-                        <div className="absolute inset-0 bg-black/20"></div>
+                  // No services message
+                  <div className="col-span-full">
+                    <div className="bg-white rounded-xl shadow-sm p-8 text-center">
+                      <div className="flex justify-center mb-4">
+                        <FaClipboardList className="w-16 h-16 text-gray-400" />
                       </div>
-                      <div className="p-4">
-                        <span className="inline-block px-2 py-1 bg-blue-100 text-blue-600 text-xs font-semibold rounded mb-2">TECHNOLOGY</span>
-                        <h4 className="font-semibold text-gray-900 mb-2">Professional Web Development Services</h4>
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-gradient-to-r from-pink-500 to-red-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-                              S
-                            </div>
-                            <span className="text-sm text-gray-600">Sarah Johnson</span>
-                          </div>
-                          <span className="text-lg font-bold text-green-600">$150</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <FaStar className="w-4 h-4 text-yellow-400" />
-                          <span>4.8 (24 reviews)</span>
-                        </div>
-                      </div>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-2">No services yet</h4>
+                      <p className="text-gray-600 mb-4">You haven't created any service listings yet.</p>
+                      <button
+                        onClick={() => router.push('/tasks/explore')}
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
+                      >
+                        Create Your First Service
+                      </button>
                     </div>
-                    <div 
-                      className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1"
-                      onClick={() => router.push('/tasks/explore')}
-                    >
-                      <div className="h-32 relative">
-                        <div className="w-full h-full bg-gradient-to-br from-purple-400 to-purple-600"></div>
-                        <div className="absolute inset-0 bg-black/20"></div>
-                      </div>
-                      <div className="p-4">
-                        <span className="inline-block px-2 py-1 bg-purple-100 text-purple-600 text-xs font-semibold rounded mb-2">DESIGN</span>
-                        <h4 className="font-semibold text-gray-900 mb-2">Creative Logo & Brand Identity Design</h4>
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-                              M
-                            </div>
-                            <span className="text-sm text-gray-600">Mike Chen</span>
-                          </div>
-                          <span className="text-lg font-bold text-green-600">$75</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <FaStar className="w-4 h-4 text-yellow-400" />
-                          <span>4.9 (18 reviews)</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div 
-                      className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1"
-                      onClick={() => router.push('/tasks/explore')}
-                    >
-                      <div className="h-32 relative">
-                        <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600"></div>
-                        <div className="absolute inset-0 bg-black/20"></div>
-                      </div>
-                      <div className="p-4">
-                        <span className="inline-block px-2 py-1 bg-green-100 text-green-600 text-xs font-semibold rounded mb-2">WRITING</span>
-                        <h4 className="font-semibold text-gray-900 mb-2">Professional Content Writing & SEO</h4>
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-gradient-to-r from-green-500 to-teal-600 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-                              E
-                            </div>
-                            <span className="text-sm text-gray-600">Emma Davis</span>
-                          </div>
-                          <span className="text-lg font-bold text-green-600">$50</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <FaStar className="w-4 h-4 text-yellow-400" />
-                          <span>4.7 (31 reviews)</span>
-                        </div>
-                      </div>
-                    </div>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
