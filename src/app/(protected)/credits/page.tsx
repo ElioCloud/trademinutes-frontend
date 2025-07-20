@@ -107,7 +107,7 @@ interface CreditStats {
   earningTrend: number; // percentage
   spendingTrend: number; // percentage
   topEarningCategories: { category: string; amount: number; percentage: number }[];
-  recentActivity: { date: string; earned: number; spent: number }[];
+  recentActivity: { date: string; earned: number; spent: number; description: string; type: string }[];
   achievements: { title: string; description: string; icon: string; unlocked: boolean }[];
   showBuyCredits: boolean;
 }
@@ -332,11 +332,13 @@ export default function CreditsPage() {
           earningTrend: weeklyEarnings > 0 ? 12.5 : 0, // Mock trend
           spendingTrend: weeklySpent > 0 ? -5.2 : 0, // Mock trend
           topEarningCategories,
-          recentActivity: [
-            { date: "This Week", earned: weeklyEarnings, spent: weeklySpent },
-            { date: "Last Week", earned: 0, spent: 0 }, // Would need historical data
-            { date: "This Month", earned: monthlyEarnings, spent: monthlySpent }
-          ],
+          recentActivity: transformedTransactions.slice(0, 10).map(transaction => ({
+            date: formatDate(transaction.date),
+            earned: transaction.type === 'earned' ? transaction.amount : 0,
+            spent: transaction.type === 'spent' ? Math.abs(transaction.amount) : 0,
+            description: transaction.description,
+            type: transaction.type
+          })),
           achievements: [
             { title: "First Earnings", description: "Earned your first credits", icon: "FaStar", unlocked: totalEarned > 0 },
             { title: "5-Star Provider", description: "Received 5-star review", icon: "FaTrophy", unlocked: bookingsAsOwner.length > 0 },
@@ -466,9 +468,11 @@ export default function CreditsPage() {
             { category: "Consulting", amount: 230, percentage: 23 }
           ],
           recentActivity: [
-            { date: "This Week", earned: 150, spent: 75 },
-            { date: "Last Week", earned: 450, spent: 120 },
-            { date: "This Month", earned: 650, spent: 300 }
+            { date: "Dec 15, 2024", earned: 150, spent: 0, description: "Provided: Web Development Service", type: "earned" },
+            { date: "Dec 14, 2024", earned: 0, spent: 75, description: "Booked: Graphic Design Service", type: "spent" },
+            { date: "Dec 12, 2024", earned: 300, spent: 0, description: "Provided: Mobile App Development", type: "earned" },
+            { date: "Dec 10, 2024", earned: 0, spent: 120, description: "Booked: SEO Consultation", type: "spent" },
+            { date: "Dec 8, 2024", earned: 200, spent: 0, description: "Provided: UI/UX Design", type: "earned" }
           ],
           achievements: [
             { title: "First Earnings", description: "Earned your first credits", icon: "FaStar", unlocked: true },
@@ -787,10 +791,20 @@ export default function CreditsPage() {
                   <div className="space-y-3">
                     {stats?.recentActivity.map((activity, index) => (
                       <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <span className="font-medium text-gray-900">{activity.date}</span>
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">{activity.description}</div>
+                          <div className="text-sm text-gray-500">{activity.date}</div>
+                        </div>
                         <div className="text-right">
-                          <div className="text-sm text-green-600">+{formatCurrency(activity.earned)}</div>
-                          <div className="text-sm text-red-600">-{formatCurrency(activity.spent)}</div>
+                          {activity.type === 'earned' ? (
+                            <div className="text-sm font-semibold text-green-600">+{formatCurrency(activity.earned)}</div>
+                          ) : activity.type === 'spent' ? (
+                            <div className="text-sm font-semibold text-red-600">-{formatCurrency(activity.spent)}</div>
+                          ) : activity.type === 'bonus' ? (
+                            <div className="text-sm font-semibold text-blue-600">+{formatCurrency(activity.earned)}</div>
+                          ) : (
+                            <div className="text-sm font-semibold text-gray-600">{formatCurrency(activity.earned || activity.spent)}</div>
+                          )}
                         </div>
                       </div>
                     ))}
