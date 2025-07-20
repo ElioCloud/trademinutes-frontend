@@ -498,12 +498,12 @@ export default function UsersNearby() {
 
                     {/* Task Stats */}
                     <div className="grid grid-cols-2 gap-2 mb-2">
-                      <div className="text-center p-1.5 bg-gray-50 rounded">
-                        <p className="text-sm font-bold text-blue-600">{task.credits}</p>
+                      <div className="text-center p-1 bg-gray-50 rounded">
+                        <p className="text-xs font-bold text-blue-600">{task.credits}</p>
                         <p className="text-xs text-gray-600">Credits</p>
                       </div>
-                      <div className="text-center p-1.5 bg-gray-50 rounded">
-                        <p className="text-sm font-bold text-green-600">✓</p>
+                      <div className="text-center p-1 bg-gray-50 rounded">
+                        <p className="text-xs font-bold text-green-600">✓</p>
                         <p className="text-xs text-gray-600">Available</p>
                       </div>
                     </div>
