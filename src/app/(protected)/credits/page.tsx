@@ -303,17 +303,20 @@ export default function CreditsPage() {
           .filter(t => t.type === 'spent' && t.date > Date.now() - 86400000 * 7)
           .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
-        const categoryBreakdown: { [key: string]: number } = {};
+        // Group earnings by service name instead of generic category
+        const serviceBreakdown: { [key: string]: number } = {};
         transformedTransactions.filter(t => t.type === 'earned').forEach(t => {
-          if (!categoryBreakdown[t.category]) {
-            categoryBreakdown[t.category] = 0;
+          // Extract service name from description (remove "Provided: " prefix)
+          const serviceName = t.description.replace('Provided: ', '') || 'Unknown Service';
+          if (!serviceBreakdown[serviceName]) {
+            serviceBreakdown[serviceName] = 0;
           }
-          categoryBreakdown[t.category] += t.amount;
+          serviceBreakdown[serviceName] += t.amount;
         });
 
-        const topEarningCategories = Object.entries(categoryBreakdown)
-          .map(([category, amount]) => ({
-            category,
+        const topEarningCategories = Object.entries(serviceBreakdown)
+          .map(([serviceName, amount]) => ({
+            category: serviceName,
             amount,
             percentage: totalEarned > 0 ? (amount / totalEarned) * 100 : 0
           }))
@@ -344,7 +347,7 @@ export default function CreditsPage() {
             { title: "5-Star Provider", description: "Received 5-star review", icon: "FaTrophy", unlocked: bookingsAsOwner.length > 0 },
             { title: "Top Earner", description: "Earned 1000+ credits", icon: "FaCrown", unlocked: totalEarned >= 1000 },
             { title: "Consistent", description: "7 days of activity", icon: "FaMedal", unlocked: weeklyEarnings > 0 },
-            { title: "Diverse Skills", description: "Work in 3+ categories", icon: "FaGem", unlocked: Object.keys(categoryBreakdown).length >= 3 }
+            { title: "Diverse Skills", description: "Work in 3+ categories", icon: "FaGem", unlocked: Object.keys(serviceBreakdown).length >= 3 }
           ],
           showBuyCredits: currentCredits < 50 // Show buy credits option when balance is low
         };
@@ -463,9 +466,9 @@ export default function CreditsPage() {
           earningTrend: 12.5,
           spendingTrend: -5.2,
           topEarningCategories: [
-            { category: "Technology", amount: 450, percentage: 45 },
-            { category: "Design", amount: 320, percentage: 32 },
-            { category: "Consulting", amount: 230, percentage: 23 }
+            { category: "Web Development Service", amount: 450, percentage: 45 },
+            { category: "UI/UX Design", amount: 320, percentage: 32 },
+            { category: "Mobile App Development", amount: 230, percentage: 23 }
           ],
           recentActivity: [
             { date: "Dec 15, 2024", earned: 150, spent: 0, description: "Provided: Web Development Service", type: "earned" },
