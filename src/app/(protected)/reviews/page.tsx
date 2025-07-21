@@ -152,24 +152,39 @@ export default function ReviewsPage() {
         // Transform the API data to match our interface
         const transformedReviews: Review[] = await Promise.all(
           allReviewsData.map(async (review: any) => {
+            console.log("🔵 Processing review:", review);
             // Fetch task details to get title, category, and price
             let taskTitle = "Unknown Task";
             let taskCategory = "General";
             let taskPrice = 0;
 
+            console.log("🔵 Fetching task details for taskId:", review.taskId);
             try {
-              const taskResponse = await fetch(`${process.env.NEXT_PUBLIC_TASK_API_URL || 'http://localhost:8084'}/api/tasks/get/${review.taskId}`, {
+              const taskUrl = `${process.env.NEXT_PUBLIC_TASK_API_URL || 'http://localhost:8084'}/api/tasks/get/${review.taskId}`;
+              console.log("🔵 Task API URL:", taskUrl);
+              
+              const taskResponse = await fetch(taskUrl, {
                 headers: { Authorization: `Bearer ${token}` }
               });
 
+              console.log("🔵 Task response status:", taskResponse.status);
+              console.log("🔵 Task response ok:", taskResponse.ok);
+
               if (taskResponse.ok) {
                 const taskData = await taskResponse.json();
-                taskTitle = taskData.Title || taskData.title || "Unknown Task";
-                taskCategory = taskData.Category || taskData.category || "General";
-                taskPrice = taskData.Credits || taskData.credits || taskData.Price || taskData.price || 0;
+                console.log("🔵 Task data received:", taskData);
+                
+                taskTitle = taskData.Title || taskData.title || taskData.data?.Title || taskData.data?.title || "Unknown Task";
+                taskCategory = taskData.Category || taskData.category || taskData.data?.Category || taskData.data?.category || "General";
+                taskPrice = taskData.Credits || taskData.credits || taskData.Price || taskData.price || taskData.data?.Credits || taskData.data?.credits || 0;
+                
+                console.log("🔵 Extracted task info:", { taskTitle, taskCategory, taskPrice });
+              } else {
+                const errorText = await taskResponse.text();
+                console.error("❌ Task fetch failed:", taskResponse.status, errorText);
               }
             } catch (error) {
-              console.warn("Failed to fetch task details for review:", review.taskId);
+              console.error("❌ Task fetch error for taskId:", review.taskId, error);
             }
 
             // Determine sentiment based on rating
