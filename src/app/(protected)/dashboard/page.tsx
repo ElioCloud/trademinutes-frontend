@@ -132,6 +132,8 @@ type Service = {
   reviews?: number;
   Reviews?: number;
   Images?: string[]; // Add Images field for cover images
+  Tiers?: Array<{ name: string; credits: number; title: string; description: string; features: string[]; availableTimeSlot: string; maxDays: number }>;
+  tiers?: Array<{ name: string; credits: number; title: string; description: string; features: string[]; availableTimeSlot: string; maxDays: number }>;
   Author?: {
     Name?: string;
     ProfilePictureURL?: string;
@@ -455,6 +457,7 @@ export default function ProfileDashboardPage() {
               rating: service.rating || service.Rating || 4.5,
               reviewCount: service.reviewCount || service.ReviewCount || service.reviews || service.Reviews || Math.floor(Math.random() * 20) + 5,
               Images: service.Images || [], // Add Images field
+              Tiers: service.Tiers || service.tiers || [], // Add Tiers field for Basic credits
               Author: service.Author || service.author || {
                 Name: profile?.Name || 'Provider',
                 ProfilePictureURL: service.Author?.Avatar || service.author?.avatar || profile?.ProfilePictureURL
