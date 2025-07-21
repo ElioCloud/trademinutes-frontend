@@ -26,7 +26,7 @@ import {
   FaRedo,
   FaChartBar,
   FaList,
-  FaGrid,
+  FaTh,
   FaBookmark,
   FaShare,
   FaFlag,
@@ -111,6 +111,7 @@ export default function ClientDirectoryPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [stats, setStats] = useState<ClientStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedView, setSelectedView] = useState<'grid' | 'list'>('grid');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedIndustry, setSelectedIndustry] = useState<string>('all');
@@ -120,257 +121,235 @@ export default function ClientDirectoryPage() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   useEffect(() => {
-    const generateMockClients = (): Client[] => {
-      return [
-        {
-          id: "1",
-          name: "Sarah Johnson",
-          email: "sarah.johnson@techstartup.com",
-          phone: "+1 (555) 123-4567",
-          avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-          location: "San Francisco, CA",
-          company: "TechStartup Inc.",
-          jobTitle: "CTO",
-          industry: "Technology",
-          isVerified: true,
-          joinDate: Date.now() - 86400000 * 365, // 1 year ago
-          lastActive: Date.now() - 86400000 * 2, // 2 days ago
-          totalSpent: 2847.50,
-          totalOrders: 8,
-          averageRating: 4.8,
-          totalReviews: 6,
-          status: 'vip',
-          tags: ['high-value', 'tech-savvy', 'quick-payer'],
-          notes: "Excellent client, always provides clear requirements and pays promptly. Interested in expanding to mobile development.",
-          preferences: {
-            preferredCategories: ['Technology', 'Design'],
-            budgetRange: '$200-500',
-            communicationStyle: 'Direct',
-            timezone: 'PST'
-          },
-          recentActivity: [
-            { type: 'booking', description: 'Booked Web Development Consultation', date: Date.now() - 86400000 * 2, amount: 150 },
-            { type: 'review', description: 'Left 5-star review for UI/UX Design', date: Date.now() - 86400000 * 5 },
-            { type: 'message', description: 'Inquired about mobile app development', date: Date.now() - 86400000 * 7 }
-          ],
-          services: [
-            { id: "s1", title: "Web Development Consultation", category: "Technology", amount: 150, date: Date.now() - 86400000 * 2, status: 'completed', rating: 5 },
-            { id: "s2", title: "UI/UX Design Services", category: "Design", amount: 200, date: Date.now() - 86400000 * 15, status: 'completed', rating: 5 },
-            { id: "s3", title: "Database Optimization", category: "Technology", amount: 300, date: Date.now() - 86400000 * 30, status: 'completed', rating: 4 }
-          ]
-        },
-        {
-          id: "2",
-          name: "Mike Chen",
-          email: "mike.chen@designstudio.com",
-          phone: "+1 (555) 234-5678",
-          avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-          location: "New York, NY",
-          company: "Design Studio Pro",
-          jobTitle: "Creative Director",
-          industry: "Design",
-          isVerified: true,
-          joinDate: Date.now() - 86400000 * 180, // 6 months ago
-          lastActive: Date.now() - 86400000 * 1, // 1 day ago
-          totalSpent: 1620.00,
-          totalOrders: 5,
-          averageRating: 4.6,
-          totalReviews: 4,
-          status: 'active',
-          tags: ['creative', 'design-focused', 'collaborative'],
-          notes: "Very creative client with great vision. Sometimes needs multiple revisions but always appreciates quality work.",
-          preferences: {
-            preferredCategories: ['Design', 'Writing'],
-            budgetRange: '$100-300',
-            communicationStyle: 'Collaborative',
-            timezone: 'EST'
-          },
-          recentActivity: [
-            { type: 'booking', description: 'Booked Logo Design Service', date: Date.now() - 86400000 * 1, amount: 120 },
-            { type: 'review', description: 'Left 4-star review for Brand Identity', date: Date.now() - 86400000 * 10 },
-            { type: 'message', description: 'Requested revision for website design', date: Date.now() - 86400000 * 12 }
-          ],
-          services: [
-            { id: "s4", title: "Logo Design Service", category: "Design", amount: 120, date: Date.now() - 86400000 * 1, status: 'ongoing' },
-            { id: "s5", title: "Brand Identity Package", category: "Design", amount: 250, date: Date.now() - 86400000 * 20, status: 'completed', rating: 4 },
-            { id: "s6", title: "Website Design", category: "Design", amount: 400, date: Date.now() - 86400000 * 45, status: 'completed', rating: 4 }
-          ]
-        },
-        {
-          id: "3",
-          name: "Emily Rodriguez",
-          email: "emily.rodriguez@marketing.com",
-          phone: "+1 (555) 345-6789",
-          avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-          location: "Los Angeles, CA",
-          company: "Digital Marketing Solutions",
-          jobTitle: "Marketing Manager",
-          industry: "Marketing",
-          isVerified: true,
-          joinDate: Date.now() - 86400000 * 90, // 3 months ago
-          lastActive: Date.now() - 86400000 * 3, // 3 days ago
-          totalSpent: 975.00,
-          totalOrders: 3,
-          averageRating: 4.9,
-          totalReviews: 2,
-          status: 'active',
-          tags: ['marketing', 'content-focused', 'results-driven'],
-          notes: "Marketing professional who values content quality and SEO. Great for ongoing content projects.",
-          preferences: {
-            preferredCategories: ['Writing', 'Technology'],
-            budgetRange: '$50-200',
-            communicationStyle: 'Professional',
-            timezone: 'PST'
-          },
-          recentActivity: [
-            { type: 'booking', description: 'Booked Content Writing Service', date: Date.now() - 86400000 * 3, amount: 75 },
-            { type: 'review', description: 'Left 5-star review for SEO Content', date: Date.now() - 86400000 * 15 },
-            { type: 'inquiry', description: 'Asked about monthly content packages', date: Date.now() - 86400000 * 20 }
-          ],
-          services: [
-            { id: "s7", title: "Content Writing Service", category: "Writing", amount: 75, date: Date.now() - 86400000 * 3, status: 'ongoing' },
-            { id: "s8", title: "SEO Content Package", category: "Writing", amount: 150, date: Date.now() - 86400000 * 25, status: 'completed', rating: 5 },
-            { id: "s9", title: "Social Media Content", category: "Writing", amount: 100, date: Date.now() - 86400000 * 40, status: 'completed', rating: 5 }
-          ]
-        },
-        {
-          id: "4",
-          name: "David Thompson",
-          email: "david.thompson@consulting.com",
-          phone: "+1 (555) 456-7890",
-          avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-          location: "Chicago, IL",
-          company: "Business Consulting Group",
-          jobTitle: "Senior Consultant",
-          industry: "Consulting",
-          isVerified: false,
-          joinDate: Date.now() - 86400000 * 60, // 2 months ago
-          lastActive: Date.now() - 86400000 * 10, // 10 days ago
-          totalSpent: 960.00,
-          totalOrders: 2,
-          averageRating: 4.7,
-          totalReviews: 1,
-          status: 'active',
-          tags: ['consulting', 'business-focused', 'strategic'],
-          notes: "Business consultant who needs strategic insights. Good for high-value consulting projects.",
-          preferences: {
-            preferredCategories: ['Consulting', 'Technology'],
-            budgetRange: '$200-500',
-            communicationStyle: 'Formal',
-            timezone: 'CST'
-          },
-          recentActivity: [
-            { type: 'booking', description: 'Booked Business Strategy Session', date: Date.now() - 86400000 * 10, amount: 300 },
-            { type: 'review', description: 'Left 4-star review for Strategy Consulting', date: Date.now() - 86400000 * 25 },
-            { type: 'message', description: 'Requested follow-up consultation', date: Date.now() - 86400000 * 30 }
-          ],
-          services: [
-            { id: "s10", title: "Business Strategy Session", category: "Consulting", amount: 300, date: Date.now() - 86400000 * 10, status: 'completed', rating: 4 },
-            { id: "s11", title: "Market Analysis Report", category: "Consulting", amount: 250, date: Date.now() - 86400000 * 35, status: 'completed', rating: 5 }
-          ]
-        },
-        {
-          id: "5",
-          name: "Lisa Wang",
-          email: "lisa.wang@startup.com",
-          phone: "+1 (555) 567-8901",
-          avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
-          location: "Seattle, WA",
-          company: "Innovation Labs",
-          jobTitle: "Product Manager",
-          industry: "Technology",
-          isVerified: true,
-          joinDate: Date.now() - 86400000 * 30, // 1 month ago
-          lastActive: Date.now() - 86400000 * 5, // 5 days ago
-          totalSpent: 640.00,
-          totalOrders: 2,
-          averageRating: 4.5,
-          totalReviews: 1,
-          status: 'new',
-          tags: ['startup', 'product-focused', 'innovative'],
-          notes: "New client from startup scene. Very innovative ideas but sometimes unclear requirements.",
-          preferences: {
-            preferredCategories: ['Technology', 'Design'],
-            budgetRange: '$100-300',
-            communicationStyle: 'Casual',
-            timezone: 'PST'
-          },
-          recentActivity: [
-            { type: 'booking', description: 'Booked Mobile App Consultation', date: Date.now() - 86400000 * 5, amount: 150 },
-            { type: 'message', description: 'Discussed app development timeline', date: Date.now() - 86400000 * 8 },
-            { type: 'inquiry', description: 'Asked about MVP development costs', date: Date.now() - 86400000 * 15 }
-          ],
-          services: [
-            { id: "s12", title: "Mobile App Consultation", category: "Technology", amount: 150, date: Date.now() - 86400000 * 5, status: 'ongoing' },
-            { id: "s13", title: "Product Design Review", category: "Design", amount: 200, date: Date.now() - 86400000 * 20, status: 'completed', rating: 4 }
-          ]
-        }
-      ];
-    };
-
-    const generateMockStats = (clients: Client[]): ClientStats => {
-      const totalRevenue = clients.reduce((sum, client) => sum + client.totalSpent, 0);
-      const activeClients = clients.filter(c => c.status === 'active' || c.status === 'vip').length;
-      const vipClients = clients.filter(c => c.status === 'vip').length;
-      const newClients = clients.filter(c => c.status === 'new').length;
-      
-      const categoryBreakdown: { [key: string]: { count: number; revenue: number } } = {};
-      const industryBreakdown: { [key: string]: number } = {};
-      
-      clients.forEach(client => {
-        // Category breakdown
-        client.preferences.preferredCategories.forEach(category => {
-          if (!categoryBreakdown[category]) {
-            categoryBreakdown[category] = { count: 0, revenue: 0 };
-          }
-          categoryBreakdown[category].count++;
-          categoryBreakdown[category].revenue += client.totalSpent / client.preferences.preferredCategories.length;
-        });
-        
-        // Industry breakdown
-        if (!industryBreakdown[client.industry]) {
-          industryBreakdown[client.industry] = 0;
-        }
-        industryBreakdown[client.industry]++;
-      });
-
-      const topSpendingClient = clients.reduce((top, client) => 
-        client.totalSpent > top.totalSpent ? client : top
-      );
-
-      return {
-        totalClients: clients.length,
-        activeClients,
-        vipClients,
-        newClients,
-        totalRevenue,
-        averageOrderValue: totalRevenue / clients.reduce((sum, c) => sum + c.totalOrders, 0),
-        topSpendingClient: { name: topSpendingClient.name, amount: topSpendingClient.totalSpent },
-        clientRetentionRate: 85.5,
-        categoryBreakdown: Object.entries(categoryBreakdown).map(([category, data]) => ({
-          category,
-          count: data.count,
-          revenue: data.revenue
-        })),
-        topIndustries: Object.entries(industryBreakdown)
-          .map(([industry, count]) => ({ industry, count }))
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 5)
-      };
-    };
-
     const fetchClients = async () => {
       setLoading(true);
       try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const mockClients = generateMockClients();
-        setClients(mockClients);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("No authentication token found");
+        }
+
+        // Get user ID first
+        const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084'}/api/auth/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         
-        const mockStats = generateMockStats(mockClients);
-        setStats(mockStats);
+        if (!profileRes.ok) {
+          throw new Error("Failed to fetch user profile");
+        }
         
+        const profileData = await profileRes.json();
+        const userId = profileData.ID || profileData.id;
+        
+        if (!userId) {
+          throw new Error("User ID not found");
+        }
+
+        // Fetch bookings where current user is the service provider (owner)
+        const TASK_API_BASE = process.env.NEXT_PUBLIC_TASK_API_URL || 'http://localhost:8084';
+        const bookingsRes = await fetch(`${TASK_API_BASE}/api/bookings?role=owner&id=${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!bookingsRes.ok) {
+          throw new Error("Failed to fetch bookings");
+        }
+
+        const bookingsData = await bookingsRes.json();
+        const bookings = bookingsData.data || bookingsData || [];
+
+        // Transform bookings into client data
+        const clientMap = new Map<string, Client>();
+        
+        for (const booking of bookings) {
+          const bookerId = booking.BookerID || booking.bookerID || booking.Booker?.ID || booking.booker?.id;
+          
+          if (!bookerId) continue;
+
+          // Get booker details from auth service
+          let bookerDetails = null;
+          try {
+            const bookerRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084'}/api/auth/user/${bookerId}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            
+            if (bookerRes.ok) {
+              const bookerData = await bookerRes.json();
+              bookerDetails = bookerData.data || bookerData;
+            }
+          } catch (err) {
+            console.log(`Failed to fetch booker details for ${bookerId}:`, err);
+          }
+
+          // Get booker profile details
+          let bookerProfile = null;
+          try {
+            const profileRes = await fetch(`${process.env.NEXT_PUBLIC_PROFILE_API_URL || 'http://localhost:8081'}/api/profile/${bookerId}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            
+            if (profileRes.ok) {
+              const profileData = await profileRes.json();
+              bookerProfile = profileData;
+            }
+          } catch (err) {
+            console.log(`Failed to fetch booker profile for ${bookerId}:`, err);
+          }
+
+          // Get task details for the booking
+          let taskDetails = null;
+          const taskId = booking.TaskID || booking.taskID || booking.task?.ID || booking.task?.id;
+          if (taskId) {
+            try {
+              const taskRes = await fetch(`${TASK_API_BASE}/api/tasks/get/${taskId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              
+              if (taskRes.ok) {
+                const taskData = await taskRes.json();
+                taskDetails = taskData.data || taskData;
+              }
+            } catch (err) {
+              console.log(`Failed to fetch task details for ${taskId}:`, err);
+            }
+          }
+
+          // Create or update client data
+          if (!clientMap.has(bookerId)) {
+            const client: Client = {
+              id: bookerId,
+              name: bookerDetails?.Name || bookerDetails?.name || booking.BookerName || booking.bookerName || "Unknown Client",
+              email: bookerDetails?.Email || bookerDetails?.email || booking.BookerEmail || booking.bookerEmail || "",
+              phone: bookerDetails?.Phone || bookerDetails?.phone || booking.BookerPhone || booking.bookerPhone || "",
+              avatar: bookerProfile?.ProfilePictureURL || bookerProfile?.profilePictureURL || bookerDetails?.Avatar || bookerDetails?.avatar || "",
+              location: bookerProfile?.location || bookerProfile?.Location || "Location not specified",
+              company: bookerProfile?.company || bookerProfile?.Company || "",
+              jobTitle: bookerProfile?.jobTitle || bookerProfile?.JobTitle || "",
+              industry: bookerProfile?.industry || bookerProfile?.Industry || "General",
+              isVerified: bookerDetails?.isVerified || false,
+              joinDate: new Date(bookerDetails?.CreatedAt || bookerDetails?.createdAt || Date.now()).getTime(),
+              lastActive: new Date(booking.CreatedAt || booking.createdAt || Date.now()).getTime(),
+              totalSpent: 0,
+              totalOrders: 0,
+              averageRating: 0,
+              totalReviews: 0,
+              status: 'active',
+              tags: [],
+              notes: "",
+              preferences: {
+                preferredCategories: [],
+                budgetRange: "",
+                communicationStyle: "",
+                timezone: ""
+              },
+              recentActivity: [],
+              services: []
+            };
+            clientMap.set(bookerId, client);
+          }
+
+          const client = clientMap.get(bookerId)!;
+          
+          // Update client data with booking information
+          client.totalSpent += booking.Credits || booking.credits || 0;
+          client.totalOrders += 1;
+          client.lastActive = Math.max(client.lastActive, new Date(booking.CreatedAt || booking.createdAt || Date.now()).getTime());
+
+          // Add service to client's services
+          if (taskDetails) {
+            client.services.push({
+              id: taskId,
+              title: taskDetails.Title || taskDetails.title || booking.TaskTitle || booking.taskTitle || "Service",
+              category: taskDetails.Category || taskDetails.category || "General",
+              amount: booking.Credits || booking.credits || 0,
+              date: new Date(booking.CreatedAt || booking.createdAt || Date.now()).getTime(),
+              status: booking.Status || booking.status || 'completed',
+              rating: 0 // Will be updated if reviews are available
+            });
+          }
+
+          // Add recent activity
+          client.recentActivity.push({
+            type: 'booking',
+            description: `Booked ${taskDetails?.Title || taskDetails?.title || booking.TaskTitle || booking.taskTitle || "service"}`,
+            date: new Date(booking.CreatedAt || booking.createdAt || Date.now()).getTime(),
+            amount: booking.Credits || booking.credits || 0
+          });
+
+          // Update status based on spending
+          if (client.totalSpent >= 2000) {
+            client.status = 'vip';
+          } else if (client.totalSpent >= 500) {
+            client.status = 'active';
+          } else {
+            client.status = 'new';
+          }
+        }
+
+        // Convert map to array
+        const realClients = Array.from(clientMap.values());
+
+        // Generate stats from real data
+        const generateStats = (clients: Client[]): ClientStats => {
+          const activeClients = clients.filter(c => c.status === 'active' || c.status === 'vip').length;
+          const vipClients = clients.filter(c => c.status === 'vip').length;
+          const newClients = clients.filter(c => c.status === 'new').length;
+          const totalRevenue = clients.reduce((sum, c) => sum + c.totalSpent, 0);
+          
+          const categoryBreakdown: { [key: string]: { count: number; revenue: number } } = {};
+          const industryBreakdown: { [key: string]: number } = {};
+          
+          clients.forEach(client => {
+            // Category breakdown from services
+            client.services.forEach(service => {
+              const category = service.category;
+              if (!categoryBreakdown[category]) {
+                categoryBreakdown[category] = { count: 0, revenue: 0 };
+              }
+              categoryBreakdown[category].count++;
+              categoryBreakdown[category].revenue += service.amount;
+            });
+            
+            // Industry breakdown
+            if (client.industry) {
+              if (!industryBreakdown[client.industry]) {
+                industryBreakdown[client.industry] = 0;
+              }
+              industryBreakdown[client.industry]++;
+            }
+          });
+
+          const topSpendingClient = clients.length > 0 ? clients.reduce((top, client) => 
+            client.totalSpent > top.totalSpent ? client : top
+          ) : { name: "No clients", totalSpent: 0 };
+
+          return {
+            totalClients: clients.length,
+            activeClients,
+            vipClients,
+            newClients,
+            totalRevenue,
+            averageOrderValue: clients.length > 0 ? totalRevenue / clients.reduce((sum, c) => sum + c.totalOrders, 0) : 0,
+            topSpendingClient: { name: topSpendingClient.name, amount: topSpendingClient.totalSpent },
+            clientRetentionRate: 85.5, // This would need to be calculated from historical data
+            categoryBreakdown: Object.entries(categoryBreakdown).map(([category, data]) => ({
+              category,
+              count: data.count,
+              revenue: data.revenue
+            })),
+            topIndustries: Object.entries(industryBreakdown)
+              .map(([industry, count]) => ({ industry, count }))
+              .sort((a, b) => b.count - a.count)
+              .slice(0, 5)
+          };
+        };
+
+        setClients(realClients);
+        setStats(generateStats(realClients));
         setError(null);
+        
       } catch (err: any) {
+        console.error("Error fetching clients:", err);
         setError(err.message || "Failed to load clients");
       } finally {
         setLoading(false);
@@ -423,7 +402,7 @@ export default function ClientDirectoryPage() {
     }
   };
 
-  const getIndustryIcon = (industry: string) => {
+  const getIndustryIcon = (industry?: string) => {
     switch (industry) {
       case 'Technology': return <FaLaptop className="w-4 h-4" />;
       case 'Design': return <FaPalette className="w-4 h-4" />;
@@ -552,7 +531,7 @@ export default function ClientDirectoryPage() {
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
-                  <FaGrid className="w-4 h-4 inline mr-2" />
+                  <FaTh className="w-4 h-4 inline mr-2" />
                   Grid
                 </button>
                 <button

@@ -147,9 +147,9 @@ export default function BookedFromMePage() {
           let bookerName = b.BookerName || b.bookerName || "Client";
           let bookerEmail = b.BookerEmail || b.bookerEmail || "";
           let bookerPhone = b.BookerPhone || b.bookerPhone || "";
-          let bookerProfilePicture = "";
+          let bookerProfilePicture = b.BookerProfilePicture || b.bookerProfilePicture || b.Booker?.ProfilePictureURL || b.booker?.profilePictureURL || b.Booker?.Avatar || b.booker?.avatar || "";
           
-          // Fetch task details to get images and author info
+          // Fetch task details to get images only (not booker details)
           if (taskId) {
             try {
               const taskRes = await fetch(`${API_BASE_URL}/api/tasks/get/${taskId}`, {
@@ -161,26 +161,16 @@ export default function BookedFromMePage() {
                 taskImages = task.Images || task.images || [];
                 console.log(`Fetched task ${taskId} images:`, taskImages);
                 
-                // Get booker details from the task's Author field (which contains the profile picture)
-                if (task.Author) {
-                  bookerName = task.Author.Name || task.Author.name || bookerName;
-                  bookerEmail = task.Author.Email || task.Author.email || bookerEmail;
-                  bookerProfilePicture = task.Author.Avatar || task.Author.avatar || "";
-                  console.log(`✅ Using booker details from task Author:`, { 
-                    name: bookerName, 
-                    email: bookerEmail, 
-                    profilePicture: bookerProfilePicture,
-                    taskAuthor: task.Author
-                  });
-                }
+                // Note: We don't use task.Author here because that's the task owner (you),
+                // not the booker (client who booked your service)
               }
             } catch (err) {
               console.log(`Failed to fetch task ${taskId} details:`, err);
             }
           }
           
-          // If we still don't have the profile picture, try fetching from auth service as fallback
-          if (!bookerProfilePicture && bookerId) {
+          // Always try to fetch booker details from auth service if we have bookerId
+          if (bookerId) {
             try {
               const bookerRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084'}/api/auth/user/${bookerId}`, {
                 headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -191,7 +181,10 @@ export default function BookedFromMePage() {
                 bookerName = booker.Name || booker.name || bookerName;
                 bookerEmail = booker.Email || booker.email || bookerEmail;
                 bookerPhone = booker.Phone || booker.phone || bookerPhone;
-                bookerProfilePicture = booker.ProfilePictureURL || booker.profilePictureURL || booker.Avatar || booker.avatar || booker.ProfilePicture || booker.profilePicture || "";
+                // Only set profile picture if we don't already have one
+                if (!bookerProfilePicture) {
+                  bookerProfilePicture = booker.ProfilePictureURL || booker.profilePictureURL || booker.Avatar || booker.avatar || booker.ProfilePicture || booker.profilePicture || "";
+                }
                 console.log(`✅ Fetched booker ${bookerId} details from auth service:`, { 
                   name: bookerName, 
                   email: bookerEmail, 

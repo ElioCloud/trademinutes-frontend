@@ -275,6 +275,7 @@ interface Service {
   reviewCount?: number;
   CreatedAt?: number;
   createdAt?: number;
+  Tiers?: Array<{ name: string; credits: number; title: string; description: string; features: string[]; availableTimeSlot: string; maxDays: number }>;
 }
 
 export default function ServiceGrid({ items = services }: { items?: (Service | typeof services[0])[] }) {
@@ -439,7 +440,9 @@ export default function ServiceGrid({ items = services }: { items?: (Service | t
           const reviews = s.reviewCount || s.reviews || Math.floor(Math.random() * 50) + 10;
           const user = s.Author?.Name || s.Author?.name || s.author?.name || s.user || 'Provider';
           const avatar = s.Author?.Avatar || s.Author?.ProfilePictureURL || s.author?.avatar || s.author?.profilePictureURL;
-          const price = s.Credits || s.credits || s.price || 0;
+          const price = s.Tiers && s.Tiers.length > 0 
+            ? s.Tiers.find((tier: any) => tier.name === 'Basic')?.credits || s.Tiers[0].credits
+            : s.Credits || s.credits || s.price || 0;
           const location = s.Location || s.location || 'Online';
           const locationType = s.LocationType || s.locationType || 'Online';
           const availability = s.Availability || s.availability || [];
@@ -484,6 +487,9 @@ export default function ServiceGrid({ items = services }: { items?: (Service | t
                   <div className="flex items-center gap-1 text-sm font-bold text-green-600">
                     <FaCoins className="w-4 h-4" />
                     <span>{price}</span>
+                    {s.Tiers && s.Tiers.length > 0 && (
+                      <span className="text-xs text-gray-500 font-normal">(Basic)</span>
+                    )}
                   </div>
                 </div>
                 <h4 className="font-semibold text-gray-900 mb-3">

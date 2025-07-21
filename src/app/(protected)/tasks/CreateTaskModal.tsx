@@ -309,6 +309,14 @@ export default function CreateTaskModal({
       formDataToSend.append('category', selectedCategory);
 
       formDataToSend.append('tiers', JSON.stringify(tiers));
+      
+      // Set base credits from the first tier (if tiers exist)
+      if (tiers.length > 0 && tiers[0].credits > 0) {
+        formDataToSend.append('credits', tiers[0].credits.toString());
+      } else {
+        // Default credits if no tiers or first tier has 0 credits
+        formDataToSend.append('credits', '10');
+      }
 
       // Add cover image
       if (coverImage) {

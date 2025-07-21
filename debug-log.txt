@@ -19724,3 +19724,857 @@ Data: [
   }
 ]
 
+[2025-07-20T19:48:31.263Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "Basic Dashboard",
+    "description": "Basic Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "Premium Dashboard",
+    "description": "Premium Dashboard",
+    "credits": 41,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "Premium Dashboard",
+    "description": "Premium Dashboard",
+    "credits": 62,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T19:48:31.264Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T19:48:31.360Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "Basic Dashboard",
+      "description": "Basic Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 41,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 62,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "Basic Dashboard",
+    "description": "Basic Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T19:48:31.263Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "Basic Dashboard",
+      "description": "Basic Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 41,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 62,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T19:48:31.403Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "Basic Dashboard",
+      "description": "Basic Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 41,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 62,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T19:48:31.190Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "Basic Dashboard",
+      "description": "Basic Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 41,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 62,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "Basic Dashboard",
+    "description": "Basic Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T19:48:31.404Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "Basic Dashboard",
+    "description": "Basic Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "Premium Dashboard",
+    "description": "Premium Dashboard",
+    "credits": 41,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "Premium Dashboard",
+    "description": "Premium Dashboard",
+    "credits": 62,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T19:48:31.404Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T20:06:25.684Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "Basic Dashboard",
+      "description": "Basic Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 41,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 62,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T20:06:25.685Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T20:06:25.684Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "Basic Dashboard",
+    "description": "Basic Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "Premium Dashboard",
+    "description": "Premium Dashboard",
+    "credits": 41,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "Premium Dashboard",
+    "description": "Premium Dashboard",
+    "credits": 62,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T20:06:25.632Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "Basic Dashboard",
+      "description": "Basic Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 41,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 62,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "Basic Dashboard",
+    "description": "Basic Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T20:06:25.847Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "Basic Dashboard",
+      "description": "Basic Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 41,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 62,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T20:06:25.798Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "Basic Dashboard",
+      "description": "Basic Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 41,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 62,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "Basic Dashboard",
+    "description": "Basic Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T20:06:25.847Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "Basic Dashboard",
+    "description": "Basic Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "Premium Dashboard",
+    "description": "Premium Dashboard",
+    "credits": 41,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "Premium Dashboard",
+    "description": "Premium Dashboard",
+    "credits": 62,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T20:06:25.847Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T20:06:45.423Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "Basic Dashboard",
+      "description": "Basic Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 41,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 62,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "Basic Dashboard",
+    "description": "Basic Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T20:06:45.468Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "Basic Dashboard",
+      "description": "Basic Dashboard",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 41,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "Premium Dashboard",
+      "description": "Premium Dashboard",
+      "credits": 62,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T20:06:45.468Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "Basic Dashboard",
+    "description": "Basic Dashboard",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "Premium Dashboard",
+    "description": "Premium Dashboard",
+    "credits": 41,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "Premium Dashboard",
+    "description": "Premium Dashboard",
+    "credits": 62,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T20:06:45.469Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T23:16:21.231Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "Just Python",
+      "description": "Just Python - only intro",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "Python Intermediate",
+      "description": "All OOPs",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "Hands On",
+      "description": "Python full course",
+      "credits": 80,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "Just Python",
+    "description": "Just Python - only intro",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T23:16:21.240Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "Just Python",
+      "description": "Just Python - only intro",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "Python Intermediate",
+      "description": "All OOPs",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "Hands On",
+      "description": "Python full course",
+      "credits": 80,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T23:16:21.343Z] TIERS PARSING START
+Data: {
+  "originalTiersData": [
+    {
+      "name": "Basic",
+      "title": "Just Python",
+      "description": "Just Python - only intro",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "Python Intermediate",
+      "description": "All OOPs",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "Hands On",
+      "description": "Python full course",
+      "credits": 80,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "originalType": "object"
+}
+
+[2025-07-20T23:16:21.241Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+
+[2025-07-20T23:16:21.183Z] TIERS DEBUG START
+Data: {
+  "tiersProperty": [
+    {
+      "name": "Basic",
+      "title": "Just Python",
+      "description": "Just Python - only intro",
+      "credits": 20,
+      "features": [],
+      "availableTimeSlot": "9:00 AM - 5:00 PM",
+      "maxDays": 7
+    },
+    {
+      "name": "Standard",
+      "title": "Python Intermediate",
+      "description": "All OOPs",
+      "credits": 40,
+      "features": [],
+      "availableTimeSlot": "8:00 AM - 6:00 PM",
+      "maxDays": 14
+    },
+    {
+      "name": "Premium",
+      "title": "Hands On",
+      "description": "Python full course",
+      "credits": 80,
+      "features": [],
+      "availableTimeSlot": "24/7 Available",
+      "maxDays": 30
+    }
+  ],
+  "tiersType": "object",
+  "tiersTypeLowercase": "undefined",
+  "tiersIsArray": true,
+  "tiersIsArrayLowercase": false,
+  "tiersLength": 3,
+  "firstTier": {
+    "name": "Basic",
+    "title": "Just Python",
+    "description": "Just Python - only intro",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  }
+}
+
+[2025-07-20T23:16:21.241Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "Just Python",
+    "description": "Just Python - only intro",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "Python Intermediate",
+    "description": "All OOPs",
+    "credits": 40,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "Hands On",
+    "description": "Python full course",
+    "credits": 80,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T23:16:21.344Z] FINAL TIERS DATA SET
+Data: [
+  {
+    "name": "Basic",
+    "title": "Just Python",
+    "description": "Just Python - only intro",
+    "credits": 20,
+    "features": [],
+    "availableTimeSlot": "9:00 AM - 5:00 PM",
+    "maxDays": 7
+  },
+  {
+    "name": "Standard",
+    "title": "Python Intermediate",
+    "description": "All OOPs",
+    "credits": 40,
+    "features": [],
+    "availableTimeSlot": "8:00 AM - 6:00 PM",
+    "maxDays": 14
+  },
+  {
+    "name": "Premium",
+    "title": "Hands On",
+    "description": "Python full course",
+    "credits": 80,
+    "features": [],
+    "availableTimeSlot": "24/7 Available",
+    "maxDays": 30
+  }
+]
+
+[2025-07-20T23:16:21.344Z] SET INITIAL SELECTED TIER
+Data: {
+  "selectedTier": "Basic",
+  "availableTiers": [
+    "Basic",
+    "Standard",
+    "Premium"
+  ]
+}
+

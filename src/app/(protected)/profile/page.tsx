@@ -22,7 +22,9 @@ import {
   FaSave,
   FaTimes,
   FaPlus,
-  FaTrash
+  FaTrash,
+  FaClipboardList,
+  FaCoins
 } from "react-icons/fa";
 import { 
   FiUser, 
@@ -44,6 +46,8 @@ import {
   FiTrash2
 } from "react-icons/fi";
 import ProfilePictureUpload from "@/components/ProfilePictureUpload";
+import CoverImageUpload from "@/components/CoverImageUpload";
+import ServiceSlider from "@/components/ServiceSlider";
 
 const MOCK_STATS = [
   { label: "Total Patients", value: 520 },
@@ -126,6 +130,8 @@ export default function UserProfileSummaryPage() {
     rating: 0
   });
   const [profileStatsLoading, setProfileStatsLoading] = useState(true);
+  const [userTasks, setUserTasks] = useState<any[]>([]);
+  const [userTasksLoading, setUserTasksLoading] = useState(true);
   const router = useRouter();
 
   // Editing states
@@ -154,6 +160,33 @@ export default function UserProfileSummaryPage() {
   const [editingProfilePicture, setEditingProfilePicture] = useState(false);
   const [editingCoverImage, setEditingCoverImage] = useState(false);
 
+  const fetchUserTasks = async (userId: string) => {
+    try {
+      setUserTasksLoading(true);
+      const TASK_API_BASE = process.env.NEXT_PUBLIC_TASK_API_URL || 'http://localhost:8084';
+      const token = localStorage.getItem("token");
+      
+      const res = await fetch(`${TASK_API_BASE}/api/tasks/get/user`, {
+        headers: { Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(10000) // 10 second timeout
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        const tasks = data.data || data || [];
+        setUserTasks(tasks);
+      } else {
+        console.log("Failed to fetch user tasks:", res.status);
+        setUserTasks([]);
+      }
+    } catch (error) {
+      console.error("Error fetching user tasks:", error);
+      setUserTasks([]);
+    } finally {
+      setUserTasksLoading(false);
+    }
+  };
+
   const fetchProfileStats = async (userId: string) => {
     try {
       setProfileStatsLoading(true);
@@ -180,11 +213,12 @@ export default function UserProfileSummaryPage() {
         ).length;
       }
       
-      // Fetch reviews to calculate average rating - use the same logic as fetchReviewsForMyTasks
+      // Fetch reviews to calculate average rating - make this completely optional
       try {
         // First, get user's tasks
         const tasksRes = await fetch(`${TASK_API_BASE}/api/tasks/get/user`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
+          signal: AbortSignal.timeout(5000) // 5 second timeout
         });
         
         if (tasksRes.ok) {
@@ -199,7 +233,9 @@ export default function UserProfileSummaryPage() {
             if (!taskId) continue;
             
             try {
-              const reviewRes = await fetch(`${REVIEW_API_BASE}/api/reviews?taskId=${taskId}`);
+              const reviewRes = await fetch(`${REVIEW_API_BASE}/api/reviews?taskId=${taskId}`, {
+                signal: AbortSignal.timeout(3000) // 3 second timeout
+              });
               if (reviewRes.ok) {
                 const reviews = await reviewRes.json();
                 if (Array.isArray(reviews)) {
@@ -209,14 +245,17 @@ export default function UserProfileSummaryPage() {
                 }
               }
             } catch (taskErr) {
-              console.error(`Error fetching reviews for task ${taskId}:`, taskErr);
+              console.log(`Error fetching reviews for task ${taskId}:`, taskErr);
             }
           }
           
           // If no reviews found via tasks, try direct user reviews
           if (allReviews.length === 0) {
             try {
-              const userReviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`);
+              // Try the correct endpoint format
+              const userReviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews?userId=${userId}`, {
+                signal: AbortSignal.timeout(3000)
+              });
               if (userReviewsRes.ok) {
                 const userReviews = await userReviewsRes.json();
                 if (Array.isArray(userReviews)) {
@@ -224,9 +263,22 @@ export default function UserProfileSummaryPage() {
                 } else if (userReviews.data && Array.isArray(userReviews.data)) {
                   allReviews = userReviews.data;
                 }
+              } else {
+                // Try alternative endpoint
+                const altUserReviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews?revieweeId=${userId}`, {
+                  signal: AbortSignal.timeout(3000)
+                });
+                if (altUserReviewsRes.ok) {
+                  const userReviews = await altUserReviewsRes.json();
+                  if (Array.isArray(userReviews)) {
+                    allReviews = userReviews;
+                  } else if (userReviews.data && Array.isArray(userReviews.data)) {
+                    allReviews = userReviews.data;
+                  }
+                }
               }
             } catch (userErr) {
-              console.error("Error fetching user reviews:", userErr);
+              console.log("Error fetching user reviews:", userErr);
             }
           }
           
@@ -244,7 +296,8 @@ export default function UserProfileSummaryPage() {
           console.log("Profile stats - Total rating:", totalRating);
         }
       } catch (reviewErr) {
-        console.error("Error fetching reviews for profile stats:", reviewErr);
+        console.log("Review API not available, continuing with default values");
+        // Continue with default values (totalRating = 0, reviewCount = 0)
       }
       
       // Calculate average rating
@@ -279,7 +332,8 @@ export default function UserProfileSummaryPage() {
       
       // Fetch user's tasks to calculate response rate and response time
       const tasksRes = await fetch(`${TASK_API_BASE}/api/tasks/get/user`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
+        signal: AbortSignal.timeout(10000) // 10 second timeout
       });
       
       let totalTasks = 0;
@@ -307,35 +361,57 @@ export default function UserProfileSummaryPage() {
             }
           }
         });
+      } else {
+        console.log("Tasks API returned status:", tasksRes.status);
       }
       
-      // Fetch total reviews
+      // Fetch total reviews - make this completely optional
       let totalReviews = 0;
       try {
-        const reviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews/user/${userId}`);
+        // Try the correct endpoint format
+        const reviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews?userId=${userId}`, {
+          signal: AbortSignal.timeout(3000) // 3 second timeout
+        });
         if (reviewsRes.ok) {
           const reviewsData = await reviewsRes.json();
           const reviews = Array.isArray(reviewsData) ? reviewsData : (reviewsData.data || []);
           totalReviews = reviews.length;
+        } else {
+          // Try alternative endpoint
+          const altReviewsRes = await fetch(`${REVIEW_API_BASE}/api/reviews?revieweeId=${userId}`, {
+            signal: AbortSignal.timeout(3000) // 3 second timeout
+          });
+          if (altReviewsRes.ok) {
+            const reviewsData = await altReviewsRes.json();
+            const reviews = Array.isArray(reviewsData) ? reviewsData : (reviewsData.data || []);
+            totalReviews = reviews.length;
+          } else {
+            console.log("Review API endpoints returned status:", reviewsRes.status, altReviewsRes.status);
+          }
         }
       } catch (reviewErr) {
-        console.error("Error fetching reviews for stats:", reviewErr);
+        console.log("Review API not available, continuing with totalReviews = 0");
+        // Continue with totalReviews = 0
       }
       
       // Fetch user creation date
       let memberSince = '';
       try {
         const userRes = await fetch(`${AUTH_API_BASE}/api/auth/user/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
+          signal: AbortSignal.timeout(5000) // 5 second timeout
         });
         if (userRes.ok) {
           const userData = await userRes.json();
           if (userData.createdAt) {
             memberSince = new Date(userData.createdAt).getFullYear().toString();
           }
+        } else {
+          console.log("User API returned status:", userRes.status);
         }
       } catch (userErr) {
         console.error("Error fetching user data for stats:", userErr);
+        // Continue with memberSince = ''
       }
       
       // Calculate statistics
@@ -424,10 +500,9 @@ export default function UserProfileSummaryPage() {
         try {
           // Try different possible endpoints for user reviews
           const possibleEndpoints = [
-            `${REVIEW_API_BASE}/api/reviews/user/${userId}`,
             `${REVIEW_API_BASE}/api/reviews?userId=${userId}`,
-            `${REVIEW_API_BASE}/api/reviews?reviewerId=${userId}`,
-            `${REVIEW_API_BASE}/api/reviews?revieweeId=${userId}`
+            `${REVIEW_API_BASE}/api/reviews?revieweeId=${userId}`,
+            `${REVIEW_API_BASE}/api/reviews?reviewerId=${userId}`
           ];
           
           for (const endpoint of possibleEndpoints) {
@@ -497,6 +572,7 @@ export default function UserProfileSummaryPage() {
           fetchReviewsForMyTasks(data.ID);
           fetchUserStats(data.ID);
           fetchProfileStats(data.ID);
+          fetchUserTasks(data.ID);
         }
       } catch (err) {
         console.error("Failed to fetch profile:", err);
@@ -709,7 +785,7 @@ export default function UserProfileSummaryPage() {
           <div className="relative w-full h-48 md:h-64 rounded-xl overflow-hidden mb-6">
             {editingCoverImage ? (
               <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                <ProfilePictureUpload
+                <CoverImageUpload
                   currentImageUrl={profile.CoverImageURL}
                   onImageUpload={handleCoverImageUpload}
                   onImageRemove={handleCoverImageRemove}
@@ -789,43 +865,43 @@ export default function UserProfileSummaryPage() {
 
             {/* Profile Stats */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg text-white">
+              <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <FiDollarSign className="w-5 h-5" />
+                  <FiDollarSign className="w-5 h-5 text-emerald-700" />
                   <div>
-                    <p className="text-sm opacity-90">Credits</p>
+                    <p className="text-sm text-gray-600">Credits</p>
                     {profileStatsLoading ? (
-                      <div className="animate-pulse bg-white/20 h-6 w-12 rounded"></div>
+                      <div className="animate-pulse bg-gray-200 h-6 w-12 rounded"></div>
                     ) : (
-                      <p className="text-xl font-bold">{profileStats.credits}</p>
+                      <p className="text-xl font-bold text-gray-900">{profileStats.credits}</p>
                     )}
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-lg text-white">
+              <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <FiCheck className="w-5 h-5" />
+                  <FiCheck className="w-5 h-5 text-emerald-700" />
                   <div>
-                    <p className="text-sm opacity-90">Tasks Completed</p>
+                    <p className="text-sm text-gray-600">Tasks Completed</p>
                     {profileStatsLoading ? (
-                      <div className="animate-pulse bg-white/20 h-6 w-12 rounded"></div>
+                      <div className="animate-pulse bg-gray-200 h-6 w-12 rounded"></div>
                     ) : (
-                      <p className="text-xl font-bold">{profileStats.tasksCompleted}</p>
+                      <p className="text-xl font-bold text-gray-900">{profileStats.tasksCompleted}</p>
                     )}
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg text-white">
+              <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <FiStar className="w-5 h-5" />
+                  <FiStar className="w-5 h-5 text-emerald-700" />
                   <div>
-                    <p className="text-sm opacity-90">Rating</p>
+                    <p className="text-sm text-gray-600">Rating</p>
                     {profileStatsLoading ? (
-                      <div className="animate-pulse bg-white/20 h-6 w-12 rounded"></div>
+                      <div className="animate-pulse bg-gray-200 h-6 w-12 rounded"></div>
                     ) : (
-                      <p className="text-xl font-bold">{profileStats.rating > 0 ? `${profileStats.rating}/5` : 'No ratings'}</p>
+                      <p className="text-xl font-bold text-gray-900">{profileStats.rating > 0 ? `${profileStats.rating}/5` : 'No ratings'}</p>
                     )}
                   </div>
                 </div>
@@ -1106,45 +1182,16 @@ export default function UserProfileSummaryPage() {
               </div>
             </div>
 
-            {/* Today's Schedule */}
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden p-6">
-                              <h3 className="text-lg font-bold mb-4 text-gray-900 flex items-center gap-2">
-                  <FiCalendar className="w-5 h-5 text-gray-600" />
-                  Today's Tasks
-                </h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-sm text-green-800">10:00 AM - 11:00 AM</span>
-                    <span className="text-xs text-green-600">John Doe</span>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-xs text-green-800">Dog Walking</span>
-                    <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-200 text-green-800">Completed</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200">
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-sm text-orange-800">11:30 AM - 12:30 PM</span>
-                    <span className="text-xs text-orange-600">Jane Smith</span>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-xs text-orange-800">Math Tutoring</span>
-                    <span className="text-xs font-medium px-2 py-1 rounded-full bg-orange-200 text-orange-800">Pending</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-sm text-blue-800">2:00 PM - 3:00 PM</span>
-                    <span className="text-xs text-blue-600">Alex Lee</span>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-xs text-blue-800">PC Setup</span>
-                    <span className="text-xs font-medium px-2 py-1 rounded-full bg-blue-200 text-blue-800">Ongoing</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* User's Services */}
+            <ServiceSlider
+              services={userTasks}
+              title="My Services"
+              loading={userTasksLoading}
+              emptyMessage="No services created yet. Create your first service to get started."
+              showViewAll={userTasks.length > 5}
+              onViewAll={() => router.push('/my-listings')}
+              maxItems={5}
+            />
           </div>
 
           {/* Right: Reviews/Feedback */}

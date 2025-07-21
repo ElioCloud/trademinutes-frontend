@@ -47,6 +47,7 @@ import {
   FaGlobe
 } from "react-icons/fa";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import ServiceSlider from "@/components/ServiceSlider";
 
 const Map = dynamic(() => import("@/components/OpenStreetMap"), { ssr: false });
 
@@ -984,261 +985,164 @@ export default function ProfileDashboardPage() {
 
             {/* Recent Services */}
             <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Recent Services</h3>
-                <div className="flex gap-2">
-                  <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
-                    <FaArrowLeft className="w-4 h-4" />
-                  </button>
-                  <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
-                    <FaArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {serviceStats.recent.length > 0 ? (
-                  serviceStats.recent.slice(0, 3).map((service, index) => {
-                    const gradients = [
-                      'from-blue-400 to-blue-600',
-                      'from-purple-400 to-purple-600', 
-                      'from-green-400 to-green-600'
-                    ];
-                    const colors = [
-                      { bg: 'bg-blue-100', text: 'text-blue-600' },
-                      { bg: 'bg-purple-100', text: 'text-purple-600' },
-                      { bg: 'bg-green-100', text: 'text-green-600' }
-                    ];
-                    const categories = ['TECHNOLOGY', 'DESIGN', 'WRITING'];
-                    
-                    return (
-                      <div 
-                        key={index} 
-                        className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1"
-                        onClick={() => handleServiceClick(service)}
-                      >
-                        <div className="h-32 relative">
-                          {service.Images && service.Images.length > 0 ? (
-                            <img
-                              src={service.Images[0]}
-                              alt={service.Title || service.title || 'Service'}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className={`w-full h-full bg-gradient-to-br ${gradients[index % gradients.length]}`}></div>
-                          )}
-                          <div className="absolute inset-0 bg-black/20"></div>
-                        </div>
-                        <div className="p-4">
-                          <span className={`inline-block px-2 py-1 ${colors[index % colors.length].bg} ${colors[index % colors.length].text} text-xs font-semibold rounded mb-2`}>
-                            {service.Category || service.category || categories[index % categories.length]}
-                          </span>
-                          <h4 className="font-semibold text-gray-900 mb-2">
-                            {service.Title || service.title || 'Service Title'}
-                          </h4>
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              {service.Author?.Avatar || service.Author?.ProfilePictureURL || service.author?.avatar || service.author?.profilePictureURL ? (
-                                <img 
-                                  src={service.Author?.Avatar || service.Author?.ProfilePictureURL || service.author?.avatar || service.author?.profilePictureURL} 
-                                  alt={service.Author?.Name || service.author?.name || 'Provider'} 
-                                  className="w-6 h-6 rounded-full object-cover"
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = 'none';
-                                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                                  }}
-                                />
-                              ) : null}
-                              <div className={`w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-semibold ${(service.Author?.Avatar || service.Author?.ProfilePictureURL || service.author?.avatar || service.author?.profilePictureURL) ? 'hidden' : ''}`}>
-                                {(service.Author?.Name || service.author?.name || profile?.Name || 'P').charAt(0).toUpperCase()}
-                              </div>
-                              <span className="text-sm text-gray-600">
-                                {service.Author?.Name || service.author?.name || profile?.Name || 'Provider'}
-                              </span>
-                            </div>
-                            <span className="text-lg font-bold text-green-600">
-                              ${service.Price || service.price || 0}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <FaStar className="w-4 h-4 text-yellow-400" />
-                            <span>
-                              {service.rating || service.Rating || profile?.rating || 4.5} 
-                              ({service.reviewCount || service.ReviewCount || service.reviews || service.Reviews || Math.floor(Math.random() * 20) + 5} reviews)
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  // No services message
-                  <div className="col-span-full">
-                    <div className="bg-[#FAF6ED] rounded-xl p-8 text-center">
-                      <div className="flex justify-center mb-4">
-                        <FaClipboardList className="w-16 h-16 text-emerald-700" />
-                      </div>
-                      <h4 className="text-lg font-semibold text-gray-900 mb-2">No services yet</h4>
-                      <p className="text-gray-600 mb-4">You haven't created any service listings yet.</p>
-                      <div className="flex justify-center">
-                        <button
-                          onClick={() => router.push('/tasks/explore')}
-                          className="bg-emerald-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-emerald-800 hover:shadow-lg transition-all flex items-center gap-2"
-                        >
-                          <FaPlus className="text-lg" />
-                          Create Your First Service
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <ServiceSlider
+                services={serviceStats.recent}
+                title="Recent Services"
+                loading={false}
+                emptyMessage="No services created yet. Create your first service to get started."
+                showViewAll={serviceStats.recent.length > 5}
+                onViewAll={() => router.push('/my-listings')}
+                maxItems={5}
+              />
             </div>
 
-      
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Bookings</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">SERVICE</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">CLIENT</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">DATE</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">STATUS</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-600">ACTION</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(upcomingAppointments.length > 0 || upcomingBookings.length > 0) ? (
-                      [...upcomingAppointments, ...upcomingBookings].slice(0, 5).map((booking, index) => {
-                        const colors = ['bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-orange-500', 'bg-pink-500'];
-                        const statuses = [
-                          { bg: 'bg-green-100', text: 'text-green-600', label: 'Confirmed' },
-                          { bg: 'bg-yellow-100', text: 'text-yellow-600', label: 'Pending' },
-                          { bg: 'bg-blue-100', text: 'text-blue-600', label: 'Scheduled' }
-                        ];
-                        
-                        return (
-                          <tr key={index} className="border-b border-gray-100">
+            {/* Upcoming Bookings */}
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Bookings</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-3 px-4 font-medium text-gray-600">SERVICE</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-600">CLIENT</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-600">DATE</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-600">STATUS</th>
+                        <th className="text-left py-3 px-4 font-medium text-gray-600">ACTION</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(upcomingAppointments.length > 0 || upcomingBookings.length > 0) ? (
+                        [...upcomingAppointments, ...upcomingBookings].slice(0, 5).map((booking, index) => {
+                          const colors = ['bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-orange-500', 'bg-pink-500'];
+                          const statuses = [
+                            { bg: 'bg-green-100', text: 'text-green-600', label: 'Confirmed' },
+                            { bg: 'bg-yellow-100', text: 'text-yellow-600', label: 'Pending' },
+                            { bg: 'bg-blue-100', text: 'text-blue-600', label: 'Scheduled' }
+                          ];
+                          
+                          return (
+                            <tr key={index} className="border-b border-gray-100">
+                              <td className="py-3 px-4">
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-8 h-8 ${colors[index % colors.length]} rounded-full flex items-center justify-center`}>
+                                    <FaTools className="w-4 h-4 text-white" />
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-gray-900">
+                                      {booking.title || booking.Title || 'Service'}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                      ${booking.price || booking.Price || Math.floor(Math.random() * 200) + 50}
+                                    </p>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                                  <span className="text-sm text-gray-700">
+                                    {booking.client || booking.Client || 'Client'}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 text-gray-700">
+                                <div className="flex items-center gap-1">
+                                  <FaCalendar className="w-3 h-3 text-gray-400" />
+                                  <span className="text-sm">
+                                    {booking.date || booking.Date || 'TBD'}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <span className={`inline-block px-2 py-1 ${statuses[index % statuses.length].bg} ${statuses[index % statuses.length].text} text-xs font-semibold rounded`}>
+                                  {statuses[index % statuses.length].label}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4">
+                                <button className={`w-8 h-8 ${colors[index % colors.length]} text-white rounded-full flex items-center justify-center hover:opacity-80`}>
+                                  <FaArrowRight className="w-3 h-3" />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      ) : (
+                        // Fallback when no bookings
+                        <>
+                          <tr className="border-b border-gray-100">
                             <td className="py-3 px-4">
                               <div className="flex items-center gap-3">
-                                <div className={`w-8 h-8 ${colors[index % colors.length]} rounded-full flex items-center justify-center`}>
+                                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
                                   <FaTools className="w-4 h-4 text-white" />
                                 </div>
                                 <div>
-                                  <p className="font-medium text-gray-900">
-                                    {booking.title || booking.Title || 'Service'}
-                                  </p>
-                                  <p className="text-xs text-gray-500">
-                                    ${booking.price || booking.Price || Math.floor(Math.random() * 200) + 50}
-                                  </p>
+                                  <p className="font-medium text-gray-900">Web Development</p>
+                                  <p className="text-xs text-gray-500">$150</p>
                                 </div>
                               </div>
                             </td>
                             <td className="py-3 px-4">
                               <div className="flex items-center gap-2">
                                 <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
-                                <span className="text-sm text-gray-700">
-                                  {booking.client || booking.Client || 'Client'}
-                                </span>
+                                <span className="text-sm text-gray-700">John Smith</span>
                               </div>
                             </td>
                             <td className="py-3 px-4 text-gray-700">
                               <div className="flex items-center gap-1">
                                 <FaCalendar className="w-3 h-3 text-gray-400" />
-                                <span className="text-sm">
-                                  {booking.date || booking.Date || 'TBD'}
-                                </span>
+                                <span className="text-sm">Dec 15, 2024</span>
                               </div>
                             </td>
                             <td className="py-3 px-4">
-                              <span className={`inline-block px-2 py-1 ${statuses[index % statuses.length].bg} ${statuses[index % statuses.length].text} text-xs font-semibold rounded`}>
-                                {statuses[index % statuses.length].label}
-                              </span>
+                              <span className="inline-block px-2 py-1 bg-green-100 text-green-600 text-xs font-semibold rounded">Confirmed</span>
                             </td>
                             <td className="py-3 px-4">
-                              <button className={`w-8 h-8 ${colors[index % colors.length]} text-white rounded-full flex items-center justify-center hover:opacity-80`}>
+                              <button className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center hover:bg-blue-600">
                                 <FaArrowRight className="w-3 h-3" />
                               </button>
                             </td>
                           </tr>
-                        );
-                      })
-                    ) : (
-                      // Fallback when no bookings
-                      <>
-                        <tr className="border-b border-gray-100">
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                                <FaTools className="w-4 h-4 text-white" />
+                          <tr className="border-b border-gray-100">
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                                  <FaTools className="w-4 h-4 text-white" />
+                                </div>
+                                <div>
+                                  <p className="font-medium text-gray-900">Logo Design</p>
+                                  <p className="text-xs text-gray-500">$75</p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="font-medium text-gray-900">Web Development</p>
-                                <p className="text-xs text-gray-500">$150</p>
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                                <span className="text-sm text-gray-700">Lisa Brown</span>
                               </div>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
-                              <span className="text-sm text-gray-700">John Smith</span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 text-gray-700">
-                            <div className="flex items-center gap-1">
-                              <FaCalendar className="w-3 h-3 text-gray-400" />
-                              <span className="text-sm">Dec 15, 2024</span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className="inline-block px-2 py-1 bg-green-100 text-green-600 text-xs font-semibold rounded">Confirmed</span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <button className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center hover:bg-blue-600">
-                              <FaArrowRight className="w-3 h-3" />
-                            </button>
-                          </td>
-                        </tr>
-                        <tr className="border-b border-gray-100">
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                                <FaTools className="w-4 h-4 text-white" />
+                            </td>
+                            <td className="py-3 px-4 text-gray-700">
+                              <div className="flex items-center gap-1">
+                                <FaCalendar className="w-3 h-3 text-gray-400" />
+                                <span className="text-sm">Dec 18, 2024</span>
                               </div>
-                              <div>
-                                <p className="font-medium text-gray-900">Logo Design</p>
-                                <p className="text-xs text-gray-500">$75</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
-                              <span className="text-sm text-gray-700">Lisa Brown</span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 text-gray-700">
-                            <div className="flex items-center gap-1">
-                              <FaCalendar className="w-3 h-3 text-gray-400" />
-                              <span className="text-sm">Dec 18, 2024</span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className="inline-block px-2 py-1 bg-yellow-100 text-yellow-600 text-xs font-semibold rounded">Pending</span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <button className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center hover:bg-purple-600">
-                              <FaArrowRight className="w-3 h-3" />
-                            </button>
-                          </td>
-                        </tr>
-                      </>
-                    )}
-                  </tbody>
-                </table>
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className="inline-block px-2 py-1 bg-yellow-100 text-yellow-600 text-xs font-semibold rounded">Pending</span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <button className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center hover:bg-purple-600">
+                                <FaArrowRight className="w-3 h-3" />
+                              </button>
+                            </td>
+                          </tr>
+                        </>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                <button className="mt-4 text-blue-600 hover:text-blue-700 font-medium">View All Bookings</button>
               </div>
-              <button className="mt-4 text-blue-600 hover:text-blue-700 font-medium">View All Bookings</button>
             </div>
           </div>
         </div>
@@ -1247,7 +1151,6 @@ export default function ProfileDashboardPage() {
         <div className="w-72 bg-white shadow-sm p-4 overflow-y-auto flex-shrink-0">
           {/* Profile & Stats Section */}
           <div className="mb-8">
-            
             <div className="text-center mb-6">
               <div className="relative inline-block">
                 {profile?.ProfilePictureURL ? (
@@ -1273,8 +1176,6 @@ export default function ProfileDashboardPage() {
               <p className="text-sm text-gray-600">Keep growing your business!</p>
             </div>
           </div>
-
-
 
           {/* Recent Activity Section (dynamic) */}
           <div className="mb-8">
@@ -1310,40 +1211,6 @@ export default function ProfileDashboardPage() {
                   </div>
                 ))
               )}
-            </div>
-          </div>
-
-          {/* Notifications Section */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
-              <FaBell className="w-4 h-4 text-gray-400" />
-            </div>
-            
-            <div className="space-y-3">
-              <div className="p-3 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
-                <p className="text-sm font-medium text-gray-900">Booking reminder</p>
-                <p className="text-xs text-gray-600">Logo Design session in 2 hours</p>
-                <p className="text-xs text-gray-500">10 minutes ago</p>
-              </div>
-              
-              <div className="p-3 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
-                <p className="text-sm font-medium text-gray-900">New message</p>
-                <p className="text-xs text-gray-600">From Sarah Johnson</p>
-                <p className="text-xs text-gray-500">1 hour ago</p>
-              </div>
-              
-              <div className="p-3 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
-                <p className="text-sm font-medium text-gray-900">Service request</p>
-                <p className="text-xs text-gray-600">New inquiry for Web Development</p>
-                <p className="text-xs text-gray-500">3 hours ago</p>
-              </div>
-              
-              <div className="p-3 bg-yellow-50 border-l-4 border-yellow-500 rounded-r-lg">
-                <p className="text-sm font-medium text-gray-900">Payment pending</p>
-                <p className="text-xs text-gray-600">$75 for Logo Design</p>
-                <p className="text-xs text-gray-500">1 day ago</p>
-              </div>
             </div>
           </div>
         </div>

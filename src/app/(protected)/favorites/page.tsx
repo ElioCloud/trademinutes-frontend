@@ -46,6 +46,7 @@ type Service = {
   CreatedAt?: number;
   createdAt?: number;
   FavoriteID?: string;
+  Tiers?: Array<{ name: string; credits: number; title: string; description: string; features: string[]; availableTimeSlot: string; maxDays: number }>;
 };
 
 export default function FavoritesPage() {
@@ -206,7 +207,9 @@ export default function FavoritesPage() {
               const reviews = service.reviewCount || Math.floor(Math.random() * 50) + 10;
               const user = service.Author?.Name || service.Author?.name || service.author?.name || 'Provider';
               const avatar = service.Author?.Avatar || service.author?.avatar;
-              const price = service.Credits || service.credits || 0;
+              const price = service.Tiers && service.Tiers.length > 0 
+                ? service.Tiers.find((tier: any) => tier.name === 'Basic')?.credits || service.Tiers[0].credits
+                : service.Credits || service.credits || 0;
               const location = service.Location || service.location || 'Online';
               const locationType = service.LocationType || service.locationType || 'Online';
               const availability = service.Availability || service.availability || [];

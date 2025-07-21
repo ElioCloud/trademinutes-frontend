@@ -49,6 +49,7 @@ interface Service {
   reviewCount?: number;
   CreatedAt?: number;
   createdAt?: number;
+  Tiers?: Array<{ name: string; credits: number; title: string; description: string; features: string[]; availableTimeSlot: string; maxDays: number }>;
 }
 
 export default function Services() {
@@ -158,7 +159,9 @@ export default function Services() {
     if (filters.budget && filters.budget !== 'Any Budget') {
       const beforeCount = filtered.length;
       filtered = filtered.filter(service => {
-        const price = service.Credits || service.credits || 0;
+        const price = service.Tiers && service.Tiers.length > 0 
+          ? service.Tiers.find((tier: any) => tier.name === 'Basic')?.credits || service.Tiers[0].credits
+          : service.Credits || service.credits || 0;
         switch (filters.budget) {
           case 'Under $50':
             return price < 50;
@@ -197,10 +200,26 @@ export default function Services() {
         filtered.sort((a, b) => (b.CreatedAt || b.createdAt || 0) - (a.CreatedAt || a.createdAt || 0));
         break;
       case 'Price: Low to High':
-        filtered.sort((a, b) => (a.Credits || a.credits || 0) - (b.Credits || b.credits || 0));
+        filtered.sort((a, b) => {
+          const priceA = a.Tiers && a.Tiers.length > 0 
+            ? a.Tiers.find((tier: any) => tier.name === 'Basic')?.credits || a.Tiers[0].credits
+            : a.Credits || a.credits || 0;
+          const priceB = b.Tiers && b.Tiers.length > 0 
+            ? b.Tiers.find((tier: any) => tier.name === 'Basic')?.credits || b.Tiers[0].credits
+            : b.Credits || b.credits || 0;
+          return priceA - priceB;
+        });
         break;
       case 'Price: High to Low':
-        filtered.sort((a, b) => (b.Credits || b.credits || 0) - (a.Credits || a.credits || 0));
+        filtered.sort((a, b) => {
+          const priceA = a.Tiers && a.Tiers.length > 0 
+            ? a.Tiers.find((tier: any) => tier.name === 'Basic')?.credits || a.Tiers[0].credits
+            : a.Credits || a.credits || 0;
+          const priceB = b.Tiers && b.Tiers.length > 0 
+            ? b.Tiers.find((tier: any) => tier.name === 'Basic')?.credits || b.Tiers[0].credits
+            : b.Credits || b.credits || 0;
+          return priceB - priceA;
+        });
         break;
       case 'Rating: High to Low':
         filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));

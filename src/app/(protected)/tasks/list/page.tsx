@@ -310,7 +310,15 @@ export default function TaskListPage() {
                       </span>
                       <div className="flex items-center gap-1 text-sm font-bold text-green-600">
                         <FaCoins className="w-4 h-4" />
-                        <span>{task.Credits}</span>
+                        <span>
+                          {task.Tiers && task.Tiers.length > 0 
+                            ? task.Tiers.find(tier => tier.name === 'Basic')?.credits || task.Tiers[0].credits
+                            : task.Credits
+                          }
+                        </span>
+                        {task.Tiers && task.Tiers.length > 0 && (
+                          <span className="text-xs text-gray-500 font-normal">(Basic)</span>
+                        )}
                       </div>
                     </div>
                     <h4 className="font-semibold text-gray-900 mb-3">

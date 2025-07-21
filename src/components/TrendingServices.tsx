@@ -49,6 +49,7 @@ type Service = {
   Images?: string[];
   rating?: number;
   reviewCount?: number;
+  Tiers?: Array<{ name: string; credits: number; title: string; description: string; features: string[]; availableTimeSlot: string; maxDays: number }>;
 };
 
 
@@ -203,7 +204,15 @@ export default function TrendingServices() {
                           </span>
                           <div className="flex items-center gap-1 text-sm font-bold text-green-600">
                             <FaCoins className="w-4 h-4" />
-                            <span>{service.Credits || service.credits || 0}</span>
+                            <span>
+                              {service.Tiers && service.Tiers.length > 0 
+                                ? service.Tiers.find((tier: any) => tier.name === 'Basic')?.credits || service.Tiers[0].credits
+                                : service.Credits || service.credits || 0
+                              }
+                            </span>
+                            {service.Tiers && service.Tiers.length > 0 && (
+                              <span className="text-xs text-gray-500 font-normal">(Basic)</span>
+                            )}
                           </div>
                         </div>
                         <h3 className="font-semibold text-gray-900 mb-3">

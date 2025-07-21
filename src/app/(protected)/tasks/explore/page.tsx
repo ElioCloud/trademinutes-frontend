@@ -41,7 +41,9 @@ const transformTaskToService = (task: any) => ({
   reviews: Math.floor(Math.random() * 50) + 10, // Mock reviews
   user: task.Author?.Name || 'Anonymous',
   avatar: 'https://images.pexels.com/photos/277576/pexels-photo-277576.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2', // Default avatar
-  price: task.Credits,
+  price: task.Tiers && task.Tiers.length > 0 
+    ? task.Tiers.find((tier: any) => tier.name === 'Basic')?.credits || task.Tiers[0].credits
+    : task.Credits,
   image: 'https://cdn.pixabay.com/photo/2016/11/19/13/06/bed-1839184_1280.jpg', // Default image
 });
 

@@ -589,7 +589,7 @@ export default function CreditsPage() {
         <div className="bg-white p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Credits</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Earnings Dashboard</h1>
               <p className="text-gray-600 mt-1">Manage your TradeMinutes credits and earnings</p>
             </div>
             <div className="flex items-center gap-4">

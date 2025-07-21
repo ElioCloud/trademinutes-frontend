@@ -32,6 +32,7 @@ interface Task {
   };
   author?: Author;
   availability: Availability[];
+  Tiers?: Array<{ name: string; credits: number; title: string; description: string; features: string[]; availableTimeSlot: string; maxDays: number }>;
 }
 
 // Marker styles
@@ -189,7 +190,13 @@ export default function TaskMap({ tasks }: { tasks: any[] }) {
                       </p>
                     )}
                     <p className="text-xs text-yellow-500 font-medium mb-2">
-                      💰 {task.credits} credits
+                      💰 {task.Tiers && task.Tiers.length > 0 
+                        ? task.Tiers.find((tier: any) => tier.name === 'Basic')?.credits || task.Tiers[0].credits
+                        : task.credits
+                      } credits
+                      {task.Tiers && task.Tiers.length > 0 && (
+                        <span className="text-gray-400"> (Basic)</span>
+                      )}
                     </p>
 
                     <Link

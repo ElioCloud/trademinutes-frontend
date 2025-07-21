@@ -648,7 +648,9 @@ export default function ServiceViewPage() {
   const reviewCount = service.reviewCount || 554;
   const serviceProvider = service.Author?.Name || service.Author?.name || service.author?.name || 'Provider';
   const avatar = service.Author?.Avatar || service.author?.avatar;
-  const price = service.Credits || service.credits || 0;
+  const price = service.Tiers && service.Tiers.length > 0 
+    ? service.Tiers.find((tier: any) => tier.name === 'Basic')?.credits || service.Tiers[0].credits
+    : service.Credits || service.credits || 0;
   const location = service.Location || service.location || 'Online';
   const locationType = service.LocationType || service.locationType || 'Online';
   const availability = service.Availability || service.availability || [];

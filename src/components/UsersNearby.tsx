@@ -214,7 +214,9 @@ export default function UsersNearby() {
             location: task.Location || task.location || 'Unknown Location',
             latitude: task.Latitude || task.latitude,
             longitude: task.Longitude || task.longitude,
-            credits: task.Credits || task.credits || 0,
+            credits: task.Tiers && task.Tiers.length > 0 
+              ? task.Tiers.find((tier: any) => tier.name === 'Basic')?.credits || task.Tiers[0].credits
+              : task.Credits || task.credits || 0,
             images: task.Images || task.images || [],
             category: task.Category || task.category,
             createdAt: task.CreatedAt || task.createdAt,

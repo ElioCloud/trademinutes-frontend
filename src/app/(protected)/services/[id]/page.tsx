@@ -43,7 +43,9 @@ export default function ServiceDetailPage() {
           id: task._id || task.id || task.ID,
           title: task.Title,
           description: task.Description,
-          price: task.Credits,
+          price: task.Tiers && task.Tiers.length > 0 
+            ? task.Tiers.find((tier: any) => tier.name === 'Basic')?.credits || task.Tiers[0].credits
+            : task.Credits,
           user: task.Author?.Name,
           avatar: task.Author?.Avatar,
           image: task.Images && task.Images.length > 0 ? task.Images[0] : "/default-image.png",
