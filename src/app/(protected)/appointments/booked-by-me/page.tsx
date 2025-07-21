@@ -266,6 +266,10 @@ export default function BookedByMePage() {
     fetchReviewed();
   }, []);
 
+  useEffect(() => {
+    console.log("🔵 showReviewModal changed to:", showReviewModal);
+  }, [showReviewModal]);
+
   // Sort bookings: completed > confirmed > pending > cancelled
   const statusOrder = { completed: 0, confirmed: 1, pending: 2, cancelled: 3 };
   const sortedBookings = [...bookings].sort((a, b) => {
@@ -585,7 +589,11 @@ export default function BookedByMePage() {
                       <div className="space-y-2">
                         {booking.status.toLowerCase() === 'completed' && !hasReviewed && (
                           <button
-                            onClick={() => setShowReviewModal(booking.id)}
+                            onClick={() => {
+                              console.log("🔵 Leave a Review button clicked for booking:", booking.id);
+                              console.log("🔵 Setting showReviewModal to:", booking.id);
+                              setShowReviewModal(booking.id);
+                            }}
                             className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                           >
                             Leave a Review
@@ -660,23 +668,60 @@ export default function BookedByMePage() {
                 <button
                   className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
                   onClick={async () => {
-                    const booking = bookings.find(b => b.id === showReviewModal);
-                    if (!booking?.taskId) return;
+                    console.log("🔵 Submit Review button clicked!");
+                    console.log("🔵 showReviewModal:", showReviewModal);
+                    console.log("🔵 bookings:", bookings);
                     
+                    const booking = bookings.find(b => b.id === showReviewModal);
+                    console.log("🔵 Found booking:", booking);
+                    
+                    if (!booking?.taskId) {
+                      console.error("❌ No booking or taskId found!");
+                      console.log("❌ booking:", booking);
+                      console.log("❌ booking?.taskId:", booking?.taskId);
+                      return;
+                    }
+                    
+                    console.log("🔵 Getting token from localStorage...");
                     const token = localStorage.getItem("token");
+                    console.log("🔵 Token:", token ? "Found" : "Not found");
+                    
                     let userId = null;
                     if (token) {
-                      const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8081'}/api/auth/profile`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                      });
-                      if (profileRes.ok) {
-                        const profileData = await profileRes.json();
-                        userId = profileData.ID || profileData.id;
+                      console.log("🔵 Fetching user profile from auth API...");
+                      const authUrl = `${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8081'}/api/auth/profile`;
+                      console.log("🔵 Auth URL:", authUrl);
+                      
+                      try {
+                        const profileRes = await fetch(authUrl, {
+                          headers: { Authorization: `Bearer ${token}` },
+                        });
+                        console.log("🔵 Profile response status:", profileRes.status);
+                        console.log("🔵 Profile response ok:", profileRes.ok);
+                        
+                        if (profileRes.ok) {
+                          const profileData = await profileRes.json();
+                          console.log("🔵 Profile data:", profileData);
+                          userId = profileData.ID || profileData.id;
+                          console.log("🔵 Extracted userId:", userId);
+                        } else {
+                          const errorText = await profileRes.text();
+                          console.error("❌ Profile fetch failed:", errorText);
+                        }
+                      } catch (error) {
+                        console.error("❌ Profile fetch error:", error);
                       }
                     }
-                    if (!userId) return;
                     
+                    if (!userId) {
+                      console.error("❌ No userId found! Cannot submit review.");
+                      setDialog({ open: true, message: "Failed to get user information. Please try logging in again.", isError: true });
+                      return;
+                    }
+                    
+                    console.log("🔵 Preparing review data...");
                     const API_BASE_URL = process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086';
+                    console.log("🔵 Review API URL:", API_BASE_URL);
                     
                     const reviewData = {
                       reviewerId: userId,
@@ -686,29 +731,39 @@ export default function BookedByMePage() {
                       comment: reviewComment,
                     };
                     
-                    console.log("Submitting review:", reviewData);
+                    console.log("🔵 Review data to submit:", reviewData);
+                    console.log("🔵 reviewRating:", reviewRating);
+                    console.log("🔵 reviewComment:", reviewComment);
                     
-                    const res = await fetch(`${API_BASE_URL}/api/reviews`, {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify(reviewData),
-                    });
-                    
-                    console.log("Review submission response:", res.status, res.statusText);
-                    
-                    if (res.ok) {
-                      const result = await res.json();
-                      console.log("Review submitted successfully:", result);
-                      setReviewedTaskIds(prev => [...prev, booking.taskId!]);
-                      setShowReviewModal(null);
-                      setReviewRating(0);
-                      setReviewComment("");
-                      setReviewSubmittedId(booking.id);
-                      setDialog({ open: true, message: "Review submitted successfully!", isError: false });
-                    } else {
-                      const errorText = await res.text();
-                      console.error("Review submission failed:", errorText);
-                      setDialog({ open: true, message: `Failed to submit review: ${errorText}`, isError: true });
+                    try {
+                      console.log("🔵 Submitting review to API...");
+                      const res = await fetch(`${API_BASE_URL}/api/reviews`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(reviewData),
+                      });
+                      
+                      console.log("🔵 Review submission response status:", res.status);
+                      console.log("🔵 Review submission response ok:", res.ok);
+                      console.log("🔵 Review submission response statusText:", res.statusText);
+                      
+                      if (res.ok) {
+                        const result = await res.json();
+                        console.log("✅ Review submitted successfully:", result);
+                        setReviewedTaskIds(prev => [...prev, booking.taskId!]);
+                        setShowReviewModal(null);
+                        setReviewRating(0);
+                        setReviewComment("");
+                        setReviewSubmittedId(booking.id);
+                        setDialog({ open: true, message: "Review submitted successfully!", isError: false });
+                      } else {
+                        const errorText = await res.text();
+                        console.error("❌ Review submission failed:", errorText);
+                        setDialog({ open: true, message: `Failed to submit review: ${errorText}`, isError: true });
+                      }
+                    } catch (error) {
+                      console.error("❌ Review submission error:", error);
+                      setDialog({ open: true, message: `Network error: ${error}`, isError: true });
                     }
                   }}
                   disabled={reviewRating === 0}
