@@ -174,6 +174,16 @@ export default function ReviewsPage() {
             ].filter(Boolean);
             
             console.log("🔵 Task ID variations to try:", taskIdVariations);
+            console.log("🔵 Original taskId from review:", JSON.stringify(review.taskId));
+            console.log("🔵 Review object keys:", Object.keys(review));
+            
+            // Check if taskId might be under a different field name
+            const possibleTaskIdFields = ['taskId', 'task_id', 'taskID', 'TaskID', 'task', 'taskId'];
+            for (const field of possibleTaskIdFields) {
+              if (review[field] && review[field] !== review.taskId) {
+                console.log(`🔵 Found alternative taskId field '${field}':`, review[field]);
+              }
+            }
             
             let taskFound = false;
             
@@ -212,6 +222,22 @@ export default function ReviewsPage() {
             
             if (!taskFound) {
               console.error("❌ All task ID variations failed for review:", review);
+              
+              // Try to get a list of valid task IDs to compare
+              try {
+                const tasksResponse = await fetch(`${process.env.NEXT_PUBLIC_TASK_API_URL || 'http://localhost:8084'}/api/tasks/get/all`, {
+                  headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                if (tasksResponse.ok) {
+                  const tasksData = await tasksResponse.json();
+                  const taskIds = tasksData.map((task: any) => task.id || task._id || task.ID);
+                  console.log("🔵 Available task IDs in system:", taskIds);
+                  console.log("🔵 Does our taskId exist in available tasks?", taskIds.includes(review.taskId));
+                }
+              } catch (error) {
+                console.error("❌ Failed to fetch available tasks:", error);
+              }
             }
 
             // Determine sentiment based on rating
