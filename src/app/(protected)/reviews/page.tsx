@@ -142,10 +142,12 @@ export default function ReviewsPage() {
         
         console.log("🔵 Reviews received:", reviewsReceivedData);
         console.log("🔵 Reviews given:", reviewsGivenData);
+        console.log("🔵 User ID being searched:", userId);
         
         // Combine both sets of reviews
         const allReviewsData = [...reviewsReceivedData, ...reviewsGivenData];
         console.log("🔵 All reviews combined:", allReviewsData);
+        console.log("🔵 Total reviews found:", allReviewsData.length);
         
         // Transform the API data to match our interface
         const transformedReviews: Review[] = await Promise.all(
