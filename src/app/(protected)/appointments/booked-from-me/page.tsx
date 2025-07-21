@@ -127,7 +127,26 @@ export default function BookedFromMePage() {
         });
         if (!res.ok) throw new Error("Failed to fetch bookings");
         const data = await res.json();
-        const bookingsPromises = (data.data || data || []).map(async (b: any) => {
+        console.log("🔵 Raw bookings response:", data);
+        
+        // Handle different response structures safely
+        let bookingsArray = [];
+        if (data && typeof data === 'object') {
+          if (Array.isArray(data)) {
+            bookingsArray = data;
+          } else if (data.data && Array.isArray(data.data)) {
+            bookingsArray = data.data;
+          } else if (data.bookings && Array.isArray(data.bookings)) {
+            bookingsArray = data.bookings;
+          } else {
+            console.warn("Unexpected data structure:", data);
+            bookingsArray = [];
+          }
+        }
+        
+        console.log("🔵 Processed bookings array:", bookingsArray);
+        
+        const bookingsPromises = bookingsArray.map(async (b: any) => {
           // Get task ID from booking
           const taskId = b.TaskID || b.taskID || b.task?.ID || b.task?.id || b.taskId;
           console.log(`Booking ${b.ID || b.id}: Task ID = ${taskId}`);
