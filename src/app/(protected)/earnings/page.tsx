@@ -10,8 +10,6 @@ import {
   FaUsers, 
   FaStar, 
   FaClock, 
-  FaTrendingUp, 
-  FaTrendingDown,
   FaArrowUp,
   FaArrowDown,
   FaEye,
@@ -231,7 +229,7 @@ export default function EarningsDashboardPage() {
   };
 
   const getTrendIcon = (trend: 'up' | 'down') => {
-    return trend === 'up' ? <FaTrendingUp className="text-green-500" /> : <FaTrendingDown className="text-red-500" />;
+    return trend === 'up' ? <FaArrowUp className="text-green-500" /> : <FaArrowDown className="text-red-500" />;
   };
 
   if (loading) {

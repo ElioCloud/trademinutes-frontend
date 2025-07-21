@@ -94,231 +94,192 @@ export default function ReviewsPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
-    const generateMockReviews = (): Review[] => {
-      const mockReviews: Review[] = [
-        {
-          id: "1",
-          reviewerId: "user1",
-          revieweeId: "currentUser",
-          taskId: "task1",
-          taskTitle: "Web Development Consultation",
-          taskCategory: "Technology",
-          taskPrice: 150.00,
-          rating: 5,
-          comment: "Excellent work! The developer was very professional and delivered exactly what I needed. The communication was great throughout the project and the final result exceeded my expectations. Highly recommend!",
-          createdAt: Date.now() - 86400000 * 2, // 2 days ago
-          reviewerName: "Sarah Johnson",
-          reviewerAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-          reviewerLocation: "New York, NY",
-          isVerified: true,
-          helpfulCount: 12,
-          replyCount: 1,
-          status: 'published',
-          tags: ['professional', 'communication', 'quality'],
-          sentiment: 'positive'
-        },
-        {
-          id: "2",
-          reviewerId: "user2",
-          revieweeId: "currentUser",
-          taskId: "task1",
-          taskTitle: "Web Development Consultation",
-          taskCategory: "Technology",
-          taskPrice: 150.00,
-          rating: 4,
-          comment: "Good service overall. The work was completed on time and the quality was satisfactory. Would work with again for future projects.",
-          createdAt: Date.now() - 86400000 * 5, // 5 days ago
-          reviewerName: "Mike Chen",
-          reviewerAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-          reviewerLocation: "San Francisco, CA",
-          isVerified: true,
-          helpfulCount: 8,
-          replyCount: 0,
-          status: 'published',
-          tags: ['on-time', 'satisfactory'],
-          sentiment: 'positive'
-        },
-        {
-          id: "3",
-          reviewerId: "user3",
-          revieweeId: "currentUser",
-          taskId: "task2",
-          taskTitle: "UI/UX Design Services",
-          taskCategory: "Design",
-          taskPrice: 200.00,
-          rating: 5,
-          comment: "Amazing design work! The designer really understood my vision and created something beautiful. The attention to detail was incredible and the final design was exactly what I was looking for.",
-          createdAt: Date.now() - 86400000 * 1, // 1 day ago
-          reviewerName: "Emily Rodriguez",
-          reviewerAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-          reviewerLocation: "Los Angeles, CA",
-          isVerified: true,
-          helpfulCount: 15,
-          replyCount: 2,
-          status: 'published',
-          tags: ['creative', 'detail-oriented', 'vision'],
-          sentiment: 'positive'
-        },
-        {
-          id: "4",
-          reviewerId: "user4",
-          revieweeId: "currentUser",
-          taskId: "task2",
-          taskTitle: "UI/UX Design Services",
-          taskCategory: "Design",
-          taskPrice: 200.00,
-          rating: 3,
-          comment: "The design was okay but took longer than expected. Communication could have been better. The final result was decent but not outstanding.",
-          createdAt: Date.now() - 86400000 * 7, // 7 days ago
-          reviewerName: "David Thompson",
-          reviewerAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-          reviewerLocation: "Chicago, IL",
-          isVerified: false,
-          helpfulCount: 3,
-          replyCount: 1,
-          status: 'published',
-          tags: ['delayed', 'communication'],
-          sentiment: 'neutral'
-        },
-        {
-          id: "5",
-          reviewerId: "user5",
-          revieweeId: "currentUser",
-          taskId: "task3",
-          taskTitle: "Content Writing & SEO",
-          taskCategory: "Writing",
-          taskPrice: 75.00,
-          rating: 5,
-          comment: "Outstanding content writing service! The writer delivered high-quality, SEO-optimized content that helped improve our search rankings. Very professional and responsive.",
-          createdAt: Date.now() - 86400000 * 3, // 3 days ago
-          reviewerName: "Lisa Wang",
-          reviewerAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
-          reviewerLocation: "Seattle, WA",
-          isVerified: true,
-          helpfulCount: 20,
-          replyCount: 0,
-          status: 'published',
-          tags: ['SEO', 'quality', 'professional'],
-          sentiment: 'positive'
-        },
-        {
-          id: "6",
-          reviewerId: "user6",
-          revieweeId: "currentUser",
-          taskId: "task4",
-          taskTitle: "Business Strategy Consulting",
-          taskCategory: "Consulting",
-          taskPrice: 300.00,
-          rating: 4,
-          comment: "Very knowledgeable consultant who provided valuable insights for our business strategy. The recommendations were practical and actionable.",
-          createdAt: Date.now() - 86400000 * 10, // 10 days ago
-          reviewerName: "Robert Kim",
-          reviewerAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
-          reviewerLocation: "Austin, TX",
-          isVerified: true,
-          helpfulCount: 11,
-          replyCount: 1,
-          status: 'published',
-          tags: ['knowledgeable', 'practical', 'insights'],
-          sentiment: 'positive'
-        }
-      ];
-      return mockReviews;
-    };
-
-    const generateMockStats = (reviews: Review[]): ReviewStats => {
-      const ratingDistribution: { [key: number]: number } = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-      const categoryBreakdown: { [key: string]: { count: number; totalRating: number } } = {};
-      
-      reviews.forEach(review => {
-        ratingDistribution[review.rating]++;
-        
-        if (!categoryBreakdown[review.taskCategory]) {
-          categoryBreakdown[review.taskCategory] = { count: 0, totalRating: 0 };
-        }
-        categoryBreakdown[review.taskCategory].count++;
-        categoryBreakdown[review.taskCategory].totalRating += review.rating;
-      });
-
-      const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
-      const averageRating = reviews.length > 0 ? totalRating / reviews.length : 0;
-      
-      const recentReviews = reviews.filter(review => 
-        review.createdAt > Date.now() - 86400000 * 7
-      ).length;
-
-      const topRatedServices = Array.from(
-        new Set(reviews.map(r => r.taskTitle))
-      ).map(title => {
-        const serviceReviews = reviews.filter(r => r.taskTitle === title);
-        const avgRating = serviceReviews.reduce((sum, r) => sum + r.rating, 0) / serviceReviews.length;
-        return { title, rating: avgRating, reviews: serviceReviews.length };
-      }).sort((a, b) => b.rating - a.rating).slice(0, 3);
-
-      const categoryStats = Object.entries(categoryBreakdown).map(([category, data]) => ({
-        category,
-        count: data.count,
-        avgRating: data.totalRating / data.count
-      }));
-
-      return {
-        totalReviews: reviews.length,
-        averageRating,
-        ratingDistribution,
-        totalRating,
-        recentReviews,
-        topRatedServices,
-        categoryBreakdown: categoryStats
-      };
-    };
-
-    const groupReviewsByTask = (reviews: Review[]): TaskReviewGroup[] => {
-      const groups: { [key: string]: TaskReviewGroup } = {};
-      
-      reviews.forEach(review => {
-        if (!groups[review.taskId]) {
-          groups[review.taskId] = {
-            taskId: review.taskId,
-            taskTitle: review.taskTitle,
-            taskCategory: review.taskCategory,
-            taskPrice: review.taskPrice,
-            totalReviews: 0,
-            averageRating: 0,
-            totalRevenue: 0,
-            reviews: []
-          };
-        }
-        
-        groups[review.taskId].reviews.push(review);
-        groups[review.taskId].totalReviews++;
-        groups[review.taskId].totalRevenue += review.taskPrice;
-      });
-
-      // Calculate average ratings
-      Object.values(groups).forEach(group => {
-        const totalRating = group.reviews.reduce((sum, review) => sum + review.rating, 0);
-        group.averageRating = totalRating / group.reviews.length;
-      });
-
-      return Object.values(groups).sort((a, b) => b.averageRating - a.averageRating);
-    };
 
     const fetchReviews = async () => {
       setLoading(true);
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const mockReviews = generateMockReviews();
-        setReviews(mockReviews);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("No authentication token found");
+        }
+
+        // Get current user ID from auth service
+        const authResponse = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8081'}/api/auth/profile`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!authResponse.ok) {
+          throw new Error("Failed to get user profile");
+        }
+
+        const userProfile = await authResponse.json();
+        const userId = userProfile.ID || userProfile.id;
+
+        if (!userId) {
+          throw new Error("User ID not found");
+        }
+
+        // Fetch reviews for the current user (as reviewee)
+        const reviewsResponse = await fetch(`${process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086'}/api/reviews?userId=${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!reviewsResponse.ok) {
+          throw new Error("Failed to fetch reviews");
+        }
+
+        const reviewsData = await reviewsResponse.json();
         
-        const mockStats = generateMockStats(mockReviews);
-        setStats(mockStats);
+        // Transform the API data to match our interface
+        const transformedReviews: Review[] = await Promise.all(
+          reviewsData.map(async (review: any) => {
+            // Fetch task details to get title, category, and price
+            let taskTitle = "Unknown Task";
+            let taskCategory = "General";
+            let taskPrice = 0;
+
+            try {
+              const taskResponse = await fetch(`${process.env.NEXT_PUBLIC_TASK_API_URL || 'http://localhost:8084'}/api/tasks/get/${review.taskId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+
+              if (taskResponse.ok) {
+                const taskData = await taskResponse.json();
+                taskTitle = taskData.Title || taskData.title || "Unknown Task";
+                taskCategory = taskData.Category || taskData.category || "General";
+                taskPrice = taskData.Credits || taskData.credits || taskData.Price || taskData.price || 0;
+              }
+            } catch (error) {
+              console.warn("Failed to fetch task details for review:", review.taskId);
+            }
+
+            // Determine sentiment based on rating
+            let sentiment: 'positive' | 'neutral' | 'negative' = 'neutral';
+            if (review.rating >= 4) sentiment = 'positive';
+            else if (review.rating <= 2) sentiment = 'negative';
+
+            // Generate tags based on comment content
+            const tags: string[] = [];
+            const comment = review.comment?.toLowerCase() || '';
+            if (comment.includes('professional') || comment.includes('excellent') || comment.includes('great')) tags.push('professional');
+            if (comment.includes('communication') || comment.includes('responsive')) tags.push('communication');
+            if (comment.includes('quality') || comment.includes('good') || comment.includes('satisfactory')) tags.push('quality');
+            if (comment.includes('on time') || comment.includes('deadline')) tags.push('on-time');
+            if (comment.includes('creative') || comment.includes('design')) tags.push('creative');
+
+            return {
+              id: review.id || review._id,
+              reviewerId: review.reviewerId,
+              revieweeId: review.revieweeId,
+              taskId: review.taskId,
+              taskTitle,
+              taskCategory,
+              taskPrice,
+              rating: review.rating,
+              comment: review.comment || "",
+              createdAt: review.createdAt * 1000, // Convert to milliseconds
+              reviewerName: review.reviewerName || "Anonymous",
+              reviewerAvatar: undefined, // API doesn't provide avatar
+              reviewerLocation: undefined, // API doesn't provide location
+              isVerified: true, // Assume verified for now
+              helpfulCount: Math.floor(Math.random() * 20) + 1, // Mock data
+              replyCount: Math.floor(Math.random() * 5), // Mock data
+              status: 'published' as const,
+              tags,
+              sentiment
+            };
+          })
+        );
+
+        setReviews(transformedReviews);
+
+        // Generate stats from real data
+        const generateStats = (reviews: Review[]): ReviewStats => {
+          const ratingDistribution: { [key: number]: number } = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+          const categoryBreakdown: { [key: string]: { count: number; totalRating: number } } = {};
+          
+          reviews.forEach(review => {
+            ratingDistribution[review.rating]++;
+            
+            if (!categoryBreakdown[review.taskCategory]) {
+              categoryBreakdown[review.taskCategory] = { count: 0, totalRating: 0 };
+            }
+            categoryBreakdown[review.taskCategory].count++;
+            categoryBreakdown[review.taskCategory].totalRating += review.rating;
+          });
+
+          const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+          const averageRating = reviews.length > 0 ? totalRating / reviews.length : 0;
+          
+          const recentReviews = reviews.filter(review => 
+            review.createdAt > Date.now() - 86400000 * 7
+          ).length;
+
+          const topRatedServices = Array.from(
+            new Set(reviews.map(r => r.taskTitle))
+          ).map(title => {
+            const serviceReviews = reviews.filter(r => r.taskTitle === title);
+            const avgRating = serviceReviews.reduce((sum, r) => sum + r.rating, 0) / serviceReviews.length;
+            return { title, rating: avgRating, reviews: serviceReviews.length };
+          }).sort((a, b) => b.rating - a.rating).slice(0, 3);
+
+          const categoryStats = Object.entries(categoryBreakdown).map(([category, data]) => ({
+            category,
+            count: data.count,
+            avgRating: data.totalRating / data.count
+          }));
+
+          return {
+            totalReviews: reviews.length,
+            averageRating,
+            ratingDistribution,
+            totalRating,
+            recentReviews,
+            topRatedServices,
+            categoryBreakdown: categoryStats
+          };
+        };
+
+        const groupReviewsByTask = (reviews: Review[]): TaskReviewGroup[] => {
+          const groups: { [key: string]: TaskReviewGroup } = {};
+          
+          reviews.forEach(review => {
+            if (!groups[review.taskId]) {
+              groups[review.taskId] = {
+                taskId: review.taskId,
+                taskTitle: review.taskTitle,
+                taskCategory: review.taskCategory,
+                taskPrice: review.taskPrice,
+                totalReviews: 0,
+                averageRating: 0,
+                totalRevenue: 0,
+                reviews: []
+              };
+            }
+            
+            groups[review.taskId].reviews.push(review);
+            groups[review.taskId].totalReviews++;
+            groups[review.taskId].totalRevenue += review.taskPrice;
+          });
+
+          // Calculate average ratings
+          Object.values(groups).forEach(group => {
+            const totalRating = group.reviews.reduce((sum, review) => sum + review.rating, 0);
+            group.averageRating = totalRating / group.reviews.length;
+          });
+
+          return Object.values(groups).sort((a, b) => b.averageRating - a.averageRating);
+        };
+
+        const stats = generateStats(transformedReviews);
+        setStats(stats);
         
-        const taskGroups = groupReviewsByTask(mockReviews);
+        const taskGroups = groupReviewsByTask(transformedReviews);
         setTaskGroups(taskGroups);
         
         setError(null);
       } catch (err: any) {
+        console.error("Error fetching reviews:", err);
         setError(err.message || "Failed to load reviews");
       } finally {
         setLoading(false);
