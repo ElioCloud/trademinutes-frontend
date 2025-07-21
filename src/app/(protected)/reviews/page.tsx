@@ -155,39 +155,63 @@ export default function ReviewsPage() {
             console.log("🔵 Processing review:", review);
             console.log("🔵 Review taskId:", review.taskId, "Type:", typeof review.taskId);
             console.log("🔵 Review taskId length:", review.taskId?.length);
+            console.log("🔵 Review taskId value (quoted):", JSON.stringify(review.taskId));
             console.log("🔵 Is taskId valid ObjectID format?", /^[0-9a-fA-F]{24}$/.test(review.taskId || ""));
+            console.log("🔵 TaskId characters:", review.taskId?.split('').map((c: string) => `${c}(${c.charCodeAt(0)})`).join(' '));
             // Fetch task details to get title, category, and price
             let taskTitle = "Unknown Task";
             let taskCategory = "General";
             let taskPrice = 0;
 
             console.log("🔵 Fetching task details for taskId:", review.taskId);
-            try {
-              const taskUrl = `${process.env.NEXT_PUBLIC_TASK_API_URL || 'http://localhost:8084'}/api/tasks/get/${review.taskId}`;
-              console.log("🔵 Task API URL:", taskUrl);
+            
+            // Try different task ID formats
+            const taskIdVariations = [
+              review.taskId,
+              review.taskId?.toString(),
+              review.taskId?.toString().replace(/['"]/g, ''), // Remove quotes
+              review.taskId?.toString().trim(), // Remove whitespace
+            ].filter(Boolean);
+            
+            console.log("🔵 Task ID variations to try:", taskIdVariations);
+            
+            let taskFound = false;
+            
+            for (const taskId of taskIdVariations) {
+              if (taskFound) break;
               
-              const taskResponse = await fetch(taskUrl, {
-                headers: { Authorization: `Bearer ${token}` }
-              });
-
-              console.log("🔵 Task response status:", taskResponse.status);
-              console.log("🔵 Task response ok:", taskResponse.ok);
-
-              if (taskResponse.ok) {
-                const taskData = await taskResponse.json();
-                console.log("🔵 Task data received:", taskData);
+              try {
+                const taskUrl = `${process.env.NEXT_PUBLIC_TASK_API_URL || 'http://localhost:8084'}/api/tasks/get/${taskId}`;
+                console.log("🔵 Trying task API URL:", taskUrl);
                 
-                taskTitle = taskData.Title || taskData.title || taskData.data?.Title || taskData.data?.title || "Unknown Task";
-                taskCategory = taskData.Category || taskData.category || taskData.data?.Category || taskData.data?.category || "General";
-                taskPrice = taskData.Credits || taskData.credits || taskData.Price || taskData.price || taskData.data?.Credits || taskData.data?.credits || 0;
-                
-                console.log("🔵 Extracted task info:", { taskTitle, taskCategory, taskPrice });
-              } else {
-                const errorText = await taskResponse.text();
-                console.error("❌ Task fetch failed:", taskResponse.status, errorText);
+                const taskResponse = await fetch(taskUrl, {
+                  headers: { Authorization: `Bearer ${token}` }
+                });
+
+                console.log("🔵 Task response status:", taskResponse.status);
+                console.log("🔵 Task response ok:", taskResponse.ok);
+
+                if (taskResponse.ok) {
+                  const taskData = await taskResponse.json();
+                  console.log("🔵 Task data received:", taskData);
+                  
+                  taskTitle = taskData.Title || taskData.title || taskData.data?.Title || taskData.data?.title || "Unknown Task";
+                  taskCategory = taskData.Category || taskData.category || taskData.data?.Category || taskData.data?.category || "General";
+                  taskPrice = taskData.Credits || taskData.credits || taskData.Price || taskData.price || taskData.data?.Credits || taskData.data?.credits || 0;
+                  
+                  console.log("🔵 Extracted task info:", { taskTitle, taskCategory, taskPrice });
+                  taskFound = true;
+                } else {
+                  const errorText = await taskResponse.text();
+                  console.error("❌ Task fetch failed for taskId:", taskId, taskResponse.status, errorText);
+                }
+              } catch (error) {
+                console.error("❌ Task fetch error for taskId:", taskId, error);
               }
-            } catch (error) {
-              console.error("❌ Task fetch error for taskId:", review.taskId, error);
+            }
+            
+            if (!taskFound) {
+              console.error("❌ All task ID variations failed for review:", review);
             }
 
             // Determine sentiment based on rating
