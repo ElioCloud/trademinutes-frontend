@@ -153,6 +153,9 @@ export default function ReviewsPage() {
         const transformedReviews: Review[] = await Promise.all(
           allReviewsData.map(async (review: any) => {
             console.log("🔵 Processing review:", review);
+            console.log("🔵 Review taskId:", review.taskId, "Type:", typeof review.taskId);
+            console.log("🔵 Review taskId length:", review.taskId?.length);
+            console.log("🔵 Is taskId valid ObjectID format?", /^[0-9a-fA-F]{24}$/.test(review.taskId || ""));
             // Fetch task details to get title, category, and price
             let taskTitle = "Unknown Task";
             let taskCategory = "General";

@@ -735,6 +735,8 @@ export default function BookedByMePage() {
                     console.log("🔵 Review data to submit:", reviewData);
                     console.log("🔵 reviewRating:", reviewRating);
                     console.log("🔵 reviewComment:", reviewComment);
+                    console.log("🔵 booking.taskId:", booking.taskId, "Type:", typeof booking.taskId);
+                    console.log("🔵 Is booking.taskId valid ObjectID?", /^[0-9a-fA-F]{24}$/.test(booking.taskId || ""));
                     
                     try {
                       console.log("🔵 Submitting review to API...");
