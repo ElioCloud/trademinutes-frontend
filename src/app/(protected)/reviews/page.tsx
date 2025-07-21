@@ -119,20 +119,37 @@ export default function ReviewsPage() {
           throw new Error("User ID not found");
         }
 
-        // Fetch reviews for the current user (as reviewee)
-        const reviewsResponse = await fetch(`${process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086'}/api/reviews?userId=${userId}`, {
+        // Fetch reviews for the current user (as reviewee - reviews received)
+        const reviewsReceivedResponse = await fetch(`${process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086'}/api/reviews?userId=${userId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        if (!reviewsResponse.ok) {
-          throw new Error("Failed to fetch reviews");
+        // Fetch reviews given by the current user (as reviewer - reviews given)
+        const reviewsGivenResponse = await fetch(`${process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086'}/api/reviews?reviewerId=${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!reviewsReceivedResponse.ok) {
+          throw new Error("Failed to fetch reviews received");
         }
 
-        const reviewsData = await reviewsResponse.json();
+        if (!reviewsGivenResponse.ok) {
+          throw new Error("Failed to fetch reviews given");
+        }
+
+        const reviewsReceivedData = await reviewsReceivedResponse.json();
+        const reviewsGivenData = await reviewsGivenResponse.json();
+        
+        console.log("🔵 Reviews received:", reviewsReceivedData);
+        console.log("🔵 Reviews given:", reviewsGivenData);
+        
+        // Combine both sets of reviews
+        const allReviewsData = [...reviewsReceivedData, ...reviewsGivenData];
+        console.log("🔵 All reviews combined:", allReviewsData);
         
         // Transform the API data to match our interface
         const transformedReviews: Review[] = await Promise.all(
-          reviewsData.map(async (review: any) => {
+          allReviewsData.map(async (review: any) => {
             // Fetch task details to get title, category, and price
             let taskTitle = "Unknown Task";
             let taskCategory = "General";
