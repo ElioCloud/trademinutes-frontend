@@ -666,7 +666,7 @@ export default function BookedByMePage() {
                     const token = localStorage.getItem("token");
                     let userId = null;
                     if (token) {
-                      const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8084'}/api/auth/profile`, {
+                      const profileRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8081'}/api/auth/profile`, {
                         headers: { Authorization: `Bearer ${token}` },
                       });
                       if (profileRes.ok) {
@@ -677,18 +677,28 @@ export default function BookedByMePage() {
                     if (!userId) return;
                     
                     const API_BASE_URL = process.env.NEXT_PUBLIC_REVIEW_API_URL || 'http://localhost:8086';
+                    
+                    const reviewData = {
+                      reviewerId: userId,
+                      revieweeId: booking.providerId,
+                      taskId: booking.taskId,
+                      rating: reviewRating,
+                      comment: reviewComment,
+                    };
+                    
+                    console.log("Submitting review:", reviewData);
+                    
                     const res = await fetch(`${API_BASE_URL}/api/reviews`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        reviewerId: userId,
-                        revieweeId: booking.providerId,
-                        taskId: booking.taskId,
-                        rating: reviewRating,
-                        comment: reviewComment,
-                      }),
+                      body: JSON.stringify(reviewData),
                     });
+                    
+                    console.log("Review submission response:", res.status, res.statusText);
+                    
                     if (res.ok) {
+                      const result = await res.json();
+                      console.log("Review submitted successfully:", result);
                       setReviewedTaskIds(prev => [...prev, booking.taskId!]);
                       setShowReviewModal(null);
                       setReviewRating(0);
@@ -696,7 +706,9 @@ export default function BookedByMePage() {
                       setReviewSubmittedId(booking.id);
                       setDialog({ open: true, message: "Review submitted successfully!", isError: false });
                     } else {
-                      setDialog({ open: true, message: "Failed to submit review. Please try again.", isError: true });
+                      const errorText = await res.text();
+                      console.error("Review submission failed:", errorText);
+                      setDialog({ open: true, message: `Failed to submit review: ${errorText}`, isError: true });
                     }
                   }}
                   disabled={reviewRating === 0}
