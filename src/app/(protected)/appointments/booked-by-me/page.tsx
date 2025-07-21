@@ -213,6 +213,7 @@ export default function BookedByMePage() {
             timeFrom: b.Timeslot?.TimeFrom || b.timeslot?.timeFrom || "",
             timeTo: b.Timeslot?.TimeTo || b.timeslot?.timeTo || "",
             status: b.Status || b.status || "",
+            taskId: taskId, // Add the missing taskId!
             providerName: providerName,
             providerEmail: providerEmail,
             providerPhone: providerPhone,
